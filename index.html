@@ -3,71 +3,126 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Your Name — Design Portfolio</title>
-  <link rel="stylesheet" href="css/style.css">
+  <title>Elle Choo — Design</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
   <header class="site-header">
     <div class="wrap">
-      <a class="site-title" href="index.html">Your Name</a>
-      <nav class="site-nav">
-        <a href="index.html" class="active">Work</a>
-        <a href="mailto:you@email.com">Contact</a>
-      </nav>
+      <a class="nav-left" href="about.html">About</a>
+      <a class="nav-center" href="index.html">Elle Choo</a>
+      <a class="nav-right" href="mailto:you@email.com">Contact</a>
     </div>
   </header>
 
-  <main class="wrap">
+  <!--
+    HOW THIS SECTION WORKS
+    Each item below already sits in its real, final position — a cell in
+    the 4x2 .work-grid. The data-ox / data-oy / data-orot / data-oscale
+    attributes describe where that item starts on load (scattered, small,
+    tilted) in viewport units. js/main.js reads those and eases the item
+    back to its natural grid spot as you scroll through this section.
+    To change how spread out an item starts, just edit its data-* numbers.
+  -->
+  <section class="hero-scatter">
+    <div class="hero-pin">
+      <div class="work-grid">
 
-    <section class="intro">
-      <h1>Graphic, interaction, and data&nbsp;viz design.</h1>
-      <p>A selection of recent projects across print, product, and editorial work.</p>
-    </section>
+        <a class="scatter-item" href="projects/project-1.html"
+           data-ox="-30" data-oy="-20" data-orot="-12" data-oscale="0.55">
+          <div class="scatter-thumb">
+            <img src="images/project-1-thumb.jpg" alt="Project One thumbnail">
+            <div class="scatter-caption">
+              <span class="name">Project One</span>
+              <span class="tag">Identity</span>
+            </div>
+          </div>
+        </a>
 
-    <section class="gallery">
+        <a class="scatter-item" href="projects/project-1.html"
+           data-ox="26" data-oy="-26" data-orot="9" data-oscale="0.6">
+          <div class="scatter-thumb">
+            <img src="images/project-2-thumb.jpg" alt="Project Two thumbnail">
+            <div class="scatter-caption">
+              <span class="name">Project Two</span>
+              <span class="tag">Data Viz</span>
+            </div>
+          </div>
+        </a>
 
-      <!-- Repeat this block for every project. Change the link, image, name, and tag. -->
-      <a class="gallery-item" href="projects/project-1.html">
-        <div class="gallery-thumb">
-          <img src="images/project-1-thumb.jpg" alt="Project 1 thumbnail">
-        </div>
-        <div class="gallery-caption">
-          <span class="name">Project One</span>
-          <span class="tag">Identity</span>
-        </div>
-      </a>
+        <a class="scatter-item" href="projects/project-1.html"
+           data-ox="-18" data-oy="22" data-orot="14" data-oscale="0.5">
+          <div class="scatter-thumb">
+            <img src="images/project-3-thumb.jpg" alt="Project Three thumbnail">
+            <div class="scatter-caption">
+              <span class="name">Project Three</span>
+              <span class="tag">Book Design</span>
+            </div>
+          </div>
+        </a>
 
-      <a class="gallery-item" href="projects/project-2.html">
-        <div class="gallery-thumb">
-          <img src="images/project-2-thumb.jpg" alt="Project 2 thumbnail">
-        </div>
-        <div class="gallery-caption">
-          <span class="name">Project Two</span>
-          <span class="tag">Data Viz</span>
-        </div>
-      </a>
+        <a class="scatter-item" href="projects/project-1.html"
+           data-ox="32" data-oy="18" data-orot="-8" data-oscale="0.62">
+          <div class="scatter-thumb">
+            <img src="images/project-4-thumb.jpg" alt="Project Four thumbnail">
+            <div class="scatter-caption">
+              <span class="name">Project Four</span>
+              <span class="tag">Editorial</span>
+            </div>
+          </div>
+        </a>
 
-      <a class="gallery-item" href="projects/project-3.html">
-        <div class="gallery-thumb">
-          <img src="images/project-3-thumb.jpg" alt="Project 3 thumbnail">
-        </div>
-        <div class="gallery-caption">
-          <span class="name">Project Three</span>
-          <span class="tag">Book Design</span>
-        </div>
-      </a>
+        <a class="scatter-item" href="projects/project-1.html"
+           data-ox="-36" data-oy="6" data-orot="6" data-oscale="0.48">
+          <div class="scatter-thumb">
+            <img src="images/project-5-thumb.jpg" alt="Project Five thumbnail">
+            <div class="scatter-caption">
+              <span class="name">Project Five</span>
+              <span class="tag">Web</span>
+            </div>
+          </div>
+        </a>
 
-    </section>
+        <a class="scatter-item" href="projects/project-1.html"
+           data-ox="17" data-oy="-30" data-orot="-15" data-oscale="0.58">
+          <div class="scatter-thumb">
+            <img src="images/project-6-thumb.jpg" alt="Project Six thumbnail">
+            <div class="scatter-caption">
+              <span class="name">Project Six</span>
+              <span class="tag">Motion</span>
+            </div>
+          </div>
+        </a>
 
-  </main>
+        <a class="scatter-item" href="projects/project-1.html"
+           data-ox="8" data-oy="28" data-orot="10" data-oscale="0.52">
+          <div class="scatter-thumb">
+            <img src="images/project-7-thumb.jpg" alt="Project Seven thumbnail">
+            <div class="scatter-caption">
+              <span class="name">Project Seven</span>
+              <span class="tag">Poster</span>
+            </div>
+          </div>
+        </a>
 
-  <footer class="site-footer">
-    <div class="wrap">
-      <span>&copy; 2026 Your Name</span>
-      <a href="mailto:you@email.com">you@email.com</a>
+        <a class="scatter-item" href="projects/project-1.html"
+           data-ox="-8" data-oy="-32" data-orot="-6" data-oscale="0.6">
+          <div class="scatter-thumb">
+            <img src="images/project-8-thumb.jpg" alt="Project Eight thumbnail">
+            <div class="scatter-caption">
+              <span class="name">Project Eight</span>
+              <span class="tag">Packaging</span>
+            </div>
+          </div>
+        </a>
+
+      </div>
     </div>
-  </footer>
+  </section>
 
+  <div class="after-grid-space"></div>
+
+  <script src="main.js" defer></script>
 </body>
 </html>
