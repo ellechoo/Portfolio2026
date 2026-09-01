@@ -8,10 +8,14 @@
 :root {
   --black: #0a0a0a;
   --white: #ffffff;
-  --grey-line: #dcdcdc;
+  --grey-fill: #f4f4f4;
   --grey-text: #6b6b6b;
-  --max-width: 1200px;
+  --max-width: 1280px;
   --gutter: 32px;
+
+  /* how much scroll distance the scatter → grid animation takes.
+     bigger number = slower, longer reveal. */
+  --scatter-scroll-distance: 220vh;
 }
 
 * {
@@ -51,136 +55,181 @@ img, video {
 }
 
 /* ---------- Header / nav ---------- */
+/* Three items, evenly spread: About / Name / Contact */
 
 .site-header {
-  padding: 28px 0 20px;
-  border-bottom: 1px solid var(--grey-line);
+  padding: 16px 0;
+  position: relative;
+  z-index: 100;
+  background: var(--white);
 }
 
 .site-header .wrap {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.site-title {
-  font-size: 18px;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-}
-
-.site-nav {
-  display: flex;
-  gap: 24px;
-  font-size: 15px;
-  font-weight: 500;
-}
-
-.site-nav a {
-  color: var(--grey-text);
-  border-bottom: 1px solid transparent;
-  padding-bottom: 2px;
-  transition: color 0.15s ease, border-color 0.15s ease;
-}
-
-.site-nav a:hover,
-.site-nav a.active {
-  color: var(--black);
-  border-color: var(--black);
-}
-
-/* ---------- Home intro ---------- */
-
-.intro {
-  padding: 64px 0 48px;
-  max-width: 640px;
-}
-
-.intro h1 {
-  font-size: clamp(28px, 4vw, 40px);
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  line-height: 1.2;
-  margin: 0 0 16px;
-}
-
-.intro p {
-  font-size: 17px;
-  color: var(--grey-text);
-  margin: 0;
-}
-
-/* ---------- Gallery grid ---------- */
-
-.gallery {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--gutter);
-  padding: 0 0 80px;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
 }
 
-@media (min-width: 720px) {
-  .gallery {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-.gallery-item {
-  display: block;
-}
-
-.gallery-thumb {
-  width: 100%;
-  aspect-ratio: 4 / 3;
-  overflow: hidden;
-  background: #f2f2f2;
-  border: 1px solid var(--grey-line);
-}
-
-.gallery-thumb img,
-.gallery-thumb video {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.4s ease;
-}
-
-.gallery-item:hover .gallery-thumb img,
-.gallery-item:hover .gallery-thumb video {
-  transform: scale(1.03);
-}
-
-.gallery-caption {
-  margin-top: 10px;
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
+.site-header a {
   font-size: 14px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--black);
 }
 
-.gallery-caption .name {
+.nav-left {
+  justify-self: start;
+}
+
+.nav-center {
+  justify-self: center;
   font-weight: 600;
 }
 
-.gallery-caption .tag {
-  color: var(--grey-text);
+.nav-right {
+  justify-self: end;
+}
+
+.site-header a {
+  opacity: 1;
+  transition: opacity 0.15s ease;
+}
+
+.site-header a:hover {
+  opacity: 0.5;
+}
+
+/* ---------- Home: scatter → grid reveal ---------- */
+/*
+  Structure:
+  .hero-scatter   tall spacer that defines how long the animation lasts
+    .hero-pin     sticky, pinned to the viewport while the spacer scrolls by
+      .work-grid  the REAL, final layout — a uniform grid. Every item lives
+                   in its actual grid cell the whole time.
+      .scatter-item   each item gets a JS-driven transform that starts
+                       offset far from its grid cell (scattered, small,
+                       rotated) and eases back to translate(0)/scale(1)
+                       (its natural grid position) as the user scrolls.
+*/
+
+.hero-scatter {
+  position: relative;
+  height: var(--scatter-scroll-distance);
+}
+
+.hero-pin {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.work-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: 20px;
+  width: min(1180px, 92vw);
+  height: min(560px, 68vh);
+}
+
+.scatter-item {
+  display: block;
+  width: 100%;
+  height: 100%;
+  will-change: transform;
+  transform: translate(0, 0) rotate(0deg) scale(1);
+}
+
+.scatter-thumb {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--grey-fill);
+}
+
+.scatter-thumb img,
+.scatter-thumb video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  animation: floaty 6s ease-in-out infinite;
+}
+
+@keyframes floaty {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.scatter-caption {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  font-size: 12px;
+  color: var(--white);
+  background: linear-gradient(to top, rgba(10, 10, 10, 0.6), transparent);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.scatter-item:hover .scatter-caption {
+  opacity: 1;
+}
+
+.scatter-caption .name {
+  font-weight: 600;
+}
+
+.scatter-caption .tag {
+  opacity: 0.8;
+}
+
+/* below the fold, after the grid has settled, a little breathing room
+   before the page ends */
+.after-grid-space {
+  height: 12vh;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scatter-thumb img,
+  .scatter-thumb video {
+    animation: none;
+  }
+}
+
+@media (max-width: 780px) {
+  :root {
+    --scatter-scroll-distance: 160vh;
+  }
+  .work-grid {
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(4, 1fr);
+    width: 88vw;
+    height: 76vh;
+    gap: 14px;
+  }
 }
 
 /* ---------- Project page ---------- */
 
 .project-header {
-  padding: 56px 0 32px;
-  border-bottom: 1px solid var(--grey-line);
-  margin-bottom: 48px;
+  padding: 48px 0 32px;
+  margin-bottom: 40px;
 }
 
 .project-header .back-link {
   display: inline-block;
-  font-size: 14px;
+  font-size: 13px;
   color: var(--grey-text);
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .project-header .back-link:hover {
@@ -198,13 +247,9 @@ img, video {
   display: flex;
   gap: 24px;
   flex-wrap: wrap;
-  font-size: 14px;
+  font-size: 13px;
   color: var(--grey-text);
   margin-bottom: 16px;
-}
-
-.project-meta span {
-  font-weight: 500;
 }
 
 .project-description {
@@ -217,13 +262,13 @@ img, video {
   display: flex;
   flex-direction: column;
   gap: var(--gutter);
-  padding-bottom: 96px;
+  padding-bottom: 120px;
 }
 
 .project-media img,
 .project-media video {
   width: 100%;
-  border: 1px solid var(--grey-line);
+  background: var(--grey-fill);
 }
 
 .project-media figcaption {
@@ -236,28 +281,8 @@ img, video {
   margin: 0;
 }
 
-/* ---------- Footer ---------- */
+/* ---------- About page ---------- */
 
-.site-footer {
-  border-top: 1px solid var(--grey-line);
-  padding: 28px 0;
-  font-size: 13px;
-  color: var(--grey-text);
-}
-
-.site-footer .wrap {
-  display: flex;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.site-footer a {
-  color: var(--grey-text);
-  border-bottom: 1px solid var(--grey-line);
-}
-
-.site-footer a:hover {
-  color: var(--black);
-  border-color: var(--black);
+.about-main {
+  min-height: 50vh;
 }
