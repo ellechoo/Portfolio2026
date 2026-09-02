@@ -16,112 +16,105 @@
     </div>
   </header>
 
-  <!--
-    HOW THIS SECTION WORKS
-    Each item below already sits in its real, final position — a cell in
-    the 4x2 .work-grid. The data-ox / data-oy / data-orot / data-oscale
-    attributes describe where that item starts on load (scattered, small,
-    tilted) in viewport units. js/main.js reads those and eases the item
-    back to its natural grid spot as you scroll through this section.
-    To change how spread out an item starts, just edit its data-* numbers.
-  -->
-  <section class="hero-scatter">
-    <div class="hero-pin">
-      <div class="work-grid">
+  <main class="wrap">
 
-        <a class="scatter-item" href="projects/project-1.html"
-           data-ox="-30" data-oy="-20" data-orot="-12" data-oscale="0.55">
-          <div class="scatter-thumb">
-            <img src="images/project-1-thumb.jpg" alt="Project One thumbnail">
-            <div class="scatter-caption">
-              <span class="name">Project One</span>
-              <span class="tag">Identity</span>
-            </div>
-          </div>
-        </a>
-
-        <a class="scatter-item" href="projects/project-1.html"
-           data-ox="26" data-oy="-26" data-orot="9" data-oscale="0.6">
-          <div class="scatter-thumb">
-            <img src="images/project-2-thumb.jpg" alt="Project Two thumbnail">
-            <div class="scatter-caption">
-              <span class="name">Project Two</span>
-              <span class="tag">Data Viz</span>
-            </div>
-          </div>
-        </a>
-
-        <a class="scatter-item" href="projects/project-1.html"
-           data-ox="-18" data-oy="22" data-orot="14" data-oscale="0.5">
-          <div class="scatter-thumb">
-            <img src="images/project-3-thumb.jpg" alt="Project Three thumbnail">
-            <div class="scatter-caption">
-              <span class="name">Project Three</span>
-              <span class="tag">Book Design</span>
-            </div>
-          </div>
-        </a>
-
-        <a class="scatter-item" href="projects/project-1.html"
-           data-ox="32" data-oy="18" data-orot="-8" data-oscale="0.62">
-          <div class="scatter-thumb">
-            <img src="images/project-4-thumb.jpg" alt="Project Four thumbnail">
-            <div class="scatter-caption">
-              <span class="name">Project Four</span>
-              <span class="tag">Editorial</span>
-            </div>
-          </div>
-        </a>
-
-        <a class="scatter-item" href="projects/project-1.html"
-           data-ox="-36" data-oy="6" data-orot="6" data-oscale="0.48">
-          <div class="scatter-thumb">
-            <img src="images/project-5-thumb.jpg" alt="Project Five thumbnail">
-            <div class="scatter-caption">
-              <span class="name">Project Five</span>
-              <span class="tag">Web</span>
-            </div>
-          </div>
-        </a>
-
-        <a class="scatter-item" href="projects/project-1.html"
-           data-ox="17" data-oy="-30" data-orot="-15" data-oscale="0.58">
-          <div class="scatter-thumb">
-            <img src="images/project-6-thumb.jpg" alt="Project Six thumbnail">
-            <div class="scatter-caption">
-              <span class="name">Project Six</span>
-              <span class="tag">Motion</span>
-            </div>
-          </div>
-        </a>
-
-        <a class="scatter-item" href="projects/project-1.html"
-           data-ox="8" data-oy="28" data-orot="10" data-oscale="0.52">
-          <div class="scatter-thumb">
-            <img src="images/project-7-thumb.jpg" alt="Project Seven thumbnail">
-            <div class="scatter-caption">
-              <span class="name">Project Seven</span>
-              <span class="tag">Poster</span>
-            </div>
-          </div>
-        </a>
-
-        <a class="scatter-item" href="projects/project-1.html"
-           data-ox="-8" data-oy="-32" data-orot="-6" data-oscale="0.6">
-          <div class="scatter-thumb">
-            <img src="images/project-8-thumb.jpg" alt="Project Eight thumbnail">
-            <div class="scatter-caption">
-              <span class="name">Project Eight</span>
-              <span class="tag">Packaging</span>
-            </div>
-          </div>
-        </a>
-
-      </div>
+    <!-- A small, tight cluster of overlapping prints — plays once on
+         load. Purely CSS; see .intro-pile / .pile-item in style.css. -->
+    <div class="intro-pile">
+      <div class="pile-item"><img src="images/project-1-thumb.jpg" alt=""></div>
+      <div class="pile-item"><img src="images/project-2-thumb.jpg" alt=""></div>
+      <div class="pile-item"><img src="images/project-3-thumb.jpg" alt=""></div>
+      <div class="pile-item"><img src="images/project-4-thumb.jpg" alt=""></div>
+      <div class="pile-item"><img src="images/project-5-thumb.jpg" alt=""></div>
     </div>
-  </section>
 
-  <div class="after-grid-space"></div>
+    <!-- Plain scroll from here down — one big image + caption per
+         project, in normal document flow. -->
+    <section class="project-list">
+
+      <a class="project-row" href="projects/project-1.html">
+        <div class="project-image">
+          <img src="images/project-1-full.jpg" alt="Project One">
+        </div>
+        <div class="project-caption">
+          <span class="tag">Identity</span>
+          <span class="name">Project One</span>
+        </div>
+      </a>
+
+      <a class="project-row" href="projects/project-1.html">
+        <div class="project-image">
+          <img src="images/project-2-full.jpg" alt="Project Two">
+        </div>
+        <div class="project-caption">
+          <span class="tag">Data Viz</span>
+          <span class="name">Project Two</span>
+        </div>
+      </a>
+
+      <a class="project-row" href="projects/project-1.html">
+        <div class="project-image">
+          <img src="images/project-3-full.jpg" alt="Project Three">
+        </div>
+        <div class="project-caption">
+          <span class="tag">Book Design</span>
+          <span class="name">Project Three</span>
+        </div>
+      </a>
+
+      <a class="project-row" href="projects/project-1.html">
+        <div class="project-image">
+          <img src="images/project-4-full.jpg" alt="Project Four">
+        </div>
+        <div class="project-caption">
+          <span class="tag">Editorial</span>
+          <span class="name">Project Four</span>
+        </div>
+      </a>
+
+      <a class="project-row" href="projects/project-1.html">
+        <div class="project-image">
+          <img src="images/project-5-full.jpg" alt="Project Five">
+        </div>
+        <div class="project-caption">
+          <span class="tag">Web</span>
+          <span class="name">Project Five</span>
+        </div>
+      </a>
+
+      <a class="project-row" href="projects/project-1.html">
+        <div class="project-image">
+          <img src="images/project-6-full.jpg" alt="Project Six">
+        </div>
+        <div class="project-caption">
+          <span class="tag">Motion</span>
+          <span class="name">Project Six</span>
+        </div>
+      </a>
+
+      <a class="project-row" href="projects/project-1.html">
+        <div class="project-image">
+          <img src="images/project-7-full.jpg" alt="Project Seven">
+        </div>
+        <div class="project-caption">
+          <span class="tag">Poster</span>
+          <span class="name">Project Seven</span>
+        </div>
+      </a>
+
+      <a class="project-row" href="projects/project-1.html">
+        <div class="project-image">
+          <img src="images/project-8-full.jpg" alt="Project Eight">
+        </div>
+        <div class="project-caption">
+          <span class="tag">Packaging</span>
+          <span class="name">Project Eight</span>
+        </div>
+      </a>
+
+    </section>
+
+  </main>
 
   <script src="main.js" defer></script>
 </body>

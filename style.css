@@ -3,7 +3,7 @@
    Black & white, Inter throughout.
    ============================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;1,500;1,600&display=swap');
 
 :root {
   --black: #0a0a0a;
@@ -12,10 +12,7 @@
   --grey-text: #6b6b6b;
   --max-width: 1280px;
   --gutter: 32px;
-
-  /* how much scroll distance the scatter → grid animation takes.
-     bigger number = slower, longer reveal. */
-  --scatter-scroll-distance: 220vh;
+  --header-height: 64px;
 }
 
 * {
@@ -52,16 +49,20 @@ img, video {
   max-width: var(--max-width);
   margin: 0 auto;
   padding: 0 var(--gutter);
+  width: 100%;
 }
 
 /* ---------- Header / nav ---------- */
-/* Three items, evenly spread: About / Name / Contact */
+/* Three items, evenly spread: About / Name / Contact. */
 
 .site-header {
-  padding: 16px 0;
-  position: relative;
+  position: sticky;
+  top: 0;
   z-index: 100;
   background: var(--white);
+  height: var(--header-height);
+  display: flex;
+  align-items: center;
 }
 
 .site-header .wrap {
@@ -75,146 +76,172 @@ img, video {
   font-weight: 500;
   letter-spacing: -0.01em;
   color: var(--black);
-}
-
-.nav-left {
-  justify-self: start;
-}
-
-.nav-center {
-  justify-self: center;
-  font-weight: 600;
-}
-
-.nav-right {
-  justify-self: end;
-}
-
-.site-header a {
-  opacity: 1;
   transition: opacity 0.15s ease;
 }
+
+.nav-left { justify-self: start; }
+.nav-center { justify-self: center; font-weight: 600; }
+.nav-right { justify-self: end; }
 
 .site-header a:hover {
   opacity: 0.5;
 }
 
-/* ---------- Home: scatter → grid reveal ---------- */
-/*
-  Structure:
-  .hero-scatter   tall spacer that defines how long the animation lasts
-    .hero-pin     sticky, pinned to the viewport while the spacer scrolls by
-      .work-grid  the REAL, final layout — a uniform grid. Every item lives
-                   in its actual grid cell the whole time.
-      .scatter-item   each item gets a JS-driven transform that starts
-                       offset far from its grid cell (scattered, small,
-                       rotated) and eases back to translate(0)/scale(1)
-                       (its natural grid position) as the user scrolls.
-*/
+/* ---------- Home: intro pile ---------- */
+/* A small, tight cluster of overlapping, tilted prints — not spread
+   across the screen. Plays once on load (pure CSS, no scroll math),
+   then sits still except for a very slight idle drift. */
 
-.hero-scatter {
+.intro-pile {
   position: relative;
-  height: var(--scatter-scroll-distance);
+  width: min(420px, 70vw);
+  height: 260px;
+  margin: 56px auto 8px;
 }
 
-.hero-pin {
-  position: sticky;
-  top: 0;
-  height: 100vh;
+.pile-item {
+  position: absolute;
+  width: 150px;
+  aspect-ratio: 3 / 2;
+  background: var(--grey-fill);
+  overflow: hidden;
+  box-shadow: 0 12px 24px -12px rgba(0, 0, 0, 0.25);
+  opacity: 0;
+  animation-duration: 0.7s;
+  animation-timing-function: cubic-bezier(0.2, 0.7, 0.3, 1);
+  animation-fill-mode: forwards;
+}
+
+.pile-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* each item: starting position, resting tilt, entrance delay, and
+   its own settle animation (which carries it from a slightly higher,
+   untilted spot down into its resting rotation) */
+.pile-item:nth-child(1) { top: 10px;  left: 40px;  animation-name: settle-1; animation-delay: 0s; z-index: 1; }
+.pile-item:nth-child(2) { top: 40px;  left: 150px; animation-name: settle-2; animation-delay: 0.09s; z-index: 2; }
+.pile-item:nth-child(3) { top: 90px;  left: 70px;  animation-name: settle-3; animation-delay: 0.18s; z-index: 3; }
+.pile-item:nth-child(4) { top: 60px;  left: 210px; animation-name: settle-4; animation-delay: 0.27s; z-index: 4; }
+.pile-item:nth-child(5) { top: 120px; left: 160px; animation-name: settle-5; animation-delay: 0.36s; z-index: 5; }
+
+@keyframes settle-1 { from { opacity: 0; transform: translateY(-36px) rotate(4deg) scale(0.92); } to { opacity: 1; transform: translateY(0) rotate(-9deg) scale(1); } }
+@keyframes settle-2 { from { opacity: 0; transform: translateY(-36px) rotate(-4deg) scale(0.92); } to { opacity: 1; transform: translateY(0) rotate(6deg) scale(1); } }
+@keyframes settle-3 { from { opacity: 0; transform: translateY(-36px) rotate(10deg) scale(0.92); } to { opacity: 1; transform: translateY(0) rotate(4deg) scale(1); } }
+@keyframes settle-4 { from { opacity: 0; transform: translateY(-36px) rotate(-10deg) scale(0.92); } to { opacity: 1; transform: translateY(0) rotate(-5deg) scale(1); } }
+@keyframes settle-5 { from { opacity: 0; transform: translateY(-36px) rotate(6deg) scale(0.92); } to { opacity: 1; transform: translateY(0) rotate(-3deg) scale(1); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .pile-item {
+    animation: none;
+    opacity: 1;
+  }
+}
+
+@media (max-width: 600px) {
+  .intro-pile {
+    height: 200px;
+  }
+  .pile-item {
+    width: 110px;
+  }
+}
+
+/* ---------- Home: project list ---------- */
+/* A plain, normal-flow scroll — no pinning, no scroll-jacking. Each
+   project is a big image with a small caption beside it. Images are
+   muted by default and go full color on hover. */
+
+.project-list {
+  padding: 40px 0 120px;
+}
+
+.project-row {
   display: flex;
-  align-items: center;
-  justify-content: center;
+  align-items: flex-start;
+  gap: 48px;
+  padding: 56px 0;
 }
 
-.work-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  grid-template-rows: repeat(2, 1fr);
-  gap: 20px;
-  width: min(1180px, 92vw);
-  height: min(560px, 68vh);
+.project-row + .project-row {
+  border-top: none;
 }
 
-.scatter-item {
-  display: block;
-  width: 100%;
-  height: 100%;
-  will-change: transform;
-  transform: translate(0, 0) rotate(0deg) scale(1);
-}
-
-.scatter-thumb {
-  position: relative;
-  width: 100%;
-  height: 100%;
+.project-image {
+  flex: 0 0 60%;
+  aspect-ratio: 3 / 2;
   overflow: hidden;
   background: var(--grey-fill);
 }
 
-.scatter-thumb img,
-.scatter-thumb video {
+.project-image img,
+.project-image video {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  animation: floaty 6s ease-in-out infinite;
+  filter: grayscale(85%);
+  transition: filter 0.5s ease, transform 0.6s ease;
 }
 
-@keyframes floaty {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
+.project-row:hover .project-image img,
+.project-row:hover .project-image video {
+  filter: grayscale(0%);
+  transform: scale(1.015);
 }
 
-.scatter-caption {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
-  padding: 10px 12px;
-  font-size: 12px;
-  color: var(--white);
-  background: linear-gradient(to top, rgba(10, 10, 10, 0.6), transparent);
-  opacity: 0;
-  transition: opacity 0.2s ease;
+.project-caption {
+  flex: 1;
+  padding-top: 14px;
+  min-width: 0;
 }
 
-.scatter-item:hover .scatter-caption {
-  opacity: 1;
+.project-caption .tag {
+  display: block;
+  font-size: 13px;
+  color: var(--grey-text);
+  margin-bottom: 6px;
 }
 
-.scatter-caption .name {
+.project-caption .name {
+  display: block;
+  font-size: 22px;
+  font-style: italic;
   font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
-.scatter-caption .tag {
-  opacity: 0.8;
+/* fade + rise into view as each row is scrolled to. Plain CSS
+   fallback keeps rows fully visible if JS doesn't run. */
+.project-row {
+  opacity: 1;
+  transform: none;
 }
 
-/* below the fold, after the grid has settled, a little breathing room
-   before the page ends */
-.after-grid-space {
-  height: 12vh;
+.project-row.reveal-ready {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .scatter-thumb img,
-  .scatter-thumb video {
-    animation: none;
-  }
+.project-row.reveal-ready.is-visible {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 @media (max-width: 780px) {
-  :root {
-    --scatter-scroll-distance: 160vh;
+  .project-row {
+    flex-direction: column;
+    gap: 16px;
+    padding: 36px 0;
   }
-  .work-grid {
-    grid-template-columns: repeat(2, 1fr);
-    grid-template-rows: repeat(4, 1fr);
-    width: 88vw;
-    height: 76vh;
-    gap: 14px;
+  .project-image {
+    flex-basis: auto;
+    width: 100%;
+  }
+  .project-caption {
+    padding-top: 0;
   }
 }
 
