@@ -13,7 +13,14 @@
     <div class="wrap">
       <a class="nav-left" href="#about">About</a>
       <a class="nav-center" href="#">Elle Choo</a>
-      <a class="nav-right" id="contact-link" href="mailto:hello@example.com">Contact</a>
+
+      <div class="nav-right">
+        <button class="contact-toggle" id="contact-toggle" type="button" aria-haspopup="true" aria-expanded="false">Contact</button>
+        <div class="contact-menu" id="contact-menu" hidden>
+          <a id="contact-email-link" href="mailto:hello@example.com">Email</a>
+          <a id="contact-linkedin-link" href="#" target="_blank" rel="noopener">LinkedIn</a>
+        </div>
+      </div>
     </div>
   </header>
 
@@ -21,10 +28,6 @@
 
     <!-- ===================== HOME VIEW ===================== -->
     <div id="home-view">
-
-      <!-- Small overlapping-prints intro, built from the first few
-           projects. Purely presentational; see #intro-pile in main.js. -->
-      <div class="intro-pile" id="intro-pile" hidden></div>
 
       <section class="project-list" id="project-list"></section>
 
@@ -66,6 +69,8 @@
     "name": "Elle Choo",
     "tagline": "Graphic & interaction design",
     "email": "hello@example.com",
+    "linkedin": "",
+    "photo": "",
     "about": "Testing bio writing."
   },
   "projects": [

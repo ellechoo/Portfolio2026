@@ -16,7 +16,6 @@
     home: document.getElementById("home-view"),
     about: document.getElementById("about-view"),
     project: document.getElementById("project-view"),
-    pile: document.getElementById("intro-pile"),
     list: document.getElementById("project-list"),
     empty: document.getElementById("empty-state"),
     aboutContent: document.getElementById("about-content"),
@@ -24,8 +23,11 @@
     projectMeta: document.getElementById("project-meta"),
     projectDescription: document.getElementById("project-description"),
     projectMedia: document.getElementById("project-media"),
-    contactLink: document.getElementById("contact-link"),
     navCenter: document.querySelector(".nav-center"),
+    contactToggle: document.getElementById("contact-toggle"),
+    contactMenu: document.getElementById("contact-menu"),
+    contactEmailLink: document.getElementById("contact-email-link"),
+    contactLinkedinLink: document.getElementById("contact-linkedin-link"),
   };
 
   function readData() {
@@ -61,9 +63,52 @@
   function renderChrome() {
     document.title = DATA.site.name ? DATA.site.name + " — Design" : "Design";
     if (els.navCenter) els.navCenter.textContent = DATA.site.name || "Portfolio";
-    if (els.contactLink && DATA.site.email) {
-      els.contactLink.href = "mailto:" + DATA.site.email;
+    setUpContactMenu();
+  }
+
+  /* ---------- contact dropdown ---------- */
+
+  function setUpContactMenu() {
+    var toggle = els.contactToggle, menu = els.contactMenu;
+    if (!toggle || !menu) return;
+
+    if (DATA.site.email) {
+      els.contactEmailLink.href = "mailto:" + DATA.site.email;
+      els.contactEmailLink.hidden = false;
+    } else if (els.contactEmailLink) {
+      els.contactEmailLink.hidden = true;
     }
+
+    if (DATA.site.linkedin) {
+      els.contactLinkedinLink.href = DATA.site.linkedin;
+      els.contactLinkedinLink.hidden = false;
+    } else if (els.contactLinkedinLink) {
+      els.contactLinkedinLink.hidden = true;
+    }
+
+    function open() {
+      menu.hidden = false;
+      toggle.setAttribute("aria-expanded", "true");
+      document.addEventListener("click", onOutsideClick);
+      document.addEventListener("keydown", onKeydown);
+    }
+    function close() {
+      menu.hidden = true;
+      toggle.setAttribute("aria-expanded", "false");
+      document.removeEventListener("click", onOutsideClick);
+      document.removeEventListener("keydown", onKeydown);
+    }
+    function onOutsideClick(e) {
+      if (!menu.contains(e.target) && e.target !== toggle) close();
+    }
+    function onKeydown(e) {
+      if (e.key === "Escape") { close(); toggle.focus(); }
+    }
+
+    toggle.addEventListener("click", function (e) {
+      e.stopPropagation();
+      if (menu.hidden) open(); else close();
+    });
   }
 
   /* ---------- media element builder (shared by thumbnails + detail) ---------- */
@@ -139,33 +184,12 @@
     var projects = sortedProjects();
 
     els.list.innerHTML = "";
-    els.pile.innerHTML = "";
 
     if (projects.length === 0) {
       els.empty.hidden = false;
-      els.pile.hidden = true;
       return;
     }
     els.empty.hidden = true;
-
-    // intro pile: first up to 5 projects with a usable thumbnail image
-    var pileSource = projects.slice(0, 5);
-    if (pileSource.length > 0) {
-      els.pile.hidden = false;
-      pileSource.forEach(function (project) {
-        var item = document.createElement("div");
-        item.className = "pile-item";
-        var thumb = project.thumbnail;
-        var src = thumb && thumb.type === "video" ? thumb.poster : thumb && thumb.src;
-        var img = document.createElement("img");
-        img.src = src || (thumb ? thumb.src : "");
-        img.alt = "";
-        item.appendChild(img);
-        els.pile.appendChild(item);
-      });
-    } else {
-      els.pile.hidden = true;
-    }
 
     projects.forEach(function (project) {
       var row = document.createElement("a");
@@ -228,6 +252,19 @@
   function renderAbout() {
     var site = DATA.site;
     els.aboutContent.innerHTML = "";
+
+    var photoWrap = document.createElement("div");
+    photoWrap.className = "about-photo";
+    if (site.photo) {
+      var photoImg = document.createElement("img");
+      photoImg.src = site.photo;
+      photoImg.alt = site.name ? site.name : "";
+      photoWrap.appendChild(photoImg);
+    } else {
+      photoWrap.classList.add("is-empty");
+      photoWrap.textContent = "Add a photo via admin.html";
+    }
+    els.aboutContent.appendChild(photoWrap);
 
     var h1 = document.createElement("h1");
     h1.textContent = site.name || "About";
@@ -305,6 +342,10 @@
     els.about.hidden = name !== "about";
     els.project.hidden = name !== "project";
     window.scrollTo(0, 0);
+    if (els.contactMenu && !els.contactMenu.hidden) {
+      els.contactMenu.hidden = true;
+      els.contactToggle.setAttribute("aria-expanded", "false");
+    }
   }
 
   function route() {

@@ -198,8 +198,20 @@
         <div class="field"><label for="site-name">Name</label><input type="text" id="site-name"></div>
         <div class="field"><label for="site-tagline">Tagline</label><input type="text" id="site-tagline"></div>
       </div>
-      <div class="field"><label for="site-email">Contact email</label><input type="email" id="site-email"></div>
+      <div class="field-row">
+        <div class="field"><label for="site-email">Contact email</label><input type="email" id="site-email"></div>
+        <div class="field"><label for="site-linkedin">LinkedIn URL</label><input type="text" id="site-linkedin" placeholder="https://linkedin.com/in/..."></div>
+      </div>
       <div class="field"><label for="site-about">About / bio</label><textarea id="site-about" rows="5"></textarea></div>
+
+      <label>Your photo (shown on the About page)</label>
+      <div id="site-photo-preview" style="width:96px; height:96px; border-radius:50%; margin-bottom:10px; overflow:hidden; background:var(--grey-fill);"></div>
+      <div style="display:flex; gap:10px; align-items:center; margin-bottom:16px;">
+        <button type="button" id="site-photo-pick-btn" class="secondary small">Choose photo</button>
+        <button type="button" id="site-photo-remove-btn" class="ghost small" hidden>Remove photo</button>
+      </div>
+      <input type="file" id="site-photo-input" accept="image/*" hidden>
+
       <button id="save-site-info" class="secondary small">Save site info</button>
     </section>
 
@@ -296,15 +308,17 @@
 
   var state = {
     dirHandle: null,
-    data: { site: { name: "", tagline: "", email: "", about: "" }, projects: [] },
+    data: { site: { name: "", tagline: "", email: "", linkedin: "", photo: "", about: "" }, projects: [] },
     editingId: null,
     mediaDraft: [],   // [{ tempId, type, src?, file?, previewUrl, caption, isThumbnail, isNew }]
+    photoDraft: undefined, // undefined = no change; {file} = new photo; "remove" = clear it
     savingBlobUrls: [],
   };
 
   var el = {};
   ["connect-panel", "connect-btn", "connect-hint", "app", "folder-name",
-   "site-name", "site-tagline", "site-email", "site-about", "save-site-info",
+   "site-name", "site-tagline", "site-email", "site-linkedin", "site-about", "save-site-info",
+   "site-photo-preview", "site-photo-pick-btn", "site-photo-remove-btn", "site-photo-input",
    "admin-project-list", "add-project-btn",
    "editor", "editor-title", "p-title", "p-year", "p-tag", "p-client", "p-summary", "p-description",
    "dropzone", "file-input", "media-list",
@@ -382,7 +396,7 @@
       var m = text.match(DATA_TAG_RE);
       if (!m) throw new Error("Couldn't find the site data block in index.html.");
       var parsed = JSON.parse(m[2]);
-      state.data.site = Object.assign({ name: "", tagline: "", email: "", about: "" }, parsed.site || {});
+      state.data.site = Object.assign({ name: "", tagline: "", email: "", linkedin: "", photo: "", about: "" }, parsed.site || {});
       state.data.projects = Array.isArray(parsed.projects) ? parsed.projects : [];
     });
   }
@@ -420,17 +434,96 @@
     el["site-name"].value = state.data.site.name || "";
     el["site-tagline"].value = state.data.site.tagline || "";
     el["site-email"].value = state.data.site.email || "";
+    el["site-linkedin"].value = state.data.site.linkedin || "";
     el["site-about"].value = state.data.site.about || "";
+
+    state.photoDraft = undefined; // undefined = no change; {file} = new photo; "remove" = clear it
+    renderPhotoPreview();
   }
 
+  function renderPhotoPreview() {
+    var preview = el["site-photo-preview"];
+    preview.innerHTML = "";
+    var removeBtn = el["site-photo-remove-btn"];
+
+    if (state.photoDraft && state.photoDraft.file) {
+      var img = document.createElement("img");
+      img.style.width = "100%";
+      img.style.height = "100%";
+      img.style.objectFit = "cover";
+      img.src = URL.createObjectURL(state.photoDraft.file);
+      preview.appendChild(img);
+      removeBtn.hidden = false;
+    } else if (state.photoDraft === "remove" || !state.data.site.photo) {
+      preview.style.background = "var(--grey-fill)";
+      removeBtn.hidden = true;
+    } else {
+      var img2 = document.createElement("img");
+      img2.style.width = "100%";
+      img2.style.height = "100%";
+      img2.style.objectFit = "cover";
+      var cached = blobUrlCache[state.data.site.photo];
+      if (cached) {
+        img2.src = cached;
+      } else {
+        img2.setAttribute("data-pending-src", state.data.site.photo);
+        resolveUrlForSrc(state.data.site.photo);
+      }
+      preview.appendChild(img2);
+      removeBtn.hidden = false;
+    }
+  }
+
+  el["site-photo-pick-btn"].addEventListener("click", function () { el["site-photo-input"].click(); });
+  el["site-photo-input"].addEventListener("change", function (e) {
+    var file = e.target.files && e.target.files[0];
+    if (file) {
+      state.photoDraft = { file: file };
+      renderPhotoPreview();
+    }
+    e.target.value = "";
+  });
+  el["site-photo-remove-btn"].addEventListener("click", function () {
+    state.photoDraft = "remove";
+    renderPhotoPreview();
+  });
+
   el["save-site-info"].addEventListener("click", function () {
-    state.data.site.name = el["site-name"].value.trim();
-    state.data.site.tagline = el["site-tagline"].value.trim();
-    state.data.site.email = el["site-email"].value.trim();
-    state.data.site.about = el["site-about"].value;
-    writeDataToDisk().then(function () {
+    var btn = el["save-site-info"];
+    btn.disabled = true;
+    btn.textContent = "Saving…";
+
+    var photoStep;
+    if (state.photoDraft && state.photoDraft.file) {
+      var file = state.photoDraft.file;
+      var filename = "profile-" + uid() + "." + extFor(file);
+      photoStep = getOrCreateDir("media/images").then(function (dir) {
+        return dir.getFileHandle(filename, { create: true });
+      }).then(function (fh) {
+        return fh.createWritable().then(function (w) { return w.write(file).then(function () { return w.close(); }); });
+      }).then(function () {
+        state.data.site.photo = "media/images/" + filename;
+      });
+    } else if (state.photoDraft === "remove") {
+      photoStep = Promise.resolve().then(function () { state.data.site.photo = ""; });
+    } else {
+      photoStep = Promise.resolve();
+    }
+
+    photoStep.then(function () {
+      state.data.site.name = el["site-name"].value.trim();
+      state.data.site.tagline = el["site-tagline"].value.trim();
+      state.data.site.email = el["site-email"].value.trim();
+      state.data.site.linkedin = el["site-linkedin"].value.trim();
+      state.data.site.about = el["site-about"].value;
+      return writeDataToDisk();
+    }).then(function () {
+      state.photoDraft = undefined;
       toast("Site info saved.");
-    }).catch(handleWriteError);
+    }).catch(handleWriteError).then(function () {
+      btn.disabled = false;
+      btn.textContent = "Save site info";
+    });
   });
 
   function sortedProjects() {
