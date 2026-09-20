@@ -217,15 +217,23 @@
       var caption = document.createElement("div");
       caption.className = "project-caption";
 
-      var tag = document.createElement("span");
-      tag.className = "tag";
-      tag.textContent = project.tag || "";
-      caption.appendChild(tag);
-
+      // Same order/markup as the sidebar on the project detail page
+      // (title, then meta, then description) so the text block lines
+      // up the same way on both pages.
       var name = document.createElement("span");
       name.className = "name";
       name.textContent = project.title || "Untitled";
       caption.appendChild(name);
+
+      var meta = document.createElement("div");
+      meta.className = "project-meta";
+      [project.tag, project.year, project.client].forEach(function (bit) {
+        if (!bit) return;
+        var span = document.createElement("span");
+        span.textContent = bit;
+        meta.appendChild(span);
+      });
+      if (meta.children.length) caption.appendChild(meta);
 
       var blurb = project.summary || project.description;
       if (blurb) {
