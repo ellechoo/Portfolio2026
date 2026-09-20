@@ -44,13 +44,23 @@
 
     <!-- ===================== PROJECT VIEW ===================== -->
     <div id="project-view" hidden>
-      <div class="project-header">
-        <a class="back-link" href="#">&larr; Back to work</a>
-        <h1 id="project-title"></h1>
-        <div class="project-meta" id="project-meta"></div>
-        <p class="project-description" id="project-description"></p>
+      <a class="back-link" href="#">&larr; Back to work</a>
+
+      <div class="project-layout" id="project-layout">
+        <div class="project-media" id="project-media"></div>
+
+        <aside class="project-sidebar">
+          <button class="sidebar-toggle" id="sidebar-toggle" type="button" aria-expanded="true">
+            <span class="sidebar-toggle-label">Hide info</span>
+            <span class="sidebar-toggle-arrow" aria-hidden="true">&rsaquo;</span>
+          </button>
+          <div class="project-sidebar-content" id="project-sidebar-content">
+            <h1 id="project-title"></h1>
+            <div class="project-meta" id="project-meta"></div>
+            <p class="project-description" id="project-description"></p>
+          </div>
+        </aside>
       </div>
-      <div class="project-media" id="project-media"></div>
     </div>
 
     <noscript>
