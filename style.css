@@ -81,9 +81,15 @@ button:focus-visible,
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
+  /* Wider than the content column on purpose — About/Contact read
+     better closer to the screen edges than lined up with the copy
+     below them. */
+  max-width: 1600px;
+  padding: 0 48px;
 }
 
-.site-header a {
+.site-header a,
+.site-header button.contact-toggle {
   font-size: 14px;
   font-weight: 500;
   letter-spacing: -0.01em;
@@ -93,70 +99,52 @@ button:focus-visible,
 
 .nav-left { justify-self: start; }
 .nav-center { justify-self: center; font-weight: 600; }
-.nav-right { justify-self: end; }
+.nav-right { justify-self: end; position: relative; }
 
-.site-header a:hover {
+.site-header a:hover,
+.site-header button.contact-toggle:hover {
   opacity: 0.5;
 }
 
-/* ---------- Home: intro pile ---------- */
-/* A small, tight cluster of overlapping, tilted prints — not spread
-   across the screen. Plays once on load (pure CSS, no scroll math),
-   then sits still except for a very slight idle drift. Items are
-   injected by main.js from the first few projects. */
-
-.intro-pile {
-  position: relative;
-  width: min(420px, 70vw);
-  height: 260px;
-  margin: 56px auto 8px;
+button.contact-toggle {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font-family: inherit;
+  cursor: pointer;
 }
 
-.pile-item {
+/* ---------- Header: contact dropdown ---------- */
+
+.contact-menu {
   position: absolute;
-  width: 150px;
-  aspect-ratio: 3 / 2;
+  top: calc(100% + 14px);
+  right: 0;
+  min-width: 160px;
+  background: var(--white);
+  border: 1px solid var(--grey-line);
+  border-radius: 8px;
+  box-shadow: 0 16px 32px -16px rgba(0, 0, 0, 0.2);
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+}
+
+.contact-menu a {
+  padding: 9px 12px;
+  border-radius: 5px;
+  font-size: 14px;
+}
+
+.contact-menu a:hover {
   background: var(--grey-fill);
-  overflow: hidden;
-  box-shadow: 0 12px 24px -12px rgba(0, 0, 0, 0.25);
-  opacity: 0;
-  animation-duration: 0.7s;
-  animation-timing-function: cubic-bezier(0.2, 0.7, 0.3, 1);
-  animation-fill-mode: forwards;
-}
-
-.pile-item img,
-.pile-item video {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.pile-item:nth-child(1) { top: 10px;  left: 40px;  animation-name: settle-1; animation-delay: 0s; z-index: 1; }
-.pile-item:nth-child(2) { top: 40px;  left: 150px; animation-name: settle-2; animation-delay: 0.09s; z-index: 2; }
-.pile-item:nth-child(3) { top: 90px;  left: 70px;  animation-name: settle-3; animation-delay: 0.18s; z-index: 3; }
-.pile-item:nth-child(4) { top: 60px;  left: 210px; animation-name: settle-4; animation-delay: 0.27s; z-index: 4; }
-.pile-item:nth-child(5) { top: 120px; left: 160px; animation-name: settle-5; animation-delay: 0.36s; z-index: 5; }
-
-@keyframes settle-1 { from { opacity: 0; transform: translateY(-36px) rotate(4deg) scale(0.92); } to { opacity: 1; transform: translateY(0) rotate(-9deg) scale(1); } }
-@keyframes settle-2 { from { opacity: 0; transform: translateY(-36px) rotate(-4deg) scale(0.92); } to { opacity: 1; transform: translateY(0) rotate(6deg) scale(1); } }
-@keyframes settle-3 { from { opacity: 0; transform: translateY(-36px) rotate(10deg) scale(0.92); } to { opacity: 1; transform: translateY(0) rotate(4deg) scale(1); } }
-@keyframes settle-4 { from { opacity: 0; transform: translateY(-36px) rotate(-10deg) scale(0.92); } to { opacity: 1; transform: translateY(0) rotate(-5deg) scale(1); } }
-@keyframes settle-5 { from { opacity: 0; transform: translateY(-36px) rotate(6deg) scale(0.92); } to { opacity: 1; transform: translateY(0) rotate(-3deg) scale(1); } }
-
-@media (prefers-reduced-motion: reduce) {
-  .pile-item {
-    animation: none;
-    opacity: 1;
-  }
+  opacity: 1;
 }
 
 @media (max-width: 600px) {
-  .intro-pile {
-    height: 200px;
-  }
-  .pile-item {
-    width: 110px;
+  .site-header .wrap {
+    padding: 0 var(--gutter);
   }
 }
 
@@ -171,8 +159,7 @@ button:focus-visible,
 
 /* ---------- Home: project list ---------- */
 /* A plain, normal-flow scroll — no pinning, no scroll-jacking. Each
-   project is a big image or video with a small caption beside it.
-   Media is muted by default and goes full color on hover. */
+   project is a big image or video with a small caption beside it. */
 
 .project-list {
   padding: 40px 0 120px;
@@ -199,15 +186,13 @@ button:focus-visible,
   width: 100%;
   height: 100%;
   object-fit: cover;
-  filter: grayscale(85%);
-  transition: filter 0.5s ease, transform 0.6s ease;
+  transition: transform 0.6s ease;
 }
 
 .project-row:hover .project-image img,
 .project-row:hover .project-image video,
 .project-image.is-playing img,
 .project-image.is-playing video {
-  filter: grayscale(0%);
   transform: scale(1.015);
 }
 
@@ -365,6 +350,33 @@ button:focus-visible,
   min-height: 50vh;
   padding: 64px 0 120px;
   max-width: 640px;
+}
+
+.about-photo {
+  width: 148px;
+  height: 148px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--grey-fill);
+  margin: 0 0 28px;
+}
+
+.about-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.about-photo.is-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px dashed var(--grey-line);
+  color: var(--grey-text);
+  font-size: 12px;
+  text-align: center;
+  padding: 12px;
+  line-height: 1.4;
 }
 
 .about-main h1 {
