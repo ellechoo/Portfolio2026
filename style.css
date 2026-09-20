@@ -175,7 +175,7 @@ button.contact-toggle {
    like a resize. A thin rule marks the top and bottom of every row. */
 
 .project-list {
-  padding: 40px 0 0;
+  padding: 15px 0 0;
   border-bottom: 1px solid var(--grey-line);
 }
 
