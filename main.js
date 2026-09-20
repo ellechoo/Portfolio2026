@@ -28,8 +28,12 @@
     contactMenu: document.getElementById("contact-menu"),
     contactEmailLink: document.getElementById("contact-email-link"),
     contactLinkedinLink: document.getElementById("contact-linkedin-link"),
-    projectLayout: document.getElementById("project-layout"),
-    sidebarToggle: document.getElementById("sidebar-toggle"),
+    lightbox: document.getElementById("lightbox"),
+    lightboxStage: document.getElementById("lightbox-stage"),
+    lightboxClose: document.getElementById("lightbox-close"),
+    lightboxPrev: document.getElementById("lightbox-prev"),
+    lightboxNext: document.getElementById("lightbox-next"),
+    lightboxCounter: document.getElementById("lightbox-counter"),
   };
 
   function readData() {
@@ -223,6 +227,14 @@
       name.textContent = project.title || "Untitled";
       caption.appendChild(name);
 
+      var blurb = project.summary || project.description;
+      if (blurb) {
+        var desc = document.createElement("p");
+        desc.className = "project-description";
+        desc.textContent = blurb;
+        caption.appendChild(desc);
+      }
+
       row.appendChild(caption);
       els.list.appendChild(row);
     });
@@ -317,8 +329,10 @@
 
     els.projectDescription.textContent = project.description || "";
 
+    var media = project.media || [];
+
     els.projectMedia.innerHTML = "";
-    (project.media || []).forEach(function (item) {
+    media.forEach(function (item, index) {
       var figure = document.createElement("figure");
       var el;
       if (item.type === "video") {
@@ -328,13 +342,26 @@
         el.controls = true;
         el.playsInline = true;
         el.preload = "metadata";
+        figure.appendChild(el);
+
+        var expand = document.createElement("button");
+        expand.type = "button";
+        expand.className = "media-expand";
+        expand.setAttribute("aria-label", "View larger");
+        expand.innerHTML = '<svg viewBox="0 0 20 20"><path d="M7 3H3v4M13 3h4v4M7 17H3v-4M13 17h4v-4"/></svg>';
+        expand.addEventListener("click", function (e) {
+          e.stopPropagation();
+          openLightbox(media, index);
+        });
+        figure.appendChild(expand);
       } else {
         el = document.createElement("img");
         el.src = item.src;
         el.alt = item.caption || project.title || "";
         el.loading = "lazy";
+        el.addEventListener("click", function () { openLightbox(media, index); });
+        figure.appendChild(el);
       }
-      figure.appendChild(el);
       if (item.caption) {
         var figcaption = document.createElement("figcaption");
         figcaption.textContent = item.caption;
@@ -346,15 +373,76 @@
     return true;
   }
 
-  /* ---------- project sidebar collapse ---------- */
+  /* ---------- lightbox ---------- */
+  /* A simple zoomed-in viewer for a project's media, with a carousel
+     when there's more than one item. Shown via the .is-open class
+     rather than the [hidden] attribute (see the contact-menu note
+     above — the same display-override risk applies here). */
 
-  function setUpSidebarToggle() {
-    var toggle = els.sidebarToggle, layout = els.projectLayout;
-    if (!toggle || !layout) return;
-    toggle.addEventListener("click", function () {
-      var collapsed = layout.classList.toggle("is-collapsed");
-      toggle.setAttribute("aria-expanded", String(!collapsed));
-      toggle.querySelector(".sidebar-toggle-label").textContent = collapsed ? "Show info" : "Hide info";
+  var lightboxMedia = [];
+  var lightboxIndex = 0;
+
+  function openLightbox(media, index) {
+    lightboxMedia = media;
+    lightboxIndex = index;
+    renderLightboxItem();
+    els.lightbox.classList.add("is-open");
+    document.addEventListener("keydown", onLightboxKeydown);
+  }
+
+  function closeLightbox() {
+    els.lightbox.classList.remove("is-open");
+    els.lightboxStage.innerHTML = ""; // stop any playing video
+    document.removeEventListener("keydown", onLightboxKeydown);
+  }
+
+  function showLightboxIndex(newIndex) {
+    var n = lightboxMedia.length;
+    lightboxIndex = (newIndex + n) % n;
+    renderLightboxItem();
+  }
+
+  function renderLightboxItem() {
+    var item = lightboxMedia[lightboxIndex];
+    els.lightboxStage.innerHTML = "";
+    var el;
+    if (item.type === "video") {
+      el = document.createElement("video");
+      el.src = item.src;
+      if (item.poster) el.poster = item.poster;
+      el.controls = true;
+      el.playsInline = true;
+      el.autoplay = true;
+    } else {
+      el = document.createElement("img");
+      el.src = item.src;
+      el.alt = item.caption || "";
+    }
+    els.lightboxStage.appendChild(el);
+
+    var multiple = lightboxMedia.length > 1;
+    els.lightboxPrev.hidden = !multiple;
+    els.lightboxNext.hidden = !multiple;
+    els.lightboxCounter.hidden = !multiple;
+    if (multiple) {
+      els.lightboxCounter.textContent = (lightboxIndex + 1) + " / " + lightboxMedia.length;
+    }
+  }
+
+  function onLightboxKeydown(e) {
+    if (e.key === "Escape") closeLightbox();
+    else if (e.key === "ArrowLeft") showLightboxIndex(lightboxIndex - 1);
+    else if (e.key === "ArrowRight") showLightboxIndex(lightboxIndex + 1);
+  }
+
+  function setUpLightbox() {
+    if (!els.lightbox) return;
+    els.lightboxClose.addEventListener("click", closeLightbox);
+    els.lightboxPrev.addEventListener("click", function () { showLightboxIndex(lightboxIndex - 1); });
+    els.lightboxNext.addEventListener("click", function () { showLightboxIndex(lightboxIndex + 1); });
+    // Click the dark backdrop (not the stage or its media/controls) to close.
+    els.lightbox.addEventListener("click", function (e) {
+      if (e.target === els.lightbox) closeLightbox();
     });
   }
 
@@ -366,6 +454,7 @@
     els.project.hidden = name !== "project";
     window.scrollTo(0, 0);
     closeContactMenu();
+    closeLightbox();
   }
 
   function route() {
@@ -383,7 +472,7 @@
   }
 
   renderChrome();
-  setUpSidebarToggle();
+  setUpLightbox();
   window.addEventListener("hashchange", route);
   route();
 })();
