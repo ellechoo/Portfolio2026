@@ -4,117 +4,73 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Elle Choo — Design</title>
+  <meta name="description" content="Graphic and interaction design portfolio of Elle Choo.">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
   <header class="site-header">
     <div class="wrap">
-      <a class="nav-left" href="about.html">About</a>
-      <a class="nav-center" href="index.html">Elle Choo</a>
-      <a class="nav-right" href="mailto:you@email.com">Contact</a>
+      <a class="nav-left" href="#about">About</a>
+      <a class="nav-center" href="#">Elle Choo</a>
+      <a class="nav-right" id="contact-link" href="mailto:hello@example.com">Contact</a>
     </div>
   </header>
 
   <main class="wrap">
 
-    <!-- A small, tight cluster of overlapping prints — plays once on
-         load. Purely CSS; see .intro-pile / .pile-item in style.css. -->
-    <div class="intro-pile">
-      <div class="pile-item"><img src="images/project-1-thumb.jpg" alt=""></div>
-      <div class="pile-item"><img src="images/project-2-thumb.jpg" alt=""></div>
-      <div class="pile-item"><img src="images/project-3-thumb.jpg" alt=""></div>
-      <div class="pile-item"><img src="images/project-4-thumb.jpg" alt=""></div>
-      <div class="pile-item"><img src="images/project-5-thumb.jpg" alt=""></div>
+    <!-- ===================== HOME VIEW ===================== -->
+    <div id="home-view">
+
+      <!-- Small overlapping-prints intro, built from the first few
+           projects. Purely presentational; see #intro-pile in main.js. -->
+      <div class="intro-pile" id="intro-pile" hidden></div>
+
+      <section class="project-list" id="project-list"></section>
+
+      <div class="empty-state" id="empty-state" hidden>
+        <p>Nothing posted yet — new work will show up here.</p>
+      </div>
+
     </div>
 
-    <!-- Plain scroll from here down — one big image + caption per
-         project, in normal document flow. -->
-    <section class="project-list">
+    <!-- ===================== ABOUT VIEW ===================== -->
+    <div id="about-view" hidden>
+      <div class="about-main" id="about-content"></div>
+    </div>
 
-      <a class="project-row" href="projects/project-1.html">
-        <div class="project-image">
-          <img src="images/project-1-full.jpg" alt="Project One">
-        </div>
-        <div class="project-caption">
-          <span class="tag">Identity</span>
-          <span class="name">Project One</span>
-        </div>
-      </a>
+    <!-- ===================== PROJECT VIEW ===================== -->
+    <div id="project-view" hidden>
+      <div class="project-header">
+        <a class="back-link" href="#">&larr; Back to work</a>
+        <h1 id="project-title"></h1>
+        <div class="project-meta" id="project-meta"></div>
+        <p class="project-description" id="project-description"></p>
+      </div>
+      <div class="project-media" id="project-media"></div>
+    </div>
 
-      <a class="project-row" href="projects/project-1.html">
-        <div class="project-image">
-          <img src="images/project-2-full.jpg" alt="Project Two">
-        </div>
-        <div class="project-caption">
-          <span class="tag">Data Viz</span>
-          <span class="name">Project Two</span>
-        </div>
-      </a>
-
-      <a class="project-row" href="projects/project-1.html">
-        <div class="project-image">
-          <img src="images/project-3-full.jpg" alt="Project Three">
-        </div>
-        <div class="project-caption">
-          <span class="tag">Book Design</span>
-          <span class="name">Project Three</span>
-        </div>
-      </a>
-
-      <a class="project-row" href="projects/project-1.html">
-        <div class="project-image">
-          <img src="images/project-4-full.jpg" alt="Project Four">
-        </div>
-        <div class="project-caption">
-          <span class="tag">Editorial</span>
-          <span class="name">Project Four</span>
-        </div>
-      </a>
-
-      <a class="project-row" href="projects/project-1.html">
-        <div class="project-image">
-          <img src="images/project-5-full.jpg" alt="Project Five">
-        </div>
-        <div class="project-caption">
-          <span class="tag">Web</span>
-          <span class="name">Project Five</span>
-        </div>
-      </a>
-
-      <a class="project-row" href="projects/project-1.html">
-        <div class="project-image">
-          <img src="images/project-6-full.jpg" alt="Project Six">
-        </div>
-        <div class="project-caption">
-          <span class="tag">Motion</span>
-          <span class="name">Project Six</span>
-        </div>
-      </a>
-
-      <a class="project-row" href="projects/project-1.html">
-        <div class="project-image">
-          <img src="images/project-7-full.jpg" alt="Project Seven">
-        </div>
-        <div class="project-caption">
-          <span class="tag">Poster</span>
-          <span class="name">Project Seven</span>
-        </div>
-      </a>
-
-      <a class="project-row" href="projects/project-1.html">
-        <div class="project-image">
-          <img src="images/project-8-full.jpg" alt="Project Eight">
-        </div>
-        <div class="project-caption">
-          <span class="tag">Packaging</span>
-          <span class="name">Project Eight</span>
-        </div>
-      </a>
-
-    </section>
+    <noscript>
+      <p style="padding:48px 0;color:#6b6b6b;">This site needs JavaScript enabled to show the work.</p>
+    </noscript>
 
   </main>
+
+  <!-- All project content lives here. Edit it by opening admin.html
+       locally and using the "Add / edit project" tool — it rewrites
+       this block directly. Editing it by hand works too: it's just
+       JSON. -->
+  <script id="site-data" type="application/json">
+{
+  "site": {
+    "name": "Elle Choo",
+    "tagline": "Graphic & interaction design",
+    "email": "hello@example.com",
+    "about": "Bio goes here — open admin.html and fill in the Site info panel, or edit this text directly."
+  },
+  "projects": []
+}
+  </script>
 
   <script src="main.js" defer></script>
 </body>
