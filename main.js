@@ -28,6 +28,8 @@
     contactMenu: document.getElementById("contact-menu"),
     contactEmailLink: document.getElementById("contact-email-link"),
     contactLinkedinLink: document.getElementById("contact-linkedin-link"),
+    projectLayout: document.getElementById("project-layout"),
+    sidebarToggle: document.getElementById("sidebar-toggle"),
   };
 
   function readData() {
@@ -67,6 +69,27 @@
   }
 
   /* ---------- contact dropdown ---------- */
+  /* Shown on hover via plain CSS (see .nav-right:hover .contact-menu),
+     and toggled open/closed by click via the .is-open class — click
+     is what makes it usable on touch, and keeps it open once opened
+     even if the pointer drifts off the button. */
+
+  function closeContactMenu() {
+    var toggle = els.contactToggle, menu = els.contactMenu;
+    if (!menu || !menu.classList.contains("is-open")) return;
+    menu.classList.remove("is-open");
+    toggle.setAttribute("aria-expanded", "false");
+    document.removeEventListener("click", onOutsideClick);
+    document.removeEventListener("keydown", onContactKeydown);
+  }
+
+  function onOutsideClick(e) {
+    var menu = els.contactMenu, toggle = els.contactToggle;
+    if (!menu.contains(e.target) && e.target !== toggle) closeContactMenu();
+  }
+  function onContactKeydown(e) {
+    if (e.key === "Escape") { closeContactMenu(); els.contactToggle.focus(); }
+  }
 
   function setUpContactMenu() {
     var toggle = els.contactToggle, menu = els.contactMenu;
@@ -86,28 +109,16 @@
       els.contactLinkedinLink.hidden = true;
     }
 
-    function open() {
-      menu.hidden = false;
-      toggle.setAttribute("aria-expanded", "true");
-      document.addEventListener("click", onOutsideClick);
-      document.addEventListener("keydown", onKeydown);
-    }
-    function close() {
-      menu.hidden = true;
-      toggle.setAttribute("aria-expanded", "false");
-      document.removeEventListener("click", onOutsideClick);
-      document.removeEventListener("keydown", onKeydown);
-    }
-    function onOutsideClick(e) {
-      if (!menu.contains(e.target) && e.target !== toggle) close();
-    }
-    function onKeydown(e) {
-      if (e.key === "Escape") { close(); toggle.focus(); }
-    }
-
     toggle.addEventListener("click", function (e) {
       e.stopPropagation();
-      if (menu.hidden) open(); else close();
+      if (menu.classList.contains("is-open")) {
+        closeContactMenu();
+      } else {
+        menu.classList.add("is-open");
+        toggle.setAttribute("aria-expanded", "true");
+        document.addEventListener("click", onOutsideClick);
+        document.addEventListener("keydown", onContactKeydown);
+      }
     });
   }
 
@@ -335,6 +346,18 @@
     return true;
   }
 
+  /* ---------- project sidebar collapse ---------- */
+
+  function setUpSidebarToggle() {
+    var toggle = els.sidebarToggle, layout = els.projectLayout;
+    if (!toggle || !layout) return;
+    toggle.addEventListener("click", function () {
+      var collapsed = layout.classList.toggle("is-collapsed");
+      toggle.setAttribute("aria-expanded", String(!collapsed));
+      toggle.querySelector(".sidebar-toggle-label").textContent = collapsed ? "Show info" : "Hide info";
+    });
+  }
+
   /* ---------- router ---------- */
 
   function showView(name) {
@@ -342,10 +365,7 @@
     els.about.hidden = name !== "about";
     els.project.hidden = name !== "project";
     window.scrollTo(0, 0);
-    if (els.contactMenu && !els.contactMenu.hidden) {
-      els.contactMenu.hidden = true;
-      els.contactToggle.setAttribute("aria-expanded", "false");
-    }
+    closeContactMenu();
   }
 
   function route() {
@@ -363,6 +383,7 @@
   }
 
   renderChrome();
+  setUpSidebarToggle();
   window.addEventListener("hashchange", route);
   route();
 })();
