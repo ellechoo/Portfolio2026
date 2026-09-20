@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portfolio Admin — Elle Choo</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700&display=swap');
+
+  :root {
+    --black: #0a0a0a;
+    --white: #ffffff;
+    --grey-fill: #f4f4f4;
+    --grey-line: #e2e2e2;
+    --grey-text: #6b6b6b;
+    --danger: #b3261e;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: var(--black);
+    background: var(--white);
+    line-height: 1.5;
+  }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 40px 24px 120px; }
+  h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.01em; margin: 0 0 4px; }
+  .subtitle { color: var(--grey-text); font-size: 14px; margin: 0 0 32px; }
+  h2 { font-size: 16px; font-weight: 600; margin: 0 0 16px; }
+  section { margin-bottom: 48px; }
+  label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 6px; }
+  .field { margin-bottom: 16px; }
+  .field-row { display: flex; gap: 16px; }
+  .field-row .field { flex: 1; }
+  input[type="text"], input[type="email"], input[type="number"], textarea {
+    width: 100%;
+    font-family: inherit;
+    font-size: 14px;
+    padding: 10px 12px;
+    border: 1px solid var(--grey-line);
+    border-radius: 6px;
+    background: var(--white);
+    color: var(--black);
+  }
+  input:focus, textarea:focus, button:focus-visible {
+    outline: 2px solid var(--black);
+    outline-offset: 1px;
+  }
+  textarea { resize: vertical; min-height: 80px; }
+  .hint { font-size: 12px; color: var(--grey-text); margin-top: 4px; }
+
+  button {
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 10px 18px;
+    border-radius: 6px;
+    border: 1px solid var(--black);
+    background: var(--black);
+    color: var(--white);
+    cursor: pointer;
+  }
+  button.secondary { background: var(--white); color: var(--black); }
+  button.ghost { background: transparent; color: var(--black); border-color: var(--grey-line); }
+  button.danger { background: var(--white); color: var(--danger); border-color: var(--danger); }
+  button.small { padding: 6px 12px; font-size: 13px; }
+  button:disabled { opacity: 0.4; cursor: default; }
+  button:hover:not(:disabled) { opacity: 0.85; }
+
+  #connect-panel {
+    border: 1px solid var(--grey-line);
+    border-radius: 10px;
+    padding: 28px;
+    text-align: center;
+  }
+  #connect-panel p { color: var(--grey-text); font-size: 14px; margin: 8px 0 20px; }
+  #unsupported {
+    border: 1px solid var(--grey-line);
+    border-radius: 10px;
+    padding: 24px;
+    background: var(--grey-fill);
+    font-size: 14px;
+  }
+
+  .status-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: var(--grey-text);
+    margin-bottom: 24px;
+  }
+  .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #2e9e4f; flex: none; }
+
+  .project-row-admin {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--grey-line);
+  }
+  .project-row-admin img, .project-row-admin video {
+    width: 64px;
+    height: 44px;
+    object-fit: cover;
+    border-radius: 4px;
+    background: var(--grey-fill);
+    flex: none;
+  }
+  .project-row-admin .info { flex: 1; min-width: 0; }
+  .project-row-admin .info .t { font-weight: 600; font-size: 14px; }
+  .project-row-admin .info .m { font-size: 12px; color: var(--grey-text); }
+  .project-row-admin .actions { display: flex; gap: 6px; flex: none; }
+
+  #editor {
+    border: 1px solid var(--grey-line);
+    border-radius: 10px;
+    padding: 24px;
+  }
+
+  .dropzone {
+    border: 1.5px dashed var(--grey-line);
+    border-radius: 8px;
+    padding: 28px;
+    text-align: center;
+    color: var(--grey-text);
+    font-size: 14px;
+    cursor: pointer;
+    margin-bottom: 16px;
+  }
+  .dropzone.drag-over { border-color: var(--black); color: var(--black); background: var(--grey-fill); }
+
+  .media-item {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 12px;
+    border: 1px solid var(--grey-line);
+    border-radius: 8px;
+    margin-bottom: 10px;
+  }
+  .media-item .preview { width: 96px; height: 64px; flex: none; border-radius: 4px; overflow: hidden; background: var(--grey-fill); }
+  .media-item .preview img, .media-item .preview video { width: 100%; height: 100%; object-fit: cover; }
+  .media-item .mid { flex: 1; min-width: 0; }
+  .media-item .mid input[type="text"] { margin-bottom: 6px; }
+  .media-item .row2 { display: flex; align-items: center; gap: 12px; font-size: 12px; color: var(--grey-text); flex-wrap: wrap; }
+  .media-item .actions { display: flex; flex-direction: column; gap: 6px; flex: none; }
+
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: 28px;
+    transform: translateX(-50%);
+    background: var(--black);
+    color: var(--white);
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 13px;
+    max-width: 90vw;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    z-index: 50;
+  }
+  .toast pre {
+    white-space: pre-wrap;
+    font-family: ui-monospace, monospace;
+    background: rgba(255,255,255,0.1);
+    padding: 8px 10px;
+    border-radius: 6px;
+    margin: 8px 0 0;
+  }
+
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Portfolio admin</h1>
+  <p class="subtitle">A local editing tool — runs only in this browser tab, on this computer. Nothing here is uploaded anywhere.</p>
+
+  <div id="unsupported" hidden>
+    <strong>This tool needs a Chromium browser.</strong>
+    <p>Open this file in Chrome or Edge on a computer (not a phone) — it uses a file-access feature Safari and Firefox don't support yet. Your portfolio site itself (<code>index.html</code>) works everywhere; only this admin page needs Chrome/Edge.</p>
+  </div>
+
+  <div id="connect-panel">
+    <p>Connect this tool to your Portfolio2026 folder to add or edit projects.</p>
+    <button id="connect-btn">Choose your Portfolio2026 folder</button>
+    <p class="hint" id="connect-hint"></p>
+  </div>
+
+  <div id="app" hidden>
+    <div class="status-bar"><span class="status-dot"></span> <span id="folder-name"></span></div>
+
+    <section id="site-info-section">
+      <h2>Site info</h2>
+      <div class="field-row">
+        <div class="field"><label for="site-name">Name</label><input type="text" id="site-name"></div>
+        <div class="field"><label for="site-tagline">Tagline</label><input type="text" id="site-tagline"></div>
+      </div>
+      <div class="field"><label for="site-email">Contact email</label><input type="email" id="site-email"></div>
+      <div class="field"><label for="site-about">About / bio</label><textarea id="site-about" rows="5"></textarea></div>
+      <button id="save-site-info" class="secondary small">Save site info</button>
+    </section>
+
+    <section id="projects-section">
+      <h2>Projects</h2>
+      <div id="admin-project-list"></div>
+      <button id="add-project-btn" style="margin-top:16px;">+ Add project</button>
+    </section>
+
+    <section id="editor" hidden>
+      <h2 id="editor-title">Add project</h2>
+
+      <div class="field-row">
+        <div class="field"><label for="p-title">Title</label><input type="text" id="p-title"></div>
+        <div class="field"><label for="p-year">Year</label><input type="text" id="p-year"></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label for="p-tag">Category / tag</label><input type="text" id="p-tag" placeholder="e.g. Web · Interaction"></div>
+        <div class="field"><label for="p-client">Client</label><input type="text" id="p-client" placeholder="e.g. Self-directed"></div>
+      </div>
+      <div class="field"><label for="p-summary">Gallery caption (optional, short)</label><input type="text" id="p-summary"></div>
+      <div class="field"><label for="p-description">Description</label><textarea id="p-description" rows="4"></textarea></div>
+
+      <label>Media</label>
+      <p class="hint" style="margin-top:-2px;">Drop images or videos below. Pick one as the gallery thumbnail — for web/interaction work, a short video thumbnail reads best.</p>
+      <div class="dropzone" id="dropzone">Drop files here, or click to choose</div>
+      <input type="file" id="file-input" accept="image/*,video/*" multiple hidden>
+      <div id="media-list"></div>
+
+      <div style="display:flex; gap:10px; margin-top:20px;">
+        <button id="save-project-btn">Save project</button>
+        <button id="cancel-edit-btn" class="ghost">Cancel</button>
+        <button id="delete-project-btn" class="danger" style="margin-left:auto;" hidden>Delete project</button>
+      </div>
+    </section>
+  </div>
+
+</div>
+
+<div id="toast" class="toast" hidden></div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ---------------- feature detect ---------------- */
+
+  if (!("showDirectoryPicker" in window)) {
+    document.getElementById("unsupported").hidden = false;
+    document.getElementById("connect-panel").hidden = true;
+    return;
+  }
+
+  /* ---------------- tiny IndexedDB handle store ---------------- */
+  /* Remembers the folder handle between visits so you don't have to
+     re-pick it every time. Browsers still require re-confirming
+     permission each session, which the "Reconnect" flow below does. */
+
+  var DB_NAME = "portfolio-admin";
+  var STORE = "handles";
+
+  function idbOpen() {
+    return new Promise(function (resolve, reject) {
+      var req = indexedDB.open(DB_NAME, 1);
+      req.onupgradeneeded = function () { req.result.createObjectStore(STORE); };
+      req.onsuccess = function () { resolve(req.result); };
+      req.onerror = function () { reject(req.error); };
+    });
+  }
+
+  function idbSet(key, val) {
+    return idbOpen().then(function (db) {
+      return new Promise(function (resolve, reject) {
+        var tx = db.transaction(STORE, "readwrite");
+        tx.objectStore(STORE).put(val, key);
+        tx.oncomplete = function () { resolve(); };
+        tx.onerror = function () { reject(tx.error); };
+      });
+    });
+  }
+
+  function idbGet(key) {
+    return idbOpen().then(function (db) {
+      return new Promise(function (resolve, reject) {
+        var tx = db.transaction(STORE, "readonly");
+        var req = tx.objectStore(STORE).get(key);
+        req.onsuccess = function () { resolve(req.result); };
+        req.onerror = function () { reject(req.error); };
+      });
+    });
+  }
+
+  /* ---------------- state ---------------- */
+
+  var state = {
+    dirHandle: null,
+    data: { site: { name: "", tagline: "", email: "", about: "" }, projects: [] },
+    editingId: null,
+    mediaDraft: [],   // [{ tempId, type, src?, file?, previewUrl, caption, isThumbnail, isNew }]
+    savingBlobUrls: [],
+  };
+
+  var el = {};
+  ["connect-panel", "connect-btn", "connect-hint", "app", "folder-name",
+   "site-name", "site-tagline", "site-email", "site-about", "save-site-info",
+   "admin-project-list", "add-project-btn",
+   "editor", "editor-title", "p-title", "p-year", "p-tag", "p-client", "p-summary", "p-description",
+   "dropzone", "file-input", "media-list",
+   "save-project-btn", "cancel-edit-btn", "delete-project-btn",
+   "toast"].forEach(function (id) { el[id] = document.getElementById(id); });
+
+  function toast(html, ms) {
+    el.toast.innerHTML = html;
+    el.toast.hidden = false;
+    clearTimeout(toast._t);
+    if (ms !== 0) {
+      toast._t = setTimeout(function () { el.toast.hidden = true; }, ms || 4000);
+    }
+  }
+
+  /* ---------------- connect / reconnect ---------------- */
+
+  el["connect-btn"].addEventListener("click", function () {
+    connect().catch(function (err) {
+      if (err && err.name === "AbortError") return;
+      console.error(err);
+      el["connect-hint"].textContent = "Couldn't open that folder: " + (err && err.message ? err.message : err);
+    });
+  });
+
+  function connect() {
+    return window.showDirectoryPicker({ mode: "readwrite" }).then(function (handle) {
+      return verifyAndLoad(handle);
+    });
+  }
+
+  function verifyAndLoad(handle) {
+    return handle.getFileHandle("index.html").then(function () {
+      state.dirHandle = handle;
+      return idbSet("root", handle);
+    }, function () {
+      throw new Error("That folder doesn't have an index.html in it — pick the Portfolio2026 folder itself.");
+    }).then(function () {
+      return loadDataFromDisk();
+    }).then(function () {
+      el["connect-panel"].hidden = true;
+      el.app.hidden = false;
+      el["folder-name"].textContent = "Connected to " + state.dirHandle.name;
+      renderAll();
+    });
+  }
+
+  function tryAutoReconnect() {
+    idbGet("root").then(function (handle) {
+      if (!handle) return;
+      return handle.queryPermission({ mode: "readwrite" }).then(function (perm) {
+        if (perm === "granted") {
+          return verifyAndLoad(handle);
+        }
+        el["connect-hint"].innerHTML = 'Previously connected to "' + handle.name + '". <button id="reconnect-btn" class="secondary small" style="margin-left:6px;">Reconnect</button>';
+        document.getElementById("reconnect-btn").addEventListener("click", function () {
+          handle.requestPermission({ mode: "readwrite" }).then(function (p) {
+            if (p === "granted") return verifyAndLoad(handle);
+          }).catch(function (err) { console.error(err); });
+        });
+      });
+    }).catch(function () {});
+  }
+
+  /* ---------------- read / write index.html ---------------- */
+
+  var DATA_TAG_RE = /(<script id="site-data" type="application\/json">)([\s\S]*?)(<\/script>)/;
+
+  function loadDataFromDisk() {
+    return state.dirHandle.getFileHandle("index.html").then(function (fh) {
+      return fh.getFile();
+    }).then(function (file) {
+      return file.text();
+    }).then(function (text) {
+      var m = text.match(DATA_TAG_RE);
+      if (!m) throw new Error("Couldn't find the site data block in index.html.");
+      var parsed = JSON.parse(m[2]);
+      state.data.site = Object.assign({ name: "", tagline: "", email: "", about: "" }, parsed.site || {});
+      state.data.projects = Array.isArray(parsed.projects) ? parsed.projects : [];
+    });
+  }
+
+  function jsonForScriptTag(data) {
+    // '<' can only occur inside JSON string values, so escaping every
+    // occurrence keeps a closing script tag typed into a description
+    // from breaking out of the block it's embedded in.
+    return JSON.stringify(data, null, 2).replace(/</g, "\\u003c");
+  }
+
+  function writeDataToDisk() {
+    return state.dirHandle.getFileHandle("index.html").then(function (fh) {
+      return fh.getFile().then(function (file) {
+        return file.text().then(function (text) {
+          var m = text.match(DATA_TAG_RE);
+          if (!m) throw new Error("Couldn't find the site data block in index.html.");
+          var newText = text.slice(0, m.index) + m[1] + "\n" + jsonForScriptTag(state.data) + "\n  " + m[3] + text.slice(m.index + m[0].length);
+          return fh.createWritable().then(function (w) {
+            return w.write(newText).then(function () { return w.close(); });
+          });
+        });
+      });
+    });
+  }
+
+  /* ---------------- rendering ---------------- */
+
+  function renderAll() {
+    renderSiteInfoForm();
+    renderProjectList();
+  }
+
+  function renderSiteInfoForm() {
+    el["site-name"].value = state.data.site.name || "";
+    el["site-tagline"].value = state.data.site.tagline || "";
+    el["site-email"].value = state.data.site.email || "";
+    el["site-about"].value = state.data.site.about || "";
+  }
+
+  el["save-site-info"].addEventListener("click", function () {
+    state.data.site.name = el["site-name"].value.trim();
+    state.data.site.tagline = el["site-tagline"].value.trim();
+    state.data.site.email = el["site-email"].value.trim();
+    state.data.site.about = el["site-about"].value;
+    writeDataToDisk().then(function () {
+      toast("Site info saved.");
+    }).catch(handleWriteError);
+  });
+
+  function sortedProjects() {
+    return state.data.projects.slice().sort(function (a, b) { return (a.order || 0) - (b.order || 0); });
+  }
+
+  function renderProjectList() {
+    var list = el["admin-project-list"];
+    list.innerHTML = "";
+    var projects = sortedProjects();
+    if (projects.length === 0) {
+      var empty = document.createElement("p");
+      empty.className = "hint";
+      empty.textContent = "No projects yet.";
+      list.appendChild(empty);
+      return;
+    }
+    projects.forEach(function (project, index) {
+      var row = document.createElement("div");
+      row.className = "project-row-admin";
+
+      var thumb = project.thumbnail;
+      var media;
+      if (thumb && thumb.type === "video") {
+        media = document.createElement("video");
+        media.src = resolveUrlForSrc(thumb.src);
+        media.muted = true;
+      } else if (thumb) {
+        media = document.createElement("img");
+        media.src = resolveUrlForSrc(thumb.src);
+      } else {
+        media = document.createElement("div");
+      }
+      row.appendChild(media);
+
+      var info = document.createElement("div");
+      info.className = "info";
+      info.innerHTML = '<div class="t"></div><div class="m"></div>';
+      info.querySelector(".t").textContent = project.title || "Untitled";
+      info.querySelector(".m").textContent = [project.tag, project.year].filter(Boolean).join(" · ");
+      row.appendChild(info);
+
+      var actions = document.createElement("div");
+      actions.className = "actions";
+
+      var up = button("↑", "ghost small", function () { moveProject(project.id, -1); });
+      up.disabled = index === 0;
+      var down = button("↓", "ghost small", function () { moveProject(project.id, 1); });
+      down.disabled = index === projects.length - 1;
+      var editBtn = button("Edit", "secondary small", function () { openEditor(project); });
+
+      actions.appendChild(up);
+      actions.appendChild(down);
+      actions.appendChild(editBtn);
+      row.appendChild(actions);
+
+      list.appendChild(row);
+    });
+  }
+
+  function button(text, cls, onClick) {
+    var b = document.createElement("button");
+    b.type = "button";
+    b.textContent = text;
+    b.className = cls;
+    b.addEventListener("click", onClick);
+    return b;
+  }
+
+  function moveProject(id, dir) {
+    var projects = sortedProjects();
+    var idx = projects.findIndex(function (p) { return p.id === id; });
+    var swapIdx = idx + dir;
+    if (swapIdx < 0 || swapIdx >= projects.length) return;
+    var a = projects[idx], b = projects[swapIdx];
+    var tmp = a.order; a.order = b.order; b.order = tmp;
+    writeDataToDisk().then(renderProjectList).catch(handleWriteError);
+  }
+
+  /* ---------------- file path helpers ---------------- */
+
+  var blobUrlCache = {};
+
+  function resolveUrlForSrc(relPath) {
+    if (!relPath) return "";
+    if (blobUrlCache[relPath]) return blobUrlCache[relPath];
+    // Placeholder synchronously; real thumbnails in the admin LIST are
+    // best-effort, so kick off an async load and swap the src in once
+    // it resolves.
+    resolveFile(relPath).then(function (file) {
+      var url = URL.createObjectURL(file);
+      blobUrlCache[relPath] = url;
+      document.querySelectorAll('[data-pending-src="' + cssEscape(relPath) + '"]').forEach(function (elm) {
+        elm.src = url;
+        elm.removeAttribute("data-pending-src");
+      });
+    }).catch(function () {});
+    return "";
+  }
+
+  function cssEscape(s) { return s.replace(/["\\]/g, "\\$&"); }
+
+  function resolveFile(relPath) {
+    var parts = relPath.split("/").filter(Boolean);
+    var fileName = parts.pop();
+    var dir = Promise.resolve(state.dirHandle);
+    parts.forEach(function (seg) {
+      dir = dir.then(function (d) { return d.getDirectoryHandle(seg); });
+    });
+    return dir.then(function (d) { return d.getFileHandle(fileName); }).then(function (fh) { return fh.getFile(); });
+  }
+
+  function getOrCreateDir(path) {
+    var parts = path.split("/").filter(Boolean);
+    var dir = Promise.resolve(state.dirHandle);
+    parts.forEach(function (seg) {
+      dir = dir.then(function (d) { return d.getDirectoryHandle(seg, { create: true }); });
+    });
+    return dir;
+  }
+
+  function uid() {
+    if (window.crypto && crypto.randomUUID) return crypto.randomUUID().slice(0, 8);
+    return Math.random().toString(36).slice(2, 10);
+  }
+
+  function slugify(s) {
+    return (s || "").toLowerCase().trim()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "") || "project";
+  }
+
+  function uniqueId(title, excludeId) {
+    var base = slugify(title);
+    var candidate = base;
+    var n = 2;
+    while (state.data.projects.some(function (p) { return p.id === candidate && p.id !== excludeId; })) {
+      candidate = base + "-" + n;
+      n++;
+    }
+    return candidate;
+  }
+
+  function extFor(file) {
+    var name = file.name || "";
+    var m = name.match(/\.([a-zA-Z0-9]+)$/);
+    if (m) return m[1].toLowerCase();
+    return file.type && file.type.indexOf("video") === 0 ? "mp4" : "jpg";
+  }
+
+  /* ---------------- editor ---------------- */
+
+  el["add-project-btn"].addEventListener("click", function () { openEditor(null); });
+  el["cancel-edit-btn"].addEventListener("click", closeEditor);
+
+  function openEditor(project) {
+    state.editingId = project ? project.id : null;
+    el["editor-title"].textContent = project ? "Edit project" : "Add project";
+    el["p-title"].value = project ? project.title || "" : "";
+    el["p-year"].value = project ? project.year || String(new Date().getFullYear()) : String(new Date().getFullYear());
+    el["p-tag"].value = project ? project.tag || "" : "";
+    el["p-client"].value = project ? project.client || "" : "";
+    el["p-summary"].value = project ? project.summary || "" : "";
+    el["p-description"].value = project ? project.description || "" : "";
+    el["delete-project-btn"].hidden = !project;
+
+    state.mediaDraft = [];
+    if (project && Array.isArray(project.media)) {
+      project.media.forEach(function (m) {
+        var isThumb = !!(project.thumbnail && project.thumbnail.src === m.src);
+        state.mediaDraft.push({
+          tempId: uid(),
+          type: m.type,
+          src: m.src,
+          poster: m.poster,
+          caption: m.caption || "",
+          isThumbnail: isThumb,
+        });
+      });
+    }
+
+    renderMediaList();
+    el.editor.hidden = false;
+    el.editor.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function closeEditor() {
+    el.editor.hidden = true;
+    state.editingId = null;
+    state.mediaDraft = [];
+  }
+
+  el["delete-project-btn"].addEventListener("click", function () {
+    if (!state.editingId) return;
+    if (!confirm("Delete this project? Its media files stay in your media folder — only the project entry is removed.")) return;
+    state.data.projects = state.data.projects.filter(function (p) { return p.id !== state.editingId; });
+    writeDataToDisk().then(function () {
+      closeEditor();
+      renderProjectList();
+      toast("Project deleted.");
+    }).catch(handleWriteError);
+  });
+
+  /* ---- media drop / picker ---- */
+
+  el.dropzone.addEventListener("click", function () { el["file-input"].click(); });
+  el["file-input"].addEventListener("change", function (e) {
+    addFilesToDraft(e.target.files);
+    e.target.value = "";
+  });
+  ["dragenter", "dragover"].forEach(function (evt) {
+    el.dropzone.addEventListener(evt, function (e) {
+      e.preventDefault();
+      el.dropzone.classList.add("drag-over");
+    });
+  });
+  ["dragleave", "drop"].forEach(function (evt) {
+    el.dropzone.addEventListener(evt, function (e) {
+      e.preventDefault();
+      el.dropzone.classList.remove("drag-over");
+    });
+  });
+  el.dropzone.addEventListener("drop", function (e) {
+    if (e.dataTransfer && e.dataTransfer.files) addFilesToDraft(e.dataTransfer.files);
+  });
+
+  function addFilesToDraft(fileList) {
+    Array.prototype.forEach.call(fileList, function (file) {
+      var isVideo = file.type.indexOf("video") === 0;
+      var isImage = file.type.indexOf("image") === 0;
+      if (!isVideo && !isImage) return;
+      state.mediaDraft.push({
+        tempId: uid(),
+        type: isVideo ? "video" : "image",
+        file: file,
+        previewUrl: URL.createObjectURL(file),
+        caption: "",
+        isThumbnail: state.mediaDraft.length === 0,
+        isNew: true,
+      });
+    });
+    renderMediaList();
+  }
+
+  function renderMediaList() {
+    var wrap = el["media-list"];
+    wrap.innerHTML = "";
+    state.mediaDraft.forEach(function (item, index) {
+      var row = document.createElement("div");
+      row.className = "media-item";
+
+      var preview = document.createElement("div");
+      preview.className = "preview";
+      var mediaEl = document.createElement(item.type === "video" ? "video" : "img");
+      if (item.previewUrl) {
+        mediaEl.src = item.previewUrl;
+      } else if (item.src) {
+        var cached = blobUrlCache[item.src];
+        if (cached) {
+          mediaEl.src = cached;
+        } else {
+          mediaEl.setAttribute("data-pending-src", item.src);
+          resolveUrlForSrc(item.src);
+        }
+      }
+      if (item.type === "video") mediaEl.muted = true;
+      preview.appendChild(mediaEl);
+      row.appendChild(preview);
+
+      var mid = document.createElement("div");
+      mid.className = "mid";
+
+      var captionInput = document.createElement("input");
+      captionInput.type = "text";
+      captionInput.placeholder = "Caption (optional)";
+      captionInput.value = item.caption || "";
+      captionInput.addEventListener("input", function () { item.caption = captionInput.value; });
+      mid.appendChild(captionInput);
+
+      var row2 = document.createElement("div");
+      row2.className = "row2";
+
+      var thumbLabel = document.createElement("label");
+      thumbLabel.style.display = "flex";
+      thumbLabel.style.alignItems = "center";
+      thumbLabel.style.gap = "6px";
+      thumbLabel.style.margin = "0";
+      thumbLabel.style.fontWeight = "400";
+      var thumbRadio = document.createElement("input");
+      thumbRadio.type = "radio";
+      thumbRadio.name = "thumbnail-select";
+      thumbRadio.checked = !!item.isThumbnail;
+      thumbRadio.addEventListener("change", function () {
+        state.mediaDraft.forEach(function (m) { m.isThumbnail = false; });
+        item.isThumbnail = true;
+      });
+      thumbLabel.appendChild(thumbRadio);
+      thumbLabel.appendChild(document.createTextNode("Gallery thumbnail"));
+      row2.appendChild(thumbLabel);
+
+      row2.appendChild(document.createTextNode(item.type === "video" ? "Video" : "Image"));
+
+      mid.appendChild(row2);
+      row.appendChild(mid);
+
+      var actions = document.createElement("div");
+      actions.className = "actions";
+      actions.appendChild(button("↑", "ghost small", function () { reorderMedia(index, -1); }));
+      actions.appendChild(button("↓", "ghost small", function () { reorderMedia(index, 1); }));
+      actions.appendChild(button("Remove", "ghost small", function () { removeMedia(index); }));
+      row.appendChild(actions);
+
+      wrap.appendChild(row);
+    });
+  }
+
+  function reorderMedia(index, dir) {
+    var target = index + dir;
+    if (target < 0 || target >= state.mediaDraft.length) return;
+    var tmp = state.mediaDraft[index];
+    state.mediaDraft[index] = state.mediaDraft[target];
+    state.mediaDraft[target] = tmp;
+    renderMediaList();
+  }
+
+  function removeMedia(index) {
+    state.mediaDraft.splice(index, 1);
+    if (state.mediaDraft.length && !state.mediaDraft.some(function (m) { return m.isThumbnail; })) {
+      state.mediaDraft[0].isThumbnail = true;
+    }
+    renderMediaList();
+  }
+
+  /* ---- poster generation for uploaded video files ---- */
+
+  function generatePoster(file) {
+    return new Promise(function (resolve, reject) {
+      var videoEl = document.createElement("video");
+      videoEl.muted = true;
+      videoEl.playsInline = true;
+      videoEl.preload = "auto";
+      var url = URL.createObjectURL(file);
+      videoEl.src = url;
+
+      videoEl.addEventListener("loadeddata", function onLoaded() {
+        videoEl.removeEventListener("loadeddata", onLoaded);
+        var t = Math.min(0.5, (videoEl.duration || 1) / 3);
+        try { videoEl.currentTime = t || 0; } catch (e) { onSeeked(); }
+      });
+      videoEl.addEventListener("seeked", onSeeked);
+      videoEl.addEventListener("error", function () {
+        URL.revokeObjectURL(url);
+        reject(new Error("Couldn't read video"));
+      });
+
+      function onSeeked() {
+        var maxW = 960;
+        var vw = videoEl.videoWidth || maxW;
+        var vh = videoEl.videoHeight || Math.round(maxW * 9 / 16);
+        var scale = Math.min(1, maxW / vw);
+        var canvas = document.createElement("canvas");
+        canvas.width = Math.round(vw * scale);
+        canvas.height = Math.round(vh * scale);
+        var ctx = canvas.getContext("2d");
+        try {
+          ctx.drawImage(videoEl, 0, 0, canvas.width, canvas.height);
+        } catch (e) {
+          URL.revokeObjectURL(url);
+          reject(e);
+          return;
+        }
+        canvas.toBlob(function (blob) {
+          URL.revokeObjectURL(url);
+          if (blob) resolve(blob); else reject(new Error("Couldn't capture a frame"));
+        }, "image/jpeg", 0.85);
+      }
+    });
+  }
+
+  /* ---- save project ---- */
+
+  el["save-project-btn"].addEventListener("click", function () {
+    var title = el["p-title"].value.trim();
+    var description = el["p-description"].value.trim();
+    if (!title) { toast("Give the project a title first."); return; }
+    if (state.mediaDraft.length === 0) { toast("Add at least one image or video."); return; }
+
+    el["save-project-btn"].disabled = true;
+    el["save-project-btn"].textContent = "Saving…";
+
+    var id = state.editingId || uniqueId(title, null);
+    var slug = id;
+
+    uploadNewMedia(slug).then(function (mediaEntries) {
+      var thumbEntry = mediaEntries.find(function (m) { return m.isThumbnail; }) || mediaEntries[0];
+      var project = {
+        id: id,
+        title: title,
+        year: el["p-year"].value.trim(),
+        tag: el["p-tag"].value.trim(),
+        client: el["p-client"].value.trim(),
+        summary: el["p-summary"].value.trim(),
+        description: description,
+        thumbnail: { type: thumbEntry.type, src: thumbEntry.src, poster: thumbEntry.poster },
+        media: mediaEntries.map(function (m) {
+          return { type: m.type, src: m.src, poster: m.poster, caption: m.caption || "" };
+        }),
+        order: 0,
+      };
+
+      var existingIndex = state.data.projects.findIndex(function (p) { return p.id === id; });
+      if (existingIndex >= 0) {
+        project.order = state.data.projects[existingIndex].order;
+        state.data.projects[existingIndex] = project;
+      } else {
+        var maxOrder = state.data.projects.reduce(function (m, p) { return Math.max(m, p.order || 0); }, 0);
+        project.order = maxOrder + 1;
+        state.data.projects.push(project);
+      }
+
+      return writeDataToDisk();
+    }).then(function () {
+      closeEditor();
+      renderProjectList();
+      toast(
+        "Saved. To put it live:<pre>cd \"" + escapeHtml(state.dirHandle.name) + "\"\ngit add -A\ngit commit -m \"Update portfolio\"\ngit push</pre>Or double-click Publish.command in the folder.",
+        9000
+      );
+    }).catch(function (err) {
+      console.error(err);
+      toast("Couldn't save: " + (err && err.message ? err.message : err), 6000);
+    }).then(function () {
+      el["save-project-btn"].disabled = false;
+      el["save-project-btn"].textContent = "Save project";
+    });
+  });
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"]/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+    });
+  }
+
+  function uploadNewMedia(slug) {
+    return Promise.all(state.mediaDraft.map(function (item) {
+      if (!item.isNew) {
+        return Promise.resolve({ type: item.type, src: item.src, poster: item.poster, caption: item.caption, isThumbnail: item.isThumbnail });
+      }
+      var kind = item.type === "video" ? "videos" : "images";
+      var filename = slug + "-" + uid() + "." + extFor(item.file);
+      var relPath = "media/" + kind + "/" + filename;
+
+      var writeFile = getOrCreateDir("media/" + kind).then(function (dir) {
+        return dir.getFileHandle(filename, { create: true });
+      }).then(function (fh) {
+        return fh.createWritable().then(function (w) {
+          return w.write(item.file).then(function () { return w.close(); });
+        });
+      });
+
+      var posterPromise = Promise.resolve(null);
+      if (item.type === "video") {
+        posterPromise = generatePoster(item.file).then(function (blob) {
+          var posterName = slug + "-" + uid() + "-poster.jpg";
+          var posterRel = "media/images/" + posterName;
+          return getOrCreateDir("media/images").then(function (dir) {
+            return dir.getFileHandle(posterName, { create: true });
+          }).then(function (fh) {
+            return fh.createWritable().then(function (w) {
+              return w.write(blob).then(function () { return w.close(); });
+            });
+          }).then(function () { return posterRel; });
+        }).catch(function (err) {
+          console.warn("Poster generation skipped:", err);
+          return null;
+        });
+      }
+
+      return Promise.all([writeFile, posterPromise]).then(function (results) {
+        return { type: item.type, src: relPath, poster: results[1] || undefined, caption: item.caption, isThumbnail: item.isThumbnail };
+      });
+    }));
+  }
+
+  function handleWriteError(err) {
+    console.error(err);
+    toast("Couldn't save to disk: " + (err && err.message ? err.message : err), 6000);
+  }
+
+  /* ---------------- go ---------------- */
+
+  tryAutoReconnect();
+})();
+</script>
+</body>
+</html>
