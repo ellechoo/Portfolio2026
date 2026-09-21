@@ -206,59 +206,48 @@
     }
     els.empty.hidden = true;
 
+    // Two per row, media-first: just a tag + title below each
+    // thumbnail — no meta row, no blurb. The full write-up lives on
+    // the project's own page.
     projects.forEach(function (project) {
-      var row = document.createElement("a");
-      row.className = "project-row";
-      row.href = "#p/" + encodeURIComponent(project.id);
+      var card = document.createElement("a");
+      card.className = "project-card";
+      card.href = "#p/" + encodeURIComponent(project.id);
 
       var media = buildThumbMedia(project);
-      if (media) row.appendChild(media);
+      if (media) card.appendChild(media);
 
       var caption = document.createElement("div");
       caption.className = "project-caption";
 
-      // Same order/markup as the sidebar on the project detail page
-      // (title, then meta, then description) so the text block lines
-      // up the same way on both pages.
+      if (project.tag) {
+        var tag = document.createElement("span");
+        tag.className = "tag";
+        tag.textContent = project.tag;
+        caption.appendChild(tag);
+      }
+
       var name = document.createElement("span");
       name.className = "name";
       name.textContent = project.title || "Untitled";
       caption.appendChild(name);
 
-      var meta = document.createElement("div");
-      meta.className = "project-meta";
-      [project.tag, project.year, project.client].forEach(function (bit) {
-        if (!bit) return;
-        var span = document.createElement("span");
-        span.textContent = bit;
-        meta.appendChild(span);
-      });
-      if (meta.children.length) caption.appendChild(meta);
-
-      var blurb = project.summary || project.description;
-      if (blurb) {
-        var desc = document.createElement("p");
-        desc.className = "project-description";
-        desc.textContent = blurb;
-        caption.appendChild(desc);
-      }
-
-      row.appendChild(caption);
-      els.list.appendChild(row);
+      card.appendChild(caption);
+      els.list.appendChild(card);
     });
 
     setUpReveal();
   }
 
   function setUpReveal() {
-    var rows = document.querySelectorAll(".project-row");
-    if (rows.length === 0) return;
+    var cards = document.querySelectorAll(".project-card");
+    if (cards.length === 0) return;
 
     var prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (prefersReducedMotion || !("IntersectionObserver" in window)) return;
 
-    rows.forEach(function (row) {
-      row.classList.add("reveal-ready");
+    cards.forEach(function (card) {
+      card.classList.add("reveal-ready");
     });
 
     var observer = new IntersectionObserver(
@@ -273,8 +262,8 @@
       { threshold: 0.15, rootMargin: "0px 0px -60px 0px" }
     );
 
-    rows.forEach(function (row) {
-      observer.observe(row);
+    cards.forEach(function (card) {
+      observer.observe(card);
     });
   }
 

@@ -185,36 +185,28 @@ button.contact-toggle {
   font-size: 15px;
 }
 
-/* ---------- Home: project list ---------- */
-/* A plain, normal-flow scroll — no pinning, no scroll-jacking. Each
-   project uses the same column proportions (image/video : text) as
-   its own detail page, so scrolling in feels continuous rather than
-   like a resize. A thin rule marks the top and bottom of every row. */
+/* ---------- Home: project grid ---------- */
+/* Two thumbnails per row — the media is the point, so captions below
+   each one stay small and minimal (just a tag + a modest title).
+   Click a card to see the project's full write-up on its own page. */
 
 .project-list {
-  padding: 15px 0 0;
-  border-bottom: 1px solid var(--grey-line);
+  padding: 15px 0 40px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  column-gap: var(--gutter);
+  row-gap: 72px;
 }
 
-.project-row {
-  display: grid;
-  grid-template-columns: 1fr minmax(280px, 33%);
-  align-items: start;
-  gap: var(--gutter);
-  padding: 56px 0;
-  border-top: 1px solid var(--grey-line);
+.project-card {
   cursor: pointer;
 }
 
 /* Still no forced crop — a thumbnail shows at its natural aspect
-   ratio, same as .project-media on the detail page, so it's the same
-   size/shape on both pages (see max-width/max-height below: a normal
-   landscape shot still renders at the full column width, exactly as
-   before). The one cap is height: a tall/portrait shot is capped so
-   it can't tower over the other rows, and — since it'll then be
-   narrower than the column — sits flush against the right edge
-   (justify-content: flex-end) so every thumbnail lines up on the
-   right, same as the first project's. */
+   ratio. The one cap is height: a tall/portrait shot is capped so it
+   can't tower over its neighbor, and — since it'll then be narrower
+   than the card — sits flush against the card's right edge
+   (justify-content: flex-end) instead of leaving a gap in the middle. */
 .project-image {
   position: relative;
   overflow: hidden;
@@ -233,8 +225,8 @@ button.contact-toggle {
   transition: transform 0.6s ease;
 }
 
-.project-row:hover .project-image img,
-.project-row:hover .project-image video,
+.project-card:hover .project-image img,
+.project-card:hover .project-image video,
 .project-image.is-playing img,
 .project-image.is-playing video {
   transform: scale(1.015);
@@ -269,52 +261,49 @@ button.contact-toggle {
   opacity: 0;
 }
 
+/* Deliberately small and quiet — just enough to identify the project,
+   nothing competing with the image above it. */
 .project-caption {
   min-width: 0;
+  margin-top: 16px;
 }
 
-/* Same treatment as the detail page's <h1>, .project-meta and
-   description, on purpose — see .project-sidebar below — and in the
-   same order (title, meta, description) so the block lines up the
-   same way on both pages. */
+.project-caption .tag {
+  display: block;
+  font-size: 12px;
+  color: var(--grey-text);
+  margin-bottom: 4px;
+}
+
 .project-caption .name {
   display: block;
-  font-size: clamp(22px, 2.4vw, 28px);
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  margin: 0 0 12px;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
-.project-caption .project-description {
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
-  overflow: hidden;
-}
-
-/* fade + rise into view as each row is scrolled to. Plain CSS
-   fallback keeps rows fully visible if JS doesn't run. */
-.project-row {
+/* fade + rise into view as each card is scrolled to. Plain CSS
+   fallback keeps cards fully visible if JS doesn't run. */
+.project-card {
   opacity: 1;
   transform: none;
 }
 
-.project-row.reveal-ready {
+.project-card.reveal-ready {
   opacity: 0;
   transform: translateY(24px);
   transition: opacity 0.6s ease, transform 0.6s ease;
 }
 
-.project-row.reveal-ready.is-visible {
+.project-card.reveal-ready.is-visible {
   opacity: 1;
   transform: translateY(0);
 }
 
-@media (max-width: 780px) {
-  .project-row {
+@media (max-width: 700px) {
+  .project-list {
     grid-template-columns: 1fr;
-    gap: 16px;
-    padding: 36px 0;
+    row-gap: 48px;
   }
   .project-image img,
   .project-image video {
@@ -324,9 +313,9 @@ button.contact-toggle {
 
 /* ---------- Project page ---------- */
 /* Media on the left, a ~1/3-width sidebar (title / meta / description)
-   on the right — the same column split as a row on the home page.
-   Click any image, or a video's expand button, to see it larger in
-   the lightbox (below). */
+   on the right, with the full write-up — the home grid only shows a
+   small caption per thumbnail. Click any image, or a video's expand
+   button, to see it larger in the lightbox (below). */
 
 .back-link {
   display: inline-block;
