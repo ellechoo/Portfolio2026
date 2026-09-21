@@ -18,6 +18,8 @@
     project: document.getElementById("project-view"),
     list: document.getElementById("project-list"),
     empty: document.getElementById("empty-state"),
+    emptyMessage: document.getElementById("empty-message"),
+    categoryFilter: document.getElementById("category-filter"),
     aboutContent: document.getElementById("about-content"),
     projectTitle: document.getElementById("project-title"),
     projectMeta: document.getElementById("project-meta"),
@@ -38,11 +40,12 @@
 
   function readData() {
     var tag = document.getElementById("site-data");
-    var fallback = { site: { name: "Portfolio", tagline: "", email: "", about: "" }, projects: [] };
+    var fallback = { site: { name: "Portfolio", tagline: "", email: "", about: "", categories: [] }, projects: [] };
     if (!tag) return fallback;
     try {
       var parsed = JSON.parse(tag.textContent);
       parsed.site = parsed.site || fallback.site;
+      parsed.site.categories = Array.isArray(parsed.site.categories) ? parsed.site.categories : [];
       parsed.projects = Array.isArray(parsed.projects) ? parsed.projects : [];
       return parsed;
     } catch (e) {
@@ -50,6 +53,11 @@
       return fallback;
     }
   }
+
+  // Which categories the home page filter is currently narrowed to.
+  // Empty = show everything. Lives at module scope (not reset per
+  // render) so it survives clicking into a project and back.
+  var activeCategories = [];
 
   function sortedProjects() {
     return DATA.projects.slice().sort(function (a, b) {
@@ -196,19 +204,92 @@
   /* ---------- home ---------- */
 
   function renderHome() {
-    var projects = sortedProjects();
+    renderCategoryFilter();
+    renderProjectCards();
+  }
+
+  /* Pill row: "All" plus one pill per category from site data.
+     Multi-select — click toggles a category on/off; matching projects
+     are the union of every active category. Empty selection == All. */
+  function renderCategoryFilter() {
+    var bar = els.categoryFilter;
+    if (!bar) return;
+    var categories = DATA.site.categories || [];
+
+    if (categories.length === 0) {
+      bar.hidden = true;
+      bar.innerHTML = "";
+      return;
+    }
+    bar.hidden = false;
+    bar.innerHTML = "";
+
+    bar.appendChild(
+      makePill("All", activeCategories.length === 0, function () {
+        activeCategories = [];
+        renderCategoryFilter();
+        renderProjectCards();
+      })
+    );
+
+    categories.forEach(function (cat) {
+      var isActive = activeCategories.indexOf(cat) !== -1;
+      bar.appendChild(
+        makePill(cat, isActive, function () {
+          var idx = activeCategories.indexOf(cat);
+          if (idx === -1) activeCategories.push(cat);
+          else activeCategories.splice(idx, 1);
+          renderCategoryFilter();
+          renderProjectCards();
+        })
+      );
+    });
+  }
+
+  function makePill(label, isActive, onClick) {
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "pill" + (isActive ? " is-active" : "");
+    btn.textContent = label;
+    btn.setAttribute("aria-pressed", isActive ? "true" : "false");
+    btn.addEventListener("click", onClick);
+    return btn;
+  }
+
+  function buildTagPill(label) {
+    var span = document.createElement("span");
+    span.className = "pill-tag";
+    span.textContent = label;
+    return span;
+  }
+
+  // Two per row, media-first: small category pills + a modest title
+  // below each thumbnail — no meta row, no blurb. The full write-up
+  // lives on the project's own page. Re-runs whenever the category
+  // filter above changes.
+  function renderProjectCards() {
+    var allProjects = sortedProjects();
+    var projects = activeCategories.length === 0
+      ? allProjects
+      : allProjects.filter(function (project) {
+          var cats = project.categories || [];
+          return activeCategories.some(function (c) { return cats.indexOf(c) !== -1; });
+        });
 
     els.list.innerHTML = "";
 
+    if (allProjects.length === 0) {
+      els.empty.hidden = false;
+      if (els.emptyMessage) els.emptyMessage.textContent = "Nothing posted yet — new work will show up here.";
+      return;
+    }
     if (projects.length === 0) {
       els.empty.hidden = false;
+      if (els.emptyMessage) els.emptyMessage.textContent = "No projects in this category yet.";
       return;
     }
     els.empty.hidden = true;
 
-    // Two per row, media-first: just a tag + title below each
-    // thumbnail — no meta row, no blurb. The full write-up lives on
-    // the project's own page.
     projects.forEach(function (project) {
       var card = document.createElement("a");
       card.className = "project-card";
@@ -220,11 +301,12 @@
       var caption = document.createElement("div");
       caption.className = "project-caption";
 
-      if (project.tag) {
-        var tag = document.createElement("span");
-        tag.className = "tag";
-        tag.textContent = project.tag;
-        caption.appendChild(tag);
+      var cats = project.categories || [];
+      if (cats.length) {
+        var tags = document.createElement("div");
+        tags.className = "project-tags";
+        cats.forEach(function (cat) { tags.appendChild(buildTagPill(cat)); });
+        caption.appendChild(tags);
       }
 
       var name = document.createElement("span");
@@ -325,7 +407,10 @@
     els.projectTitle.textContent = project.title || "";
 
     els.projectMeta.innerHTML = "";
-    [project.tag, project.year, project.client].forEach(function (bit) {
+    (project.categories || []).forEach(function (cat) {
+      els.projectMeta.appendChild(buildTagPill(cat));
+    });
+    [project.year, project.client].forEach(function (bit) {
       if (!bit) return;
       var span = document.createElement("span");
       span.textContent = bit;

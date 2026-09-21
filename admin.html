@@ -215,6 +215,16 @@
       <button id="save-site-info" class="secondary small">Save site info</button>
     </section>
 
+    <section id="categories-section">
+      <h2>Categories</h2>
+      <p class="hint" style="margin-top:-8px; margin-bottom:12px;">The set of categories a project can be tagged with. Shown as filter pills on your home page, and saved right away — no need to hit Save.</p>
+      <div id="category-list" style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px;"></div>
+      <div style="display:flex; gap:8px;">
+        <input type="text" id="new-category-input" placeholder="New category name" style="flex:1;">
+        <button type="button" id="add-category-btn" class="secondary small">Add</button>
+      </div>
+    </section>
+
     <section id="projects-section">
       <h2>Projects</h2>
       <div id="admin-project-list"></div>
@@ -229,7 +239,11 @@
         <div class="field"><label for="p-year">Year</label><input type="text" id="p-year"></div>
       </div>
       <div class="field-row">
-        <div class="field"><label for="p-tag">Category / tag</label><input type="text" id="p-tag" placeholder="e.g. Web · Interaction"></div>
+        <div class="field">
+          <label>Categories</label>
+          <div id="p-categories" style="display:flex; flex-wrap:wrap; gap:8px;"></div>
+          <p class="hint" id="p-categories-empty-hint" hidden>No categories yet — add some above in Site info.</p>
+        </div>
         <div class="field"><label for="p-client">Client</label><input type="text" id="p-client" placeholder="e.g. Self-directed"></div>
       </div>
       <div class="field"><label for="p-summary">Gallery caption (optional, short)</label><input type="text" id="p-summary"></div>
@@ -308,9 +322,10 @@
 
   var state = {
     dirHandle: null,
-    data: { site: { name: "", tagline: "", email: "", linkedin: "", photo: "", about: "" }, projects: [] },
+    data: { site: { name: "", tagline: "", email: "", linkedin: "", photo: "", about: "", categories: [] }, projects: [] },
     editingId: null,
     mediaDraft: [],   // [{ tempId, type, src?, file?, previewUrl, caption, isThumbnail, isNew }]
+    categoriesDraft: [], // categories currently checked on for the project being edited
     photoDraft: undefined, // undefined = no change; {file} = new photo; "remove" = clear it
     savingBlobUrls: [],
   };
@@ -319,8 +334,9 @@
   ["connect-panel", "connect-btn", "connect-hint", "app", "folder-name",
    "site-name", "site-tagline", "site-email", "site-linkedin", "site-about", "save-site-info",
    "site-photo-preview", "site-photo-pick-btn", "site-photo-remove-btn", "site-photo-input",
+   "category-list", "new-category-input", "add-category-btn",
    "admin-project-list", "add-project-btn",
-   "editor", "editor-title", "p-title", "p-year", "p-tag", "p-client", "p-summary", "p-description",
+   "editor", "editor-title", "p-title", "p-year", "p-categories", "p-categories-empty-hint", "p-client", "p-summary", "p-description",
    "dropzone", "file-input", "media-list",
    "save-project-btn", "cancel-edit-btn", "delete-project-btn",
    "toast"].forEach(function (id) { el[id] = document.getElementById(id); });
@@ -396,7 +412,8 @@
       var m = text.match(DATA_TAG_RE);
       if (!m) throw new Error("Couldn't find the site data block in index.html.");
       var parsed = JSON.parse(m[2]);
-      state.data.site = Object.assign({ name: "", tagline: "", email: "", linkedin: "", photo: "", about: "" }, parsed.site || {});
+      state.data.site = Object.assign({ name: "", tagline: "", email: "", linkedin: "", photo: "", about: "", categories: [] }, parsed.site || {});
+      if (!Array.isArray(state.data.site.categories)) state.data.site.categories = [];
       state.data.projects = Array.isArray(parsed.projects) ? parsed.projects : [];
     });
   }
@@ -427,8 +444,79 @@
 
   function renderAll() {
     renderSiteInfoForm();
+    renderCategoryList();
     renderProjectList();
   }
+
+  /* ---------------- categories ---------------- */
+
+  function renderCategoryList() {
+    var wrap = el["category-list"];
+    wrap.innerHTML = "";
+    var cats = state.data.site.categories || [];
+    if (cats.length === 0) {
+      var empty = document.createElement("p");
+      empty.className = "hint";
+      empty.style.margin = "0";
+      empty.textContent = "No categories yet — add one below.";
+      wrap.appendChild(empty);
+      return;
+    }
+    cats.forEach(function (cat) {
+      var chip = document.createElement("span");
+      chip.style.cssText = "display:inline-flex; align-items:center; gap:6px; padding:6px 6px 6px 14px; border:1px solid var(--grey-line); border-radius:999px; font-size:13px;";
+      chip.textContent = cat;
+      var del = document.createElement("button");
+      del.type = "button";
+      del.textContent = "×";
+      del.title = "Delete category";
+      del.setAttribute("aria-label", "Delete " + cat);
+      del.style.cssText = "width:20px; height:20px; border-radius:50%; border:none; background:var(--grey-fill); color:var(--black); cursor:pointer; font-size:14px; line-height:1; padding:0;";
+      del.addEventListener("click", function () { deleteCategory(cat); });
+      chip.appendChild(del);
+      wrap.appendChild(chip);
+    });
+  }
+
+  function addCategory() {
+    var input = el["new-category-input"];
+    var name = input.value.trim();
+    if (!name) return;
+    state.data.site.categories = state.data.site.categories || [];
+    if (state.data.site.categories.indexOf(name) !== -1) {
+      toast("That category already exists.");
+      return;
+    }
+    state.data.site.categories.push(name);
+    input.value = "";
+    writeDataToDisk().then(function () {
+      renderCategoryList();
+      if (!el.editor.hidden) renderCategoryCheckboxes();
+      toast("Category added.");
+    }).catch(handleWriteError);
+  }
+
+  function deleteCategory(cat) {
+    if (!confirm('Delete "' + cat + '"? It\'ll be removed from any projects tagged with it.')) return;
+    state.data.site.categories = (state.data.site.categories || []).filter(function (c) { return c !== cat; });
+    state.data.projects.forEach(function (p) {
+      if (Array.isArray(p.categories)) {
+        p.categories = p.categories.filter(function (c) { return c !== cat; });
+      }
+    });
+    state.categoriesDraft = state.categoriesDraft.filter(function (c) { return c !== cat; });
+    writeDataToDisk().then(function () {
+      renderCategoryList();
+      renderProjectList();
+      if (!el.editor.hidden) renderCategoryCheckboxes();
+      toast("Category deleted.");
+    }).catch(handleWriteError);
+  }
+
+  el["add-category-btn"].addEventListener("click", addCategory);
+  el["new-category-input"].addEventListener("keydown", function (e) {
+    if (e.key === "Enter") { e.preventDefault(); addCategory(); }
+  });
 
   function renderSiteInfoForm() {
     el["site-name"].value = state.data.site.name || "";
@@ -563,7 +651,7 @@
       info.className = "info";
       info.innerHTML = '<div class="t"></div><div class="m"></div>';
       info.querySelector(".t").textContent = project.title || "Untitled";
-      info.querySelector(".m").textContent = [project.tag, project.year].filter(Boolean).join(" · ");
+      info.querySelector(".m").textContent = [(project.categories || []).join(", "), project.year].filter(Boolean).join(" · ");
       row.appendChild(info);
 
       var actions = document.createElement("div");
@@ -679,16 +767,44 @@
   el["add-project-btn"].addEventListener("click", function () { openEditor(null); });
   el["cancel-edit-btn"].addEventListener("click", closeEditor);
 
+  // Toggle chips for every category in state.data.site.categories,
+  // checked state driven by state.categoriesDraft.
+  function renderCategoryCheckboxes() {
+    var wrap = el["p-categories"];
+    var cats = state.data.site.categories || [];
+    wrap.innerHTML = "";
+    el["p-categories-empty-hint"].hidden = cats.length > 0;
+    cats.forEach(function (cat) {
+      var active = state.categoriesDraft.indexOf(cat) !== -1;
+      var chip = document.createElement("button");
+      chip.type = "button";
+      chip.textContent = cat;
+      chip.setAttribute("aria-pressed", active ? "true" : "false");
+      chip.style.cssText = "font-family:inherit; font-size:13px; padding:7px 14px; border-radius:999px; cursor:pointer; border:1px solid " +
+        (active ? "var(--black)" : "var(--grey-line)") + "; background:" + (active ? "var(--black)" : "var(--white)") +
+        "; color:" + (active ? "var(--white)" : "var(--black)") + ";";
+      chip.addEventListener("click", function () {
+        var idx = state.categoriesDraft.indexOf(cat);
+        if (idx === -1) state.categoriesDraft.push(cat);
+        else state.categoriesDraft.splice(idx, 1);
+        renderCategoryCheckboxes();
+      });
+      wrap.appendChild(chip);
+    });
+  }
+
   function openEditor(project) {
     state.editingId = project ? project.id : null;
     el["editor-title"].textContent = project ? "Edit project" : "Add project";
     el["p-title"].value = project ? project.title || "" : "";
     el["p-year"].value = project ? project.year || String(new Date().getFullYear()) : String(new Date().getFullYear());
-    el["p-tag"].value = project ? project.tag || "" : "";
     el["p-client"].value = project ? project.client || "" : "";
     el["p-summary"].value = project ? project.summary || "" : "";
     el["p-description"].value = project ? project.description || "" : "";
     el["delete-project-btn"].hidden = !project;
+
+    state.categoriesDraft = project && Array.isArray(project.categories) ? project.categories.slice() : [];
+    renderCategoryCheckboxes();
 
     state.mediaDraft = [];
     if (project && Array.isArray(project.media)) {
@@ -714,6 +830,7 @@
     el.editor.hidden = true;
     state.editingId = null;
     state.mediaDraft = [];
+    state.categoriesDraft = [];
   }
 
   el["delete-project-btn"].addEventListener("click", function () {
@@ -923,7 +1040,7 @@
         id: id,
         title: title,
         year: el["p-year"].value.trim(),
-        tag: el["p-tag"].value.trim(),
+        categories: state.categoriesDraft.slice(),
         client: el["p-client"].value.trim(),
         summary: el["p-summary"].value.trim(),
         description: description,
