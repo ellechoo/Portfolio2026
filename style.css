@@ -125,7 +125,6 @@ button:focus-visible,
 .site-header button.contact-toggle {
   font-size: 14px;
   font-weight: 500;
-  letter-spacing: 0.02em;
   text-transform: uppercase;
   color: var(--black);
   transition: opacity 0.15s ease;
