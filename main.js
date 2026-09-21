@@ -284,6 +284,13 @@
     var site = DATA.site;
     els.aboutContent.innerHTML = "";
 
+    var layout = document.createElement("div");
+    layout.className = "about-layout";
+
+    // Left: photo + name.
+    var left = document.createElement("div");
+    left.className = "about-left";
+
     var photoWrap = document.createElement("div");
     photoWrap.className = "about-photo";
     if (site.photo) {
@@ -295,25 +302,26 @@
       photoWrap.classList.add("is-empty");
       photoWrap.textContent = "Add a photo via admin.html";
     }
-    els.aboutContent.appendChild(photoWrap);
+    left.appendChild(photoWrap);
 
     var h1 = document.createElement("h1");
     h1.textContent = site.name || "About";
-    els.aboutContent.appendChild(h1);
+    left.appendChild(h1);
+
+    layout.appendChild(left);
+
+    // Right: bio. (No email here — the Contact menu in the nav
+    // already covers that.)
+    var right = document.createElement("div");
+    right.className = "about-right";
 
     var p = document.createElement("p");
     p.textContent = site.about || "";
-    els.aboutContent.appendChild(p);
+    right.appendChild(p);
 
-    if (site.email) {
-      var contact = document.createElement("p");
-      var a = document.createElement("a");
-      a.className = "email-link";
-      a.href = "mailto:" + site.email;
-      a.textContent = site.email;
-      contact.appendChild(a);
-      els.aboutContent.appendChild(contact);
-    }
+    layout.appendChild(right);
+
+    els.aboutContent.appendChild(layout);
   }
 
   /* ---------- project detail ---------- */

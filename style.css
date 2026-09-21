@@ -121,18 +121,19 @@ button.contact-toggle {
    (click — needed for touch, and to keep it open once opened). Uses
    a real "display:none" default rather than the [hidden] attribute,
    since an author rule elsewhere would otherwise be free to override
-   [hidden]'s display: none. A small invisible bridge (the ::before)
-   keeps the gap between button and menu hoverable. */
+   [hidden]'s display: none.
 
-.nav-right {
-  padding-bottom: 14px;
-  margin-bottom: -14px;
-}
+   The menu opens wider than the "Contact" button and sits a few
+   pixels below it, so a straight-line move from the button into the
+   menu can dip outside both boxes for a moment (button is narrow,
+   menu is wide) and lose :hover before it arrives. The ::before below
+   is an invisible strip sized to the menu's own width/position, so
+   that entire path stays "inside" nav-right the whole way down. */
 
 .contact-menu {
   display: none;
   position: absolute;
-  top: calc(100% + 14px);
+  top: calc(100% + 8px);
   right: 0;
   min-width: 160px;
   background: var(--white);
@@ -141,6 +142,15 @@ button.contact-toggle {
   box-shadow: 0 16px 32px -16px rgba(0, 0, 0, 0.2);
   padding: 6px;
   flex-direction: column;
+}
+
+.nav-right::before {
+  content: "";
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: 160px; /* matches .contact-menu's min-width */
+  height: 8px; /* matches the gap above */
 }
 
 .nav-right:hover .contact-menu,
@@ -189,21 +199,30 @@ button.contact-toggle {
   cursor: pointer;
 }
 
-/* No fixed aspect-ratio / object-fit crop here on purpose — the image
-   shows at its natural size (width: 100%, height: auto), same as
-   .project-media on the detail page below, so a project's thumbnail
-   is the same size and shape on both pages. */
+/* Still no forced crop — a thumbnail shows at its natural aspect
+   ratio, same as .project-media on the detail page, so it's the same
+   size/shape on both pages (see max-width/max-height below: a normal
+   landscape shot still renders at the full column width, exactly as
+   before). The one cap is height: a tall/portrait shot is capped so
+   it can't tower over the other rows, and — since it'll then be
+   narrower than the column — sits flush against the right edge
+   (justify-content: flex-end) so every thumbnail lines up on the
+   right, same as the first project's. */
 .project-image {
   position: relative;
   overflow: hidden;
   background: var(--grey-fill);
+  display: flex;
+  justify-content: flex-end;
 }
 
 .project-image img,
 .project-image video {
-  width: 100%;
-  height: auto;
   display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 600px;
   transition: transform 0.6s ease;
 }
 
@@ -254,7 +273,6 @@ button.contact-toggle {
 .project-caption .name {
   display: block;
   font-size: clamp(22px, 2.4vw, 28px);
-  font-style: italic;
   font-weight: 700;
   letter-spacing: -0.02em;
   margin: 0 0 12px;
@@ -290,6 +308,10 @@ button.contact-toggle {
     grid-template-columns: 1fr;
     gap: 16px;
     padding: 36px 0;
+  }
+  .project-image img,
+  .project-image video {
+    max-height: 420px;
   }
 }
 
@@ -386,7 +408,6 @@ button.contact-toggle {
   font-weight: 700;
   letter-spacing: -0.02em;
   margin: 0 0 12px;
-  font-style: italic;
 }
 
 .project-meta {
@@ -504,11 +525,26 @@ button.contact-toggle {
 }
 
 /* ---------- About page ---------- */
+/* Photo + name on the left, the bio to its right — so the (fairly
+   long) bio text doesn't just run on below a photo, and reads more
+   like the project pages (media on the left, text alongside it). */
 
 .about-main {
   min-height: 50vh;
   padding: 64px 0 120px;
-  max-width: 640px;
+  max-width: 820px;
+}
+
+.about-layout {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: var(--gutter);
+  align-items: start;
+}
+
+.about-left,
+.about-right {
+  min-width: 0;
 }
 
 .about-photo {
@@ -516,7 +552,7 @@ button.contact-toggle {
   height: 180px;
   overflow: hidden;
   background: var(--grey-fill);
-  margin: 0 0 28px;
+  margin: 0 0 20px;
 }
 
 .about-photo img {
@@ -537,25 +573,22 @@ button.contact-toggle {
   line-height: 1.4;
 }
 
-.about-main h1 {
-  font-size: clamp(26px, 4vw, 36px);
+.about-left h1 {
+  font-size: clamp(22px, 2.4vw, 28px);
   font-weight: 700;
-  font-style: italic;
   letter-spacing: -0.02em;
-  margin: 0 0 24px;
+  margin: 0;
 }
 
-.about-main p {
+.about-right p {
   font-size: 16px;
   color: var(--grey-text);
   white-space: pre-line;
+  margin: 0;
 }
 
-.about-main a.email-link {
-  color: var(--black);
-  border-bottom: 1px solid var(--grey-line);
-}
-
-.about-main a.email-link:hover {
-  border-color: var(--black);
+@media (max-width: 640px) {
+  .about-layout {
+    grid-template-columns: 1fr;
+  }
 }
