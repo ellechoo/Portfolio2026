@@ -6,12 +6,19 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;1,500;1,600&display=swap');
 
 /* Array (Frode Helland, via Fontshare — free for personal/commercial
-   use) — used for headings only, see .about-left h1 / .project-sidebar
-   h1 below. Everything else stays Inter. */
+   use) — used for headings only (Semibold), see .about-left h1 /
+   .project-sidebar h1 below. Everything else stays Inter. */
 @font-face {
   font-family: 'Array';
   src: url('fonts/Array-Regular.woff2') format('woff2');
   font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Array';
+  src: url('fonts/Array-Semibold.woff2') format('woff2');
+  font-weight: 600;
   font-style: normal;
   font-display: swap;
 }
@@ -266,26 +273,23 @@ button.contact-toggle {
   cursor: pointer;
 }
 
-/* Still no forced crop — a thumbnail shows at its natural aspect
-   ratio. The one cap is height: a tall/portrait shot is capped so it
-   can't tower over its neighbor, and — since it'll then be narrower
-   than the card — is centered so any leftover space reads as
-   intentional framing rather than a stray gap to one side. */
+/* Every thumbnail is a filled square — no empty space, whatever the
+   source image/video's own aspect ratio, via object-fit: cover.
+   (The project's own page still shows the untouched, uncropped
+   media.) */
 .project-image {
   position: relative;
   overflow: hidden;
   background: var(--grey-fill);
-  display: flex;
-  justify-content: center;
+  aspect-ratio: 1 / 1;
 }
 
 .project-image img,
 .project-image video {
   display: block;
-  width: auto;
-  height: auto;
-  max-width: 100%;
-  max-height: 600px;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   transition: transform 0.6s ease;
 }
 
@@ -346,32 +350,10 @@ button.contact-toggle {
   letter-spacing: -0.01em;
 }
 
-/* fade + rise into view as each card is scrolled to. Plain CSS
-   fallback keeps cards fully visible if JS doesn't run. */
-.project-card {
-  opacity: 1;
-  transform: none;
-}
-
-.project-card.reveal-ready {
-  opacity: 0;
-  transform: translateY(24px);
-  transition: opacity 0.6s ease, transform 0.6s ease;
-}
-
-.project-card.reveal-ready.is-visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
 @media (max-width: 700px) {
   .project-list {
     grid-template-columns: 1fr;
     row-gap: 48px;
-  }
-  .project-image img,
-  .project-image video {
-    max-height: 420px;
   }
 }
 
@@ -465,10 +447,10 @@ button.contact-toggle {
 
 .project-sidebar h1 {
   font-family: 'Array', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: clamp(22px, 2.4vw, 28px);
-  font-weight: 700;
+  font-size: clamp(30px, 3.6vw, 44px);
+  font-weight: 600;
   letter-spacing: -0.02em;
-  margin: 0 0 12px;
+  margin: 0 0 14px;
 }
 
 .project-meta {
@@ -637,8 +619,8 @@ button.contact-toggle {
 
 .about-left h1 {
   font-family: 'Array', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: clamp(22px, 2.4vw, 28px);
-  font-weight: 700;
+  font-size: clamp(30px, 3.6vw, 44px);
+  font-weight: 600;
   letter-spacing: -0.02em;
   margin: 0;
 }
