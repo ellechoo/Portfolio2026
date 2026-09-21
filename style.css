@@ -5,6 +5,24 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;1,500;1,600&display=swap');
 
+/* Array (Frode Helland, via Fontshare — free for personal/commercial
+   use) — used for headings only, see .about-left h1 / .project-sidebar
+   h1 below. Everything else stays Inter. */
+@font-face {
+  font-family: 'Array';
+  src: url('fonts/Array-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Array';
+  src: url('fonts/Array-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   --black: #0a0a0a;
   --white: #ffffff;
@@ -185,13 +203,59 @@ button.contact-toggle {
   font-size: 15px;
 }
 
+/* ---------- Home: category filter ---------- */
+
+.category-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 15px 0 0;
+}
+
+.pill {
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--grey-line);
+  background: var(--white);
+  color: var(--black);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.pill:hover {
+  border-color: var(--black);
+}
+
+.pill.is-active {
+  background: var(--black);
+  color: var(--white);
+  border-color: var(--black);
+}
+
+/* Small, read-only version of the same pill shape — used as the tag
+   badges under each project and in the project page's meta row, so
+   they read as "the same thing" as the filter above, just quieter. */
+.pill-tag {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 4px 11px;
+  border-radius: 999px;
+  border: 1px solid var(--grey-line);
+  color: var(--grey-text);
+}
+
 /* ---------- Home: project grid ---------- */
 /* Two thumbnails per row — the media is the point, so captions below
-   each one stay small and minimal (just a tag + a modest title).
+   each one stay small and minimal (just tag pills + a modest title).
    Click a card to see the project's full write-up on its own page. */
 
 .project-list {
-  padding: 15px 0 40px;
+  padding: 24px 0 40px;
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   column-gap: var(--gutter);
@@ -205,14 +269,14 @@ button.contact-toggle {
 /* Still no forced crop — a thumbnail shows at its natural aspect
    ratio. The one cap is height: a tall/portrait shot is capped so it
    can't tower over its neighbor, and — since it'll then be narrower
-   than the card — sits flush against the card's right edge
-   (justify-content: flex-end) instead of leaving a gap in the middle. */
+   than the card — is centered so any leftover space reads as
+   intentional framing rather than a stray gap to one side. */
 .project-image {
   position: relative;
   overflow: hidden;
   background: var(--grey-fill);
   display: flex;
-  justify-content: flex-end;
+  justify-content: center;
 }
 
 .project-image img,
@@ -268,11 +332,11 @@ button.contact-toggle {
   margin-top: 16px;
 }
 
-.project-caption .tag {
-  display: block;
-  font-size: 12px;
-  color: var(--grey-text);
-  margin-bottom: 4px;
+.project-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
 }
 
 .project-caption .name {
@@ -400,6 +464,7 @@ button.contact-toggle {
 }
 
 .project-sidebar h1 {
+  font-family: 'Array', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   font-size: clamp(22px, 2.4vw, 28px);
   font-weight: 700;
   letter-spacing: -0.02em;
@@ -408,7 +473,8 @@ button.contact-toggle {
 
 .project-meta {
   display: flex;
-  gap: 16px;
+  align-items: center;
+  gap: 10px;
   flex-wrap: wrap;
   font-size: 13px;
   color: var(--grey-text);
@@ -570,6 +636,7 @@ button.contact-toggle {
 }
 
 .about-left h1 {
+  font-family: 'Array', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   font-size: clamp(22px, 2.4vw, 28px);
   font-weight: 700;
   letter-spacing: -0.02em;
