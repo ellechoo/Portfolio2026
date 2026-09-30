@@ -359,9 +359,17 @@ button.contact-toggle {
   margin-top: 16px;
 }
 
-/* Title + category tags share a row, title on the left and tags
-   flush to the right. flex-wrap: nowrap (plus flex-shrink: 0 + white-
-   space: nowrap on .name below, and flex-shrink: 0 on the tags)
+/* Title + category tags share a row, tags sitting right after the
+   title rather than pushed out to the far edge (justify-content:
+   flex-start, not space-between) — so the gap between them is always
+   just the gap value below, the same fixed minimum on every card at
+   every screen width, instead of stretching to fill however wide the
+   card happens to be. That stretch was the problem this replaced: at
+   narrower widths the thumbnail (and so the card) is still often
+   wider than title + tags together, and space-between was spreading
+   that leftover width out as a growing gap instead of leaving it as
+   plain trailing space. flex-wrap: nowrap (plus flex-shrink: 0 +
+   white-space: nowrap on .name below, and flex-shrink: 0 on the tags)
    means this row is never allowed to drop the tags to a second line
    or compress anything to fit — title and tags always stay on one
    line at their natural width. Left in normal flow (unlike the image
@@ -377,7 +385,7 @@ button.contact-toggle {
 .project-caption-top {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   flex-wrap: nowrap;
   gap: 6px 10px;
 }
@@ -399,7 +407,7 @@ button.contact-toggle {
 .project-caption .name {
   display: block;
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 700;
   /* All-caps only on the gallery cards (this class isn't used on the
      project detail page's own title, .project-sidebar h1) -- letter-
      spacing loosened from -0.01em since tight negative tracking reads
@@ -410,11 +418,14 @@ button.contact-toggle {
   flex-shrink: 0;
 }
 
+/* Subdued relative to the (now bold) title above it -- a quiet
+   one-line blurb, not competing for attention. */
 .project-caption .summary {
   display: block;
   font-size: 13px;
   font-weight: 400;
   margin-top: 4px;
+  opacity: 0.6;
 }
 
 /* ---------- Project page ---------- */
