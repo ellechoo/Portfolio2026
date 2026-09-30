@@ -8,24 +8,25 @@
   @import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700&display=swap');
 
   :root {
-    --black: #0a0a0a;
-    --white: #ffffff;
-    --grey-fill: #f4f4f4;
-    --grey-line: #e2e2e2;
-    --grey-text: #6b6b6b;
-    --danger: #b3261e;
+    --bg: #0a0a0a;
+    --ink: #f2f2f2;
+    --surface: #1a1a1a;
+    --surface-hover: #262626;
+    --line: #303030;
+    --muted: #9a9a9a;
+    --danger: #ff6b5e;
   }
   * { box-sizing: border-box; }
   body {
     margin: 0;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    color: var(--black);
-    background: var(--white);
+    color: var(--ink);
+    background: var(--bg);
     line-height: 1.5;
   }
   .wrap { max-width: 880px; margin: 0 auto; padding: 40px 24px 120px; }
   h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.01em; margin: 0 0 4px; }
-  .subtitle { color: var(--grey-text); font-size: 14px; margin: 0 0 32px; }
+  .subtitle { color: var(--muted); font-size: 14px; margin: 0 0 32px; }
   h2 { font-size: 16px; font-weight: 600; margin: 0 0 16px; }
   section { margin-bottom: 48px; }
   label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 6px; }
@@ -37,17 +38,17 @@
     font-family: inherit;
     font-size: 14px;
     padding: 10px 12px;
-    border: 1px solid var(--grey-line);
+    border: 1px solid var(--line);
     border-radius: 6px;
-    background: var(--white);
-    color: var(--black);
+    background: var(--surface);
+    color: var(--ink);
   }
-  input:focus, textarea:focus, button:focus-visible {
-    outline: 2px solid var(--black);
+  input:focus, textarea:focus, select:focus, button:focus-visible {
+    outline: 2px solid var(--ink);
     outline-offset: 1px;
   }
   textarea { resize: vertical; min-height: 80px; }
-  .hint { font-size: 12px; color: var(--grey-text); margin-top: 4px; }
+  .hint { font-size: 12px; color: var(--muted); margin-top: 4px; }
 
   button {
     font-family: inherit;
@@ -55,30 +56,30 @@
     font-weight: 500;
     padding: 10px 18px;
     border-radius: 6px;
-    border: 1px solid var(--black);
-    background: var(--black);
-    color: var(--white);
+    border: 1px solid var(--ink);
+    background: var(--ink);
+    color: var(--bg);
     cursor: pointer;
   }
-  button.secondary { background: var(--white); color: var(--black); }
-  button.ghost { background: transparent; color: var(--black); border-color: var(--grey-line); }
-  button.danger { background: var(--white); color: var(--danger); border-color: var(--danger); }
+  button.secondary { background: var(--bg); color: var(--ink); }
+  button.ghost { background: transparent; color: var(--ink); border-color: var(--line); }
+  button.danger { background: var(--bg); color: var(--danger); border-color: var(--danger); }
   button.small { padding: 6px 12px; font-size: 13px; }
   button:disabled { opacity: 0.4; cursor: default; }
   button:hover:not(:disabled) { opacity: 0.85; }
 
   #connect-panel {
-    border: 1px solid var(--grey-line);
+    border: 1px solid var(--line);
     border-radius: 10px;
     padding: 28px;
     text-align: center;
   }
-  #connect-panel p { color: var(--grey-text); font-size: 14px; margin: 8px 0 20px; }
+  #connect-panel p { color: var(--muted); font-size: 14px; margin: 8px 0 20px; }
   #unsupported {
-    border: 1px solid var(--grey-line);
+    border: 1px solid var(--line);
     border-radius: 10px;
     padding: 24px;
-    background: var(--grey-fill);
+    background: var(--surface);
     font-size: 14px;
   }
 
@@ -87,83 +88,148 @@
     align-items: center;
     gap: 10px;
     font-size: 13px;
-    color: var(--grey-text);
+    color: var(--muted);
     margin-bottom: 24px;
   }
-  .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #2e9e4f; flex: none; }
+  .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #34d058; flex: none; }
 
   .project-row-admin {
     display: flex;
     align-items: center;
     gap: 14px;
     padding: 12px 0;
-    border-bottom: 1px solid var(--grey-line);
+    border-bottom: 1px solid var(--line);
   }
   .project-row-admin img, .project-row-admin video {
     width: 64px;
     height: 44px;
     object-fit: cover;
     border-radius: 4px;
-    background: var(--grey-fill);
+    background: var(--surface);
     flex: none;
   }
   .project-row-admin .info { flex: 1; min-width: 0; }
   .project-row-admin .info .t { font-weight: 600; font-size: 14px; }
-  .project-row-admin .info .m { font-size: 12px; color: var(--grey-text); }
+  .project-row-admin .info .m { font-size: 12px; color: var(--muted); }
   .project-row-admin .actions { display: flex; gap: 6px; flex: none; }
 
   #editor {
-    border: 1px solid var(--grey-line);
+    border: 1px solid var(--line);
     border-radius: 10px;
     padding: 24px;
   }
 
   .dropzone {
-    border: 1.5px dashed var(--grey-line);
+    border: 1.5px dashed var(--line);
     border-radius: 8px;
     padding: 28px;
     text-align: center;
-    color: var(--grey-text);
+    color: var(--muted);
     font-size: 14px;
     cursor: pointer;
     margin-bottom: 16px;
   }
-  .dropzone.drag-over { border-color: var(--black); color: var(--black); background: var(--grey-fill); }
+  .dropzone.drag-over { border-color: var(--ink); color: var(--ink); background: var(--surface-hover); }
 
   .media-item {
     display: flex;
     gap: 12px;
     align-items: flex-start;
     padding: 12px;
-    border: 1px solid var(--grey-line);
+    border: 1px solid var(--line);
     border-radius: 8px;
     margin-bottom: 10px;
   }
-  .media-item .preview { width: 96px; height: 64px; flex: none; border-radius: 4px; overflow: hidden; background: var(--grey-fill); }
+  .media-item .preview { width: 96px; height: 64px; flex: none; border-radius: 4px; overflow: hidden; background: var(--surface); }
   .media-item .preview img, .media-item .preview video { width: 100%; height: 100%; object-fit: cover; }
   .media-item .mid { flex: 1; min-width: 0; }
   .media-item .mid input[type="text"] { margin-bottom: 6px; }
-  .media-item .row2 { display: flex; align-items: center; gap: 12px; font-size: 12px; color: var(--grey-text); flex-wrap: wrap; }
+  .media-item .row2 { display: flex; align-items: center; gap: 12px; font-size: 12px; color: var(--muted); flex-wrap: wrap; }
   .media-item .actions { display: flex; flex-direction: column; gap: 6px; flex: none; }
+
+  /* Drag-to-reorder (see renderMediaList) — same idea as the category
+     chips below, but a vertical list, so the drag handle sits on its
+     own rather than making the whole row (caption input included)
+     draggable, and the drop edge is shown top/bottom instead of
+     left/right. */
+  .media-item .drag-handle {
+    flex: none;
+    align-self: stretch;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    font-size: 16px;
+    line-height: 1;
+    letter-spacing: -3px;
+    color: var(--muted);
+    cursor: grab;
+    user-select: none;
+  }
+  .media-item .drag-handle:active { cursor: grabbing; }
+  .media-item.is-dragging { opacity: 0.4; }
+  .media-item.drop-before { box-shadow: 0 -3px 0 var(--ink); }
+  .media-item.drop-after { box-shadow: 0 3px 0 var(--ink); }
+
+  /* Draggable category chips (see renderCategoryList) — drag one over
+     another to drop it before/after; the drop side is shown with a
+     black edge so it's clear where it'll land. */
+  .category-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 6px 6px 14px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    font-size: 13px;
+    cursor: grab;
+    background: var(--surface);
+  }
+  .category-chip.is-dragging { opacity: 0.4; }
+  .category-chip .cat-name { cursor: text; }
+  .category-chip .cat-name-input {
+    font: inherit;
+    font-size: 13px;
+    color: inherit;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--ink);
+    padding: 0;
+    outline: none;
+  }
+  .category-chip.drop-before { box-shadow: -3px 0 0 var(--ink); }
+  .category-chip.drop-after { box-shadow: 3px 0 0 var(--ink); }
+  .category-chip .delete-btn {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: none;
+    background: var(--surface-hover);
+    color: var(--ink);
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+    padding: 0;
+  }
 
   .toast {
     position: fixed;
     left: 50%;
     bottom: 28px;
     transform: translateX(-50%);
-    background: var(--black);
-    color: var(--white);
+    background: var(--ink);
+    color: var(--bg);
     padding: 12px 20px;
     border-radius: 8px;
     font-size: 13px;
     max-width: 90vw;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     z-index: 50;
   }
   .toast pre {
     white-space: pre-wrap;
     font-family: ui-monospace, monospace;
-    background: rgba(255,255,255,0.1);
+    background: rgba(0,0,0,0.08);
     padding: 8px 10px;
     border-radius: 6px;
     margin: 8px 0 0;
@@ -205,7 +271,7 @@
       <div class="field"><label for="site-about">About / bio</label><textarea id="site-about" rows="5"></textarea></div>
 
       <label>Your photo (shown on the About page)</label>
-      <div id="site-photo-preview" style="width:96px; height:96px; margin-bottom:10px; overflow:hidden; background:var(--grey-fill);"></div>
+      <div id="site-photo-preview" style="width:96px; height:96px; margin-bottom:10px; overflow:hidden; background:var(--surface);"></div>
       <div style="display:flex; gap:10px; align-items:center; margin-bottom:16px;">
         <button type="button" id="site-photo-pick-btn" class="secondary small">Choose photo</button>
         <button type="button" id="site-photo-remove-btn" class="ghost small" hidden>Remove photo</button>
@@ -217,7 +283,7 @@
 
     <section id="categories-section">
       <h2>Categories</h2>
-      <p class="hint" style="margin-top:-8px; margin-bottom:12px;">The set of categories a project can be tagged with. Shown as filter pills on your home page, and saved right away — no need to hit Save.</p>
+      <p class="hint" style="margin-top:-8px; margin-bottom:12px;">The set of categories a project can be tagged with. Shown as filter pills on your home page, in this order — drag one to rearrange. Saved right away, no need to hit Save.</p>
       <div id="category-list" style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px;"></div>
       <div style="display:flex; gap:8px;">
         <input type="text" id="new-category-input" placeholder="New category name" style="flex:1;">
@@ -248,11 +314,13 @@
       </div>
       <div class="field"><label for="p-summary">Gallery caption (optional, short)</label><input type="text" id="p-summary"></div>
       <div class="field"><label for="p-description">Description</label><textarea id="p-description" rows="4"></textarea></div>
+      <div class="field"><label for="p-website">Website link (optional)</label><input type="url" id="p-website" placeholder="https://..."></div>
 
       <label>Media</label>
-      <p class="hint" style="margin-top:-2px;">Drop images or videos below. Pick one as the gallery thumbnail — for web/interaction work, a short video thumbnail reads best.</p>
+      <p class="hint" style="margin-top:-2px;">Drop images or videos below, or add files already sitting in your media folder. Pick one as the gallery thumbnail — for web/interaction work, a short video thumbnail reads best.</p>
       <div class="dropzone" id="dropzone">Drop files here, or click to choose</div>
       <input type="file" id="file-input" accept="image/*,video/*" multiple hidden>
+      <button type="button" id="pick-existing-btn" class="secondary small" style="margin-bottom:16px;">+ Add from media folder</button>
       <div id="media-list"></div>
 
       <div style="display:flex; gap:10px; margin-top:20px;">
@@ -336,8 +404,8 @@
    "site-photo-preview", "site-photo-pick-btn", "site-photo-remove-btn", "site-photo-input",
    "category-list", "new-category-input", "add-category-btn",
    "admin-project-list", "add-project-btn",
-   "editor", "editor-title", "p-title", "p-year", "p-categories", "p-categories-empty-hint", "p-client", "p-summary", "p-description",
-   "dropzone", "file-input", "media-list",
+   "editor", "editor-title", "p-title", "p-year", "p-categories", "p-categories-empty-hint", "p-client", "p-summary", "p-description", "p-website",
+   "dropzone", "file-input", "pick-existing-btn", "media-list",
    "save-project-btn", "cancel-edit-btn", "delete-project-btn",
    "toast"].forEach(function (id) { el[id] = document.getElementById(id); });
 
@@ -449,6 +517,12 @@
   }
 
   /* ---------------- categories ---------------- */
+  /* Drag-to-reorder: native HTML5 drag & drop, no library. dragCat
+     holds the category currently being dragged (module scope, since
+     it needs to be read by every other chip's dragover/drop handler,
+     not just the one that started the drag). */
+
+  var dragCat = null;
 
   function renderCategoryList() {
     var wrap = el["category-list"];
@@ -464,19 +538,162 @@
     }
     cats.forEach(function (cat) {
       var chip = document.createElement("span");
-      chip.style.cssText = "display:inline-flex; align-items:center; gap:6px; padding:6px 6px 6px 14px; border:1px solid var(--grey-line); border-radius:999px; font-size:13px;";
-      chip.textContent = cat;
+      chip.className = "category-chip";
+      chip.draggable = true;
+
+      var nameSpan = document.createElement("span");
+      nameSpan.className = "cat-name";
+      nameSpan.textContent = cat;
+      nameSpan.title = "Click to rename";
+      nameSpan.addEventListener("click", function (e) {
+        e.stopPropagation();
+        startRenameCategory(chip, cat);
+      });
+      chip.appendChild(nameSpan);
+
       var del = document.createElement("button");
       del.type = "button";
+      del.className = "delete-btn";
       del.textContent = "×";
       del.title = "Delete category";
       del.setAttribute("aria-label", "Delete " + cat);
-      del.style.cssText = "width:20px; height:20px; border-radius:50%; border:none; background:var(--grey-fill); color:var(--black); cursor:pointer; font-size:14px; line-height:1; padding:0;";
       del.addEventListener("click", function () { deleteCategory(cat); });
       chip.appendChild(del);
+
+      chip.addEventListener("dragstart", function (e) {
+        dragCat = cat;
+        chip.classList.add("is-dragging");
+        e.dataTransfer.effectAllowed = "move";
+        // Firefox requires data to actually be set for the drag to start.
+        e.dataTransfer.setData("text/plain", cat);
+      });
+      chip.addEventListener("dragend", function () {
+        dragCat = null;
+        wrap.querySelectorAll(".category-chip").forEach(function (c) {
+          c.classList.remove("is-dragging", "drop-before", "drop-after");
+        });
+      });
+      chip.addEventListener("dragover", function (e) {
+        if (!dragCat || dragCat === cat) return;
+        e.preventDefault();
+        e.dataTransfer.dropEffect = "move";
+        var before = dropsBefore(e, chip);
+        chip.classList.toggle("drop-before", before);
+        chip.classList.toggle("drop-after", !before);
+      });
+      chip.addEventListener("dragleave", function () {
+        chip.classList.remove("drop-before", "drop-after");
+      });
+      chip.addEventListener("drop", function (e) {
+        e.preventDefault();
+        var moving = dragCat;
+        chip.classList.remove("drop-before", "drop-after");
+        if (!moving || moving === cat) return;
+        moveCategoryRelativeTo(moving, cat, dropsBefore(e, chip));
+      });
+
       wrap.appendChild(chip);
     });
   }
+
+  // Click a category's name to rename it in place — swaps the label
+  // for a text input, and commits on Enter/blur (Escape cancels).
+  // Renaming updates the category itself plus every project already
+  // tagged with it, so nothing gets silently untagged the way it
+  // would deleting and re-adding under a new name.
+  function startRenameCategory(chip, cat) {
+    if (chip.querySelector("input")) return; // already editing
+    chip.draggable = false;
+    var nameSpan = chip.querySelector(".cat-name");
+    var input = document.createElement("input");
+    input.type = "text";
+    input.className = "cat-name-input";
+    input.value = cat;
+    input.size = Math.max(3, cat.length);
+    nameSpan.replaceWith(input);
+    input.focus();
+    input.select();
+
+    var done = false;
+    function commit() {
+      if (done) return;
+      done = true;
+      var newName = input.value.trim();
+      if (!newName || newName === cat) { renderCategoryList(); return; }
+      renameCategory(cat, newName);
+    }
+    function onKeydown(e) {
+      if (e.key === "Enter") { e.preventDefault(); commit(); }
+      else if (e.key === "Escape") { done = true; renderCategoryList(); }
+    }
+    input.addEventListener("keydown", onKeydown);
+    input.addEventListener("blur", commit);
+  }
+
+  function renameCategory(oldName, newName) {
+    var cats = state.data.site.categories || [];
+    if (cats.indexOf(newName) !== -1) {
+      toast('A category called "' + newName + '" already exists.');
+      renderCategoryList();
+      return;
+    }
+    var idx = cats.indexOf(oldName);
+    if (idx === -1) { renderCategoryList(); return; }
+    cats[idx] = newName;
+    state.data.site.categories = cats;
+    state.data.projects.forEach(function (p) {
+      if (Array.isArray(p.categories)) {
+        p.categories = p.categories.map(function (c) { return c === oldName ? newName : c; });
+      }
+    });
+    var draftIdx = state.categoriesDraft.indexOf(oldName);
+    if (draftIdx !== -1) state.categoriesDraft[draftIdx] = newName;
+    writeDataToDisk().then(function () {
+      renderCategoryList();
+      renderProjectList();
+      if (!el.editor.hidden) renderCategoryCheckboxes();
+      toast("Category renamed.");
+    }).catch(handleWriteError);
+  }
+
+  // Which side of `chip` the pointer is currently on, for a drop
+  // that's landing directly on it.
+  function dropsBefore(e, chip) {
+    var rect = chip.getBoundingClientRect();
+    return (e.clientX - rect.left) < rect.width / 2;
+  }
+
+  function moveCategoryRelativeTo(movingCat, targetCat, before) {
+    var cats = (state.data.site.categories || []).slice();
+    var fromIdx = cats.indexOf(movingCat);
+    if (fromIdx === -1) return;
+    cats.splice(fromIdx, 1);
+    var toIdx = cats.indexOf(targetCat);
+    cats.splice(toIdx + (before ? 0 : 1), 0, movingCat);
+    state.data.site.categories = cats;
+    writeDataToDisk().then(function () {
+      renderCategoryList();
+      if (!el.editor.hidden) renderCategoryCheckboxes();
+    }).catch(handleWriteError);
+  }
+
+  // Dropping in the empty space after the last chip (not on a chip
+  // itself) sends the dragged category to the end of the list.
+  el["category-list"].addEventListener("dragover", function (e) {
+    if (e.target === el["category-list"] && dragCat) e.preventDefault();
+  });
+  el["category-list"].addEventListener("drop", function (e) {
+    if (e.target !== el["category-list"] || !dragCat) return;
+    e.preventDefault();
+    var moving = dragCat;
+    var cats = (state.data.site.categories || []).filter(function (c) { return c !== moving; });
+    cats.push(moving);
+    state.data.site.categories = cats;
+    writeDataToDisk().then(function () {
+      renderCategoryList();
+      if (!el.editor.hidden) renderCategoryCheckboxes();
+    }).catch(handleWriteError);
+  });
 
   function addCategory() {
     var input = el["new-category-input"];
@@ -543,7 +760,7 @@
       preview.appendChild(img);
       removeBtn.hidden = false;
     } else if (state.photoDraft === "remove" || !state.data.site.photo) {
-      preview.style.background = "var(--grey-fill)";
+      preview.style.background = "var(--surface)";
       removeBtn.hidden = true;
     } else {
       var img2 = document.createElement("img");
@@ -691,9 +908,40 @@
     writeDataToDisk().then(renderProjectList).catch(handleWriteError);
   }
 
+  /* ---------------- picking existing media-folder files ---------------- */
+
+  var VIDEO_EXT_RE = /\.(mp4|webm|mov|m4v)$/i;
+  var IMAGE_EXT_RE = /\.(jpe?g|png|gif|webp|avif|svg)$/i;
+
   /* ---------------- file path helpers ---------------- */
 
   var blobUrlCache = {};
+
+  // Directory handles for paths we've already walked to, so reading N
+  // files out of the same folder (e.g. the media library picker) does
+  // one walk from the root instead of N — this was the main cause of
+  // the picker feeling slow once the media folder had a lot of files
+  // in it.
+  var dirHandleCache = {};
+
+  function getCachedDir(dirPath) {
+    if (!dirHandleCache[dirPath]) {
+      var parts = dirPath.split("/").filter(Boolean);
+      var dir = Promise.resolve(state.dirHandle);
+      parts.forEach(function (seg) {
+        dir = dir.then(function (d) { return d.getDirectoryHandle(seg); });
+      });
+      // Don't let a failed lookup (folder not created yet) poison the
+      // cache forever — clear it so a later retry (e.g. after the
+      // folder gets created) walks fresh instead of reusing the
+      // rejection.
+      dirHandleCache[dirPath] = dir.catch(function (err) {
+        delete dirHandleCache[dirPath];
+        throw err;
+      });
+    }
+    return dirHandleCache[dirPath];
+  }
 
   function resolveUrlForSrc(relPath) {
     if (!relPath) return "";
@@ -717,11 +965,7 @@
   function resolveFile(relPath) {
     var parts = relPath.split("/").filter(Boolean);
     var fileName = parts.pop();
-    var dir = Promise.resolve(state.dirHandle);
-    parts.forEach(function (seg) {
-      dir = dir.then(function (d) { return d.getDirectoryHandle(seg); });
-    });
-    return dir.then(function (d) { return d.getFileHandle(fileName); }).then(function (fh) { return fh.getFile(); });
+    return getCachedDir(parts.join("/")).then(function (d) { return d.getFileHandle(fileName); }).then(function (fh) { return fh.getFile(); });
   }
 
   function getOrCreateDir(path) {
@@ -781,8 +1025,8 @@
       chip.textContent = cat;
       chip.setAttribute("aria-pressed", active ? "true" : "false");
       chip.style.cssText = "font-family:inherit; font-size:13px; padding:7px 14px; border-radius:999px; cursor:pointer; border:1px solid " +
-        (active ? "var(--black)" : "var(--grey-line)") + "; background:" + (active ? "var(--black)" : "var(--white)") +
-        "; color:" + (active ? "var(--white)" : "var(--black)") + ";";
+        (active ? "var(--ink)" : "var(--line)") + "; background:" + (active ? "var(--ink)" : "var(--bg)") +
+        "; color:" + (active ? "var(--bg)" : "var(--ink)") + ";";
       chip.addEventListener("click", function () {
         var idx = state.categoriesDraft.indexOf(cat);
         if (idx === -1) state.categoriesDraft.push(cat);
@@ -801,6 +1045,7 @@
     el["p-client"].value = project ? project.client || "" : "";
     el["p-summary"].value = project ? project.summary || "" : "";
     el["p-description"].value = project ? project.description || "" : "";
+    el["p-website"].value = project ? project.website || "" : "";
     el["delete-project-btn"].hidden = !project;
 
     state.categoriesDraft = project && Array.isArray(project.categories) ? project.categories.slice() : [];
@@ -885,12 +1130,130 @@
     renderMediaList();
   }
 
+  /* ---- existing-file picker (added by reference — no re-upload) ----
+     Opens the OS's own file dialog straight into the media folder,
+     rather than a custom thumbnail grid drawn in-page — the native
+     dialog does its own (fast) thumbnailing, so this stays quick no
+     matter how many files are sitting in there. */
+
+  el["pick-existing-btn"].addEventListener("click", function () {
+    pickExistingMediaFiles().catch(function (err) {
+      if (err && err.name === "AbortError") return; // user cancelled the dialog
+      console.error(err);
+      toast("Couldn't open the media folder: " + (err && err.message ? err.message : err), 6000);
+    });
+  });
+
+  function pickExistingMediaFiles() {
+    if (!window.showOpenFilePicker) {
+      toast("Your browser doesn't support picking files this way — try Chrome or Edge.", 6000);
+      return Promise.resolve();
+    }
+    return getOrCreateDir("media").then(function (mediaDir) {
+      return window.showOpenFilePicker({
+        multiple: true,
+        startIn: mediaDir,
+        types: [{
+          description: "Images and videos",
+          accept: {
+            "image/*": [".jpg", ".jpeg", ".png", ".gif", ".webp", ".avif", ".svg"],
+            "video/*": [".mp4", ".webm", ".mov", ".m4v"],
+          },
+        }],
+      });
+    }).then(function (handles) {
+      return Promise.all(handles.map(function (handle) { return state.dirHandle.resolve(handle); }));
+    }).then(function (allSegments) {
+      var usedInDraft = state.mediaDraft.map(function (m) { return m.src; }).filter(Boolean);
+      var added = 0;
+      var skippedOutside = 0;
+      var skippedType = 0;
+      allSegments.forEach(function (segments) {
+        if (!segments) { skippedOutside++; return; } // not inside this project's folder
+        var name = segments[segments.length - 1];
+        var kind = VIDEO_EXT_RE.test(name) ? "video" : (IMAGE_EXT_RE.test(name) ? "image" : null);
+        if (!kind) { skippedType++; return; }
+        var path = segments.join("/");
+        if (usedInDraft.indexOf(path) !== -1) return; // already in this project
+        state.mediaDraft.push({
+          tempId: uid(),
+          type: kind,
+          src: path,
+          caption: "",
+          isThumbnail: state.mediaDraft.length === 0,
+          isNew: false,
+        });
+        usedInDraft.push(path);
+        added++;
+      });
+      if (added > 0) renderMediaList();
+      if (skippedOutside > 0) {
+        toast("Only files inside your media folder can be added this way — skipped " + skippedOutside + ".", 6000);
+      } else if (skippedType > 0) {
+        toast("Skipped " + skippedType + " file(s) that weren't images or videos.", 6000);
+      } else if (added === 0) {
+        toast("Nothing new to add.");
+      }
+    });
+  }
+
+  // Drag-to-reorder for the media list, same native-HTML5 approach as
+  // renderCategoryList's chips (dragMediaId is that pattern's dragCat,
+  // just keyed by tempId since media items have no name to key on).
+  // Unlike category reordering, this only touches state.mediaDraft in
+  // memory — it's saved to disk later, whenever the project form itself
+  // is submitted (see the save-project-btn handler).
+  var dragMediaId = null;
+
   function renderMediaList() {
     var wrap = el["media-list"];
     wrap.innerHTML = "";
     state.mediaDraft.forEach(function (item, index) {
       var row = document.createElement("div");
       row.className = "media-item";
+
+      var handle = document.createElement("span");
+      handle.className = "drag-handle";
+      handle.draggable = true;
+      handle.title = "Drag to reorder";
+      handle.setAttribute("aria-label", "Drag to reorder");
+      handle.textContent = "⋮⋮";
+      handle.addEventListener("dragstart", function (e) {
+        dragMediaId = item.tempId;
+        row.classList.add("is-dragging");
+        e.dataTransfer.effectAllowed = "move";
+        // Firefox requires data to actually be set for the drag to start.
+        e.dataTransfer.setData("text/plain", item.tempId);
+        // Only the handle is draggable, but show the whole row as the
+        // drag image so it doesn't look like just the handle is moving.
+        if (e.dataTransfer.setDragImage) e.dataTransfer.setDragImage(row, 12, 12);
+      });
+      handle.addEventListener("dragend", function () {
+        dragMediaId = null;
+        wrap.querySelectorAll(".media-item").forEach(function (r) {
+          r.classList.remove("is-dragging", "drop-before", "drop-after");
+        });
+      });
+      row.appendChild(handle);
+
+      row.addEventListener("dragover", function (e) {
+        if (!dragMediaId || dragMediaId === item.tempId) return;
+        e.preventDefault();
+        e.dataTransfer.dropEffect = "move";
+        var before = dropsBeforeVertical(e, row);
+        row.classList.toggle("drop-before", before);
+        row.classList.toggle("drop-after", !before);
+      });
+      row.addEventListener("dragleave", function () {
+        row.classList.remove("drop-before", "drop-after");
+      });
+      row.addEventListener("drop", function (e) {
+        e.preventDefault();
+        var moving = dragMediaId;
+        row.classList.remove("drop-before", "drop-after");
+        if (!moving || moving === item.tempId) return;
+        moveMediaRelativeTo(moving, item.tempId, dropsBeforeVertical(e, row));
+      });
 
       var preview = document.createElement("div");
       preview.className = "preview";
@@ -941,7 +1304,14 @@
       thumbLabel.appendChild(document.createTextNode("Gallery thumbnail"));
       row2.appendChild(thumbLabel);
 
-      row2.appendChild(document.createTextNode(item.type === "video" ? "Video" : "Image"));
+      var typeSpan = document.createElement("span");
+      typeSpan.textContent = item.type === "video" ? "Video" : "Image";
+      row2.appendChild(typeSpan);
+      if (item.src && !item.isNew) {
+        var fromSpan = document.createElement("span");
+        fromSpan.textContent = "From media folder";
+        row2.appendChild(fromSpan);
+      }
 
       mid.appendChild(row2);
       row.appendChild(mid);
@@ -971,6 +1341,23 @@
     if (state.mediaDraft.length && !state.mediaDraft.some(function (m) { return m.isThumbnail; })) {
       state.mediaDraft[0].isThumbnail = true;
     }
+    renderMediaList();
+  }
+
+  // Which half of `row` the pointer is over, for a drop landing
+  // directly on it — vertical counterpart of dropsBefore (categories).
+  function dropsBeforeVertical(e, row) {
+    var rect = row.getBoundingClientRect();
+    return (e.clientY - rect.top) < rect.height / 2;
+  }
+
+  function moveMediaRelativeTo(movingId, targetId, before) {
+    var fromIdx = state.mediaDraft.findIndex(function (m) { return m.tempId === movingId; });
+    if (fromIdx === -1) return;
+    var moving = state.mediaDraft[fromIdx];
+    state.mediaDraft.splice(fromIdx, 1);
+    var toIdx = state.mediaDraft.findIndex(function (m) { return m.tempId === targetId; });
+    state.mediaDraft.splice(toIdx + (before ? 0 : 1), 0, moving);
     renderMediaList();
   }
 
@@ -1044,6 +1431,7 @@
         client: el["p-client"].value.trim(),
         summary: el["p-summary"].value.trim(),
         description: description,
+        website: normalizeUrl(el["p-website"].value.trim()),
         thumbnail: { type: thumbEntry.type, src: thumbEntry.src, poster: thumbEntry.poster },
         media: mediaEntries.map(function (m) {
           return { type: m.type, src: m.src, poster: m.poster, caption: m.caption || "" };
@@ -1077,6 +1465,11 @@
       el["save-project-btn"].textContent = "Save project";
     });
   });
+
+  function normalizeUrl(s) {
+    if (!s) return "";
+    return /^[a-z][a-z0-9+.-]*:/i.test(s) ? s : "https://" + s;
+  }
 
   function escapeHtml(s) {
     return String(s).replace(/[&<>"]/g, function (c) {

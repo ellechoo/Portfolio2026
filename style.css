@@ -31,14 +31,24 @@
 }
 
 :root {
-  --black: #0a0a0a;
-  --white: #ffffff;
-  --grey-fill: #f4f4f4;
-  --grey-text: #6b6b6b;
-  --grey-line: #e4e4e4;
+  /* Dark theme: black page background, off-white ink, and a slightly
+     raised "surface" tone for cards/menus/placeholders so they read
+     as distinct from the page behind them. */
+  --bg: #000000;
+  --ink: #f2f2f2;
+  --surface: #1a1a1a;
+  --surface-hover: #262626;
+  --line: #303030;
   --max-width: 1600px;
   --gutter: 48px;
   --header-height: 64px;
+  /* Shared height for every home-page thumbnail (see .project-image
+     below) — width is whatever that height works out to for each
+     item's own ratio, so nothing gets cropped. Scales with viewport
+     width so it stays proportionate at any window size; the min/max
+     just keep it from ever going absurdly small or large. Calibrated
+     to match "09.03"'s video at a normal desktop width. */
+  --thumb-height: clamp(140px, 24vw, 420px);
 }
 
 @media (max-width: 600px) {
@@ -58,8 +68,8 @@ html {
 
 body {
   margin: 0;
-  background: var(--white);
-  color: var(--black);
+  background: var(--bg);
+  color: var(--ink);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   font-weight: 400;
   line-height: 1.5;
@@ -85,7 +95,7 @@ p, figcaption {
 a:focus-visible,
 button:focus-visible,
 [tabindex]:focus-visible {
-  outline: 2px solid var(--black);
+  outline: 2px solid var(--ink);
   outline-offset: 3px;
 }
 
@@ -109,7 +119,7 @@ button:focus-visible,
   position: sticky;
   top: 0;
   z-index: 100;
-  background: var(--white);
+  background: var(--bg);
   height: var(--header-height);
   display: flex;
   align-items: center;
@@ -126,8 +136,8 @@ button:focus-visible,
   font-size: 14px;
   font-weight: 500;
   text-transform: uppercase;
-  color: var(--black);
-  transition: opacity 0.15s ease;
+  color: var(--ink);
+  text-decoration: none;
 }
 
 .nav-left { justify-self: start; }
@@ -136,7 +146,8 @@ button:focus-visible,
 
 .site-header a:hover,
 .site-header button.contact-toggle:hover {
-  opacity: 0.5;
+  text-decoration: underline;
+  text-underline-offset: 4px;
 }
 
 button.contact-toggle {
@@ -168,10 +179,10 @@ button.contact-toggle {
   top: calc(100% + 8px);
   right: 0;
   min-width: 160px;
-  background: var(--white);
-  border: 1px solid var(--grey-line);
+  background: var(--surface);
+  border: 1px solid var(--line);
   border-radius: 8px;
-  box-shadow: 0 16px 32px -16px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 16px 32px -16px rgba(0, 0, 0, 0.6);
   padding: 6px;
   flex-direction: column;
 }
@@ -197,7 +208,7 @@ button.contact-toggle {
 }
 
 .contact-menu a:hover {
-  background: var(--grey-fill);
+  background: var(--surface-hover);
   opacity: 1;
 }
 
@@ -206,41 +217,63 @@ button.contact-toggle {
 .empty-state {
   padding: 96px 0;
   text-align: center;
-  color: var(--grey-text);
+  color: var(--ink);
   font-size: 15px;
 }
 
 /* ---------- Home: category filter ---------- */
 
 .category-filter {
+  position: relative;
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-  padding: 15px 0 0;
+  padding: 30px 0 0;
 }
 
+/* A single shared ring that slides between pills on hover, rather than
+   each pill drawing its own. Sized/positioned in JS (renderCategoryFilter)
+   to sit just outside whichever pill is being hovered, and its left/top/
+   width/height transitions are what make it glide from one to the next
+   instead of jumping. Stays white regardless of the pill's own color, and
+   is fully separate from the colored .is-active ring below (a pill can
+   show both at once — its own colored "selected" ring, plus this white
+   one while the mouse happens to be over it). */
+.pill-hover-ring {
+  position: absolute;
+  box-sizing: border-box;
+  border-radius: 999px;
+  border: 2px solid #ffffff;
+  opacity: 0;
+  pointer-events: none;
+  transition: left 0.18s ease, top 0.18s ease, width 0.18s ease, height 0.18s ease, opacity 0.15s ease;
+}
+
+/* Always filled with its category color and dark text — pressed and
+   unpressed look the same fill-wise, unlike the always-outlined
+   .pill-tag badges below (that outline/fill contrast is what tells
+   the two apart). The only thing that marks "selected" is the outer
+   ring (outline), toggled on in .is-active below. */
 .pill {
   font-family: inherit;
   font-size: 13px;
   font-weight: 500;
+  line-height: 1.5;
   letter-spacing: -0.01em;
-  padding: 8px 16px;
+  text-transform: uppercase;
+  padding: 6px 14px;
   border-radius: 999px;
-  border: 1px solid var(--grey-line);
-  background: var(--white);
-  color: var(--black);
+  border: 1px solid var(--tag-color, var(--ink));
+  background: var(--tag-color, var(--ink));
+  color: var(--bg);
   cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
-}
-
-.pill:hover {
-  border-color: var(--black);
+  transition: outline-color 0.15s ease;
+  outline: 2px solid transparent;
+  outline-offset: 2px;
 }
 
 .pill.is-active {
-  background: var(--black);
-  color: var(--white);
-  border-color: var(--black);
+  outline-color: var(--tag-color, var(--ink));
 }
 
 /* Small, read-only version of the same pill shape — used as the tag
@@ -252,40 +285,47 @@ button.contact-toggle {
   font-weight: 500;
   padding: 4px 11px;
   border-radius: 999px;
-  border: 1px solid var(--grey-line);
-  color: var(--grey-text);
+  border: 1px solid var(--tag-color, var(--line));
+  color: var(--tag-color, var(--ink));
 }
 
 /* ---------- Home: project grid ---------- */
-/* Two thumbnails per row — the media is the point, so captions below
-   each one stay small and minimal (just tag pills + a modest title).
-   Click a card to see the project's full write-up on its own page. */
+/* A "justified gallery" row layout: every thumbnail shares the same
+   height (--thumb-height, set on :root), and each one's width is
+   whatever that height works out to for its own ratio — a square
+   stays square, a wide video stays wide, nothing is cropped or
+   stretched. An item that doesn't fit the remaining space in a row
+   just wraps to the next one. Captions below each thumbnail stay
+   small and minimal (just tag pills + a modest title). Click a card
+   to see the project's full write-up on its own page. */
 
 .project-list {
-  padding: 24px 0 40px;
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  padding: var(--gutter) 0 40px;
+  display: flex;
+  flex-wrap: wrap;
   column-gap: var(--gutter);
-  row-gap: 72px;
+  row-gap: var(--gutter);
+}
+
+/* .project-list's own "display: flex" above would otherwise beat the
+   browser's default [hidden] rule (same specificity, but an author
+   rule always wins over the user-agent one) — same trap as the
+   contact-menu below. Needed so hiding the whole grid when a filter
+   matches nothing actually hides it. */
+.project-list[hidden] {
+  display: none;
 }
 
 .project-card {
   cursor: pointer;
+  flex: 0 0 auto;
+  max-width: 100%;
 }
 
-/* Thumbnails keep their natural width-to-height ratio and are never
-   zoomed/cropped to fit a shape — a rectangle just shows as a
-   rectangle. The only limit is a max height, so a very tall/portrait
-   image (e.g. a poster) doesn't tower over its row; when that cap
-   kicks in, the image is centered and only its top/bottom edges are
-   clipped (via overflow:hidden), never scaled to fill a fixed box.
-   (The project's own page still shows the untouched, uncropped
-   media.) */
 .project-image {
   position: relative;
-  overflow: hidden;
-  background: var(--grey-fill);
-  max-height: 600px;
+  background: var(--surface);
+  height: var(--thumb-height);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -294,45 +334,58 @@ button.contact-toggle {
 .project-image img,
 .project-image video {
   display: block;
-  width: 100%;
-  height: auto;
-  transition: transform 0.6s ease;
+  height: 100%;
+  width: auto;
+  max-width: 100%;
 }
 
-.project-card:hover .project-image img,
-.project-card:hover .project-image video,
-.project-image.is-playing img,
-.project-image.is-playing video {
-  transform: scale(1.015);
-}
-
-/* Small play affordance on video thumbnails, for touch devices where
-   there's no hover to reveal that it moves. Fades once playing. */
-.play-hint {
+/* Four corner brackets (like a viewfinder/crop marks) instead of the
+   thumbnail itself changing size — two 1-line gradients per corner (one
+   arm each), positioned via the four background-position corners so
+   they stay pinned to the image's own corners regardless of its size.
+   Sits just outside the image edge (negative inset) and eases in a
+   little closer on hover, like the frame is closing in. Tied only to
+   :hover, not to .is-playing — a video autoplaying in view otherwise
+   left the frame stuck on even once the mouse moved away. */
+.project-image::after {
+  content: "";
   position: absolute;
-  right: 14px;
-  bottom: 14px;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: rgba(10, 10, 10, 0.55);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 1;
-  transition: opacity 0.3s ease;
+  inset: -14px;
   pointer-events: none;
-}
-
-.play-hint svg {
-  width: 10px;
-  height: 10px;
-  fill: var(--white);
-  margin-left: 1px;
-}
-
-.project-image.is-playing .play-hint {
   opacity: 0;
+  transition: opacity 0.25s ease, inset 0.25s ease;
+  --frame-arm: 22px;
+  --frame-thickness: 1px;
+  --frame-color: #ffffff;
+  background-image:
+    linear-gradient(var(--frame-color), var(--frame-color)),
+    linear-gradient(var(--frame-color), var(--frame-color)),
+    linear-gradient(var(--frame-color), var(--frame-color)),
+    linear-gradient(var(--frame-color), var(--frame-color)),
+    linear-gradient(var(--frame-color), var(--frame-color)),
+    linear-gradient(var(--frame-color), var(--frame-color)),
+    linear-gradient(var(--frame-color), var(--frame-color)),
+    linear-gradient(var(--frame-color), var(--frame-color));
+  background-repeat: no-repeat;
+  background-size:
+    var(--frame-arm) var(--frame-thickness),
+    var(--frame-thickness) var(--frame-arm),
+    var(--frame-arm) var(--frame-thickness),
+    var(--frame-thickness) var(--frame-arm),
+    var(--frame-arm) var(--frame-thickness),
+    var(--frame-thickness) var(--frame-arm),
+    var(--frame-arm) var(--frame-thickness),
+    var(--frame-thickness) var(--frame-arm);
+  background-position:
+    top left, top left,
+    top right, top right,
+    bottom left, bottom left,
+    bottom right, bottom right;
+}
+
+.project-card:hover .project-image::after {
+  opacity: 1;
+  inset: -8px;
 }
 
 /* Deliberately small and quiet — just enough to identify the project,
@@ -342,11 +395,28 @@ button.contact-toggle {
   margin-top: 16px;
 }
 
+/* Title + category tags share a row, title on the left and tags
+   flush to the right — wraps to its own line only if a card gets
+   too narrow to fit both. */
+.project-caption-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+}
+
 .project-tags {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  margin-bottom: 8px;
+}
+
+/* A touch smaller here than the pill-tag default so a full set of
+   tags comfortably fits alongside the title on one line. */
+.project-tags .pill-tag {
+  font-size: 10px;
+  padding: 3px 9px;
 }
 
 .project-caption .name {
@@ -356,11 +426,11 @@ button.contact-toggle {
   letter-spacing: -0.01em;
 }
 
-@media (max-width: 700px) {
-  .project-list {
-    grid-template-columns: 1fr;
-    row-gap: 48px;
-  }
+.project-caption .summary {
+  display: block;
+  font-size: 13px;
+  font-weight: 400;
+  margin-top: 4px;
 }
 
 /* ---------- Project page ---------- */
@@ -372,12 +442,12 @@ button.contact-toggle {
 .back-link {
   display: inline-block;
   font-size: 13px;
-  color: var(--grey-text);
+  color: var(--ink);
   margin: 32px 0 24px;
 }
 
 .back-link:hover {
-  color: var(--black);
+  opacity: 0.6;
 }
 
 .project-layout {
@@ -403,7 +473,7 @@ button.contact-toggle {
 .project-media img,
 .project-media video {
   width: 100%;
-  background: var(--grey-fill);
+  background: var(--surface);
 }
 
 .project-media img {
@@ -413,7 +483,7 @@ button.contact-toggle {
 .project-media figcaption {
   margin: 10px 0 0;
   font-size: 13px;
-  color: var(--grey-text);
+  color: var(--ink);
 }
 
 /* Expand affordance — the only way into the lightbox for a video
@@ -427,7 +497,7 @@ button.contact-toggle {
   border-radius: 50%;
   border: none;
   background: rgba(10, 10, 10, 0.55);
-  color: var(--white);
+  color: var(--ink);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -453,9 +523,10 @@ button.contact-toggle {
 
 .project-sidebar h1 {
   font-family: 'Array', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: clamp(30px, 3.6vw, 44px);
+  font-size: clamp(32px, 3.8vw, 48px);
   font-weight: 600;
   letter-spacing: -0.02em;
+  line-height: 1.1;
   margin: 0 0 14px;
 }
 
@@ -465,15 +536,27 @@ button.contact-toggle {
   gap: 10px;
   flex-wrap: wrap;
   font-size: 13px;
-  color: var(--grey-text);
-  margin-bottom: 16px;
+  color: var(--ink);
+  margin-bottom: 32px;
 }
 
 .project-description {
   font-size: 15px;
-  color: var(--grey-text);
+  color: var(--ink);
   white-space: pre-line;
 }
+
+.project-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 16px;
+  font-size: 13px;
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.project-link[hidden] { display: none; }
 
 @media (max-width: 900px) {
   .project-layout {
@@ -482,6 +565,76 @@ button.contact-toggle {
   .project-sidebar {
     position: static;
     order: -1;
+  }
+}
+
+/* ---------- Project: next-project link ---------- */
+/* A simple "keep going" footer at the bottom of every project page —
+   points to whatever's next in the same date order as the gallery
+   (renderProject, main.js), wrapping back to the first project after
+   the last one. */
+
+.next-project {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 64px;
+  padding: 28px 0;
+  border-top: 1px solid var(--line);
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.next-project[hidden] {
+  display: none;
+}
+
+.next-project-eyebrow {
+  flex: 0 0 auto;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+.next-project-title {
+  flex: 1 1 auto;
+  min-width: 0;
+  text-align: right;
+  font-family: 'Array', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: clamp(22px, 2.6vw, 32px);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.next-project-arrow {
+  flex: 0 0 auto;
+  font-size: 20px;
+  transition: transform 0.15s ease;
+}
+
+.next-project:hover .next-project-title {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.next-project:hover .next-project-arrow {
+  transform: translateX(4px);
+}
+
+@media (max-width: 600px) {
+  .next-project {
+    flex-wrap: wrap;
+  }
+  .next-project-title {
+    text-align: left;
+    white-space: normal;
   }
 }
 
@@ -524,7 +677,7 @@ button.contact-toggle {
   position: absolute;
   background: none;
   border: none;
-  color: var(--white);
+  color: var(--ink);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -574,6 +727,86 @@ button.contact-toggle {
   .lightbox-next { right: 0; }
 }
 
+/* ---------- Custom cursor ---------- */
+/* A single small four-pointed-star outline tracks the mouse exactly
+   (no lag/easing — this replaces the old dot-plus-separate-lagging-
+   ring setup), replacing the native pointer on a real mouse/trackpad
+   (see the (hover: hover) media query below); touch devices are left
+   completely alone. Uses mix-blend-mode: difference so it stays
+   visible whether it's sitting over the black page background or a
+   light thumbnail (e.g. Moon Tides' cream poster) without needing
+   separate light/dark styling. Position is driven by JS
+   (setUpCustomCursor, main.js); .is-active grows it while hovering
+   anything clickable. It's an SVG (not a bordered div) so the outline
+   can actually follow a four-pointed shape — a plain border can't be
+   clipped into a star without the corners looking wrong. */
+.cursor-star {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 16px;
+  height: 16px;
+  overflow: visible;
+  pointer-events: none;
+  z-index: 1100;
+  transform: translate(-50%, -50%);
+  mix-blend-mode: difference;
+  opacity: 0;
+  transition: width 0.2s ease, height 0.2s ease, opacity 0.15s ease;
+}
+
+.cursor-star polygon {
+  fill: none;
+  stroke: #ffffff;
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+}
+
+.cursor-star.is-active {
+  width: 30px;
+  height: 30px;
+}
+
+/* JS only adds .is-visible once the cursor is actually moving inside
+   the window (and removes it when the pointer leaves), so the star
+   doesn't appear pinned at the top-left corner before the first
+   mousemove, or linger after the mouse leaves the browser entirely. */
+.cursor-star.is-visible {
+  opacity: 1;
+}
+
+/* Trail echoes: short-lived clones of the star (spawned in JS as the
+   cursor moves, spaced out and kept brief so the trail stays light
+   rather than crowding the page), each one fading and growing
+   slightly before removing itself. Purely decorative, so given no
+   pointer-events of its own. */
+.cursor-echo {
+  position: fixed;
+  pointer-events: none;
+  z-index: 1090;
+  overflow: visible;
+  mix-blend-mode: difference;
+  animation: cursor-echo-fade 1.3s ease-out forwards;
+}
+
+.cursor-echo polygon {
+  fill: none;
+  stroke: #ffffff;
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+}
+
+@keyframes cursor-echo-fade {
+  0% { opacity: 0.3; transform: translate(-50%, -50%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(1.3); }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  * {
+    cursor: none !important;
+  }
+}
+
 /* ---------- About page ---------- */
 /* Photo + name on the left, the bio to its right — so the (fairly
    long) bio text doesn't just run on below a photo, and reads more
@@ -587,7 +820,7 @@ button.contact-toggle {
 
 .about-layout {
   display: grid;
-  grid-template-columns: 200px 1fr;
+  grid-template-columns: 240px 1fr;
   gap: var(--gutter);
   align-items: start;
 }
@@ -598,10 +831,10 @@ button.contact-toggle {
 }
 
 .about-photo {
-  width: 180px;
-  height: 180px;
+  width: 213px;
+  height: 213px;
   overflow: hidden;
-  background: var(--grey-fill);
+  background: var(--surface);
   margin: 0 0 20px;
 }
 
@@ -615,8 +848,8 @@ button.contact-toggle {
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px dashed var(--grey-line);
-  color: var(--grey-text);
+  border: 1px dashed var(--line);
+  color: var(--ink);
   font-size: 12px;
   text-align: center;
   padding: 12px;
@@ -625,15 +858,17 @@ button.contact-toggle {
 
 .about-left h1 {
   font-family: 'Array', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: clamp(30px, 3.6vw, 44px);
+  font-size: clamp(32px, 3.8vw, 48px);
   font-weight: 600;
   letter-spacing: -0.02em;
+  line-height: 1.1;
   margin: 0;
+  width: fit-content;
 }
 
 .about-right p {
   font-size: 16px;
-  color: var(--grey-text);
+  color: var(--ink);
   white-space: pre-line;
   margin: 0;
 }
