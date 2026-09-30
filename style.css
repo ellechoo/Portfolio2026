@@ -728,24 +728,27 @@ button.contact-toggle {
 }
 
 /* ---------- Custom cursor ---------- */
-/* A single small four-pointed-star outline tracks the mouse exactly
-   (no lag/easing — this replaces the old dot-plus-separate-lagging-
-   ring setup), replacing the native pointer on a real mouse/trackpad
-   (see the (hover: hover) media query below); touch devices are left
+/* A single four-pointed star tracks the mouse exactly (no lag/easing —
+   this replaces the old dot-plus-separate-lagging-ring setup),
+   replacing the native pointer on a real mouse/trackpad (see the
+   (hover: hover) media query below); touch devices are left
    completely alone. Uses mix-blend-mode: difference so it stays
    visible whether it's sitting over the black page background or a
    light thumbnail (e.g. Moon Tides' cream poster) without needing
    separate light/dark styling. Position is driven by JS
-   (setUpCustomCursor, main.js); .is-active grows it while hovering
-   anything clickable. It's an SVG (not a bordered div) so the outline
-   can actually follow a four-pointed shape — a plain border can't be
-   clipped into a star without the corners looking wrong. */
+   (setUpCustomCursor, main.js). Filled solid by default; .is-active
+   (hovering anything clickable) grows it and switches it to an
+   outline-only star, so the "this is clickable" state reads as a
+   distinct shape change, not just a size change. It's an SVG (not a
+   bordered div) so the outline can actually follow a four-pointed
+   shape — a plain border can't be clipped into a star without the
+   corners looking wrong. */
 .cursor-star {
   position: fixed;
   top: 0;
   left: 0;
-  width: 16px;
-  height: 16px;
+  width: 20px;
+  height: 20px;
   overflow: visible;
   pointer-events: none;
   z-index: 1100;
@@ -756,15 +759,19 @@ button.contact-toggle {
 }
 
 .cursor-star polygon {
-  fill: none;
+  fill: #ffffff;
   stroke: #ffffff;
   stroke-width: 1.5;
   stroke-linejoin: round;
 }
 
 .cursor-star.is-active {
-  width: 30px;
-  height: 30px;
+  width: 36px;
+  height: 36px;
+}
+
+.cursor-star.is-active polygon {
+  fill: none;
 }
 
 /* JS only adds .is-visible once the cursor is actually moving inside
