@@ -389,21 +389,49 @@ button.contact-toggle {
 }
 
 /* Deliberately small and quiet — just enough to identify the project,
-   nothing competing with the image above it. */
+   nothing competing with the image above it. padding-top reserves
+   room for .project-caption-top, which sits just below (see its
+   comment for why it's positioned absolutely instead of in normal
+   flow) — sized for its common one-line height. Summaries are rare
+   sitewide and short when present, so the rarer case of a long title
+   forcing tags onto a second line (see below) isn't worth reserving
+   extra height for everywhere just to keep that edge case from ever
+   brushing a summary underneath it. */
 .project-caption {
   min-width: 0;
   margin-top: 16px;
+  position: relative;
+  padding-top: 23px;
 }
 
 /* Title + category tags share a row, title on the left and tags
-   flush to the right — wraps to its own line only if a card gets
-   too narrow to fit both. */
+   flush to the right. Positioned absolutely (anchored to
+   .project-caption just above) and given the card's own width via a
+   plain percentage — not because percentages are special here, but
+   because taking this row out of normal flow is what stops it from
+   feeding its content width into .project-card's own shrink-to-fit
+   width the way an in-flow child does (confirmed by testing; a
+   percentage width alone, while still in flow, was NOT enough). That
+   leaves the image as the only thing that can make a card wider than
+   its thumbnail. When title + tags fit within that width,
+   space-between lays them out exactly as before. When they don't (a
+   long title on a narrow/portrait image, e.g. a poster), the title
+   (flex-shrink: 0, nowrap — see .name below) holds its full width
+   and overflows past the image's edge rather than shrinking or
+   wrapping mid-word; flex-wrap: wrap on this row then drops the tags
+   to their own line below instead of letting them get dragged along
+   into that overflow and colliding with whatever card sits to the
+   right. */
 .project-caption-top {
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 6px 10px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
 }
 
 .project-tags {
@@ -424,6 +452,8 @@ button.contact-toggle {
   font-size: 16px;
   font-weight: 600;
   letter-spacing: -0.01em;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .project-caption .summary {
