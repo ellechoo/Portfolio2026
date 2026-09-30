@@ -322,13 +322,18 @@ button.contact-toggle {
   max-width: 100%;
 }
 
+/* No background here (deliberately, see below) and left-aligned
+   rather than centered: when a card's width gets pulled wider than
+   this image by a long caption below it (.project-caption-top,
+   further down), the image should just sit flush left in that extra
+   space, with the leftover area reading as plain page background —
+   not a visibly different-colored box padded out around it. */
 .project-image {
   position: relative;
-  background: var(--surface);
   height: var(--thumb-height);
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
 }
 
 .project-image img,
@@ -389,55 +394,40 @@ button.contact-toggle {
 }
 
 /* Deliberately small and quiet — just enough to identify the project,
-   nothing competing with the image above it. padding-top reserves
-   room for .project-caption-top, which sits just below (see its
-   comment for why it's positioned absolutely instead of in normal
-   flow) — sized for its common one-line height. Summaries are rare
-   sitewide and short when present, so the rarer case of a long title
-   forcing tags onto a second line (see below) isn't worth reserving
-   extra height for everywhere just to keep that edge case from ever
-   brushing a summary underneath it. */
+   nothing competing with the image above it. */
 .project-caption {
   min-width: 0;
   margin-top: 16px;
-  position: relative;
-  padding-top: 23px;
 }
 
 /* Title + category tags share a row, title on the left and tags
-   flush to the right. Positioned absolutely (anchored to
-   .project-caption just above) and given the card's own width via a
-   plain percentage — not because percentages are special here, but
-   because taking this row out of normal flow is what stops it from
-   feeding its content width into .project-card's own shrink-to-fit
-   width the way an in-flow child does (confirmed by testing; a
-   percentage width alone, while still in flow, was NOT enough). That
-   leaves the image as the only thing that can make a card wider than
-   its thumbnail. When title + tags fit within that width,
-   space-between lays them out exactly as before. When they don't (a
-   long title on a narrow/portrait image, e.g. a poster), the title
-   (flex-shrink: 0, nowrap — see .name below) holds its full width
-   and overflows past the image's edge rather than shrinking or
-   wrapping mid-word; flex-wrap: wrap on this row then drops the tags
-   to their own line below instead of letting them get dragged along
-   into that overflow and colliding with whatever card sits to the
-   right. */
+   flush to the right. flex-wrap: nowrap (plus flex-shrink: 0 + white-
+   space: nowrap on .name below, and flex-shrink: 0 on the tags)
+   means this row is never allowed to drop the tags to a second line
+   or compress anything to fit — title and tags always stay on one
+   line at their natural width. Left in normal flow (unlike the image
+   above, .project-card doesn't constrain this), so when that natural
+   width is wider than the thumbnail (a long title on a narrow/
+   portrait image, e.g. a poster), the card itself simply grows to
+   fit it — same "justified gallery" wrapping as everything else,
+   just with the caption driving the width instead of the image; the
+   next card in the row just wraps down if there's no longer room for
+   it. The image itself never stretches or gains a background to fill
+   that extra width (see .project-image above) — it stays its own
+   natural size, flush left under the start of the title. */
 .project-caption-top {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 6px 10px;
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
 }
 
 .project-tags {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+  flex-shrink: 0;
 }
 
 /* A touch smaller here than the pill-tag default so a full set of
