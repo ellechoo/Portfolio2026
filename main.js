@@ -671,7 +671,7 @@
       var echo = star.cloneNode(true);
       echo.removeAttribute("id");
       echo.setAttribute("class", "cursor-echo");
-      var size = star.classList.contains("is-active") ? 30 : 16;
+      var size = star.classList.contains("is-active") ? 36 : 20;
       echo.style.width = size + "px";
       echo.style.height = size + "px";
       echo.style.left = x + "px";
