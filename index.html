@@ -11,14 +11,14 @@
 
   <header class="site-header">
     <div class="wrap">
-      <a class="nav-left" href="#about">ABOUT</a>
+      <a class="nav-left" href="#about">about</a>
       <a class="nav-center" href="#">ELLE CHOO</a>
 
       <div class="nav-right">
-        <button class="contact-toggle" id="contact-toggle" type="button" aria-haspopup="true" aria-expanded="false">CONTACT ME</button>
+        <button class="contact-toggle" id="contact-toggle" type="button" aria-haspopup="true" aria-expanded="false">contact</button>
         <div class="contact-menu" id="contact-menu" hidden>
-          <a id="contact-email-link" href="mailto:hello@example.com">EMAIL</a>
-          <a id="contact-linkedin-link" href="#" target="_blank" rel="noopener">LINKEDIN</a>
+          <a id="contact-email-link" href="mailto:hello@example.com">email</a>
+          <a id="contact-linkedin-link" href="#" target="_blank" rel="noopener">linkedin</a>
         </div>
       </div>
     </div>
@@ -34,7 +34,7 @@
       <section class="project-list" id="project-list"></section>
 
       <div class="empty-state" id="empty-state" hidden>
-        <p id="empty-message">Nothing posted yet — new work will show up here.</p>
+        <p id="empty-message">nothing posted yet — new work will show up here.</p>
       </div>
 
     </div>
@@ -46,7 +46,7 @@
 
     <!-- ===================== PROJECT VIEW ===================== -->
     <div id="project-view" hidden>
-      <a class="back-link" href="#">&larr; Back to work</a>
+      <a class="back-link" href="#">&larr; back to work</a>
 
       <div class="project-layout">
         <div class="project-media" id="project-media"></div>
@@ -55,12 +55,19 @@
           <h1 id="project-title"></h1>
           <div class="project-meta" id="project-meta"></div>
           <p class="project-description" id="project-description"></p>
+          <a class="project-link" id="project-link" href="#" target="_blank" rel="noopener" hidden>visit site &nearr;</a>
         </aside>
       </div>
+
+      <a class="next-project" id="next-project" href="#" hidden>
+        <span class="next-project-eyebrow">Next project</span>
+        <span class="next-project-title" id="next-project-title"></span>
+        <span class="next-project-arrow" aria-hidden="true">&rarr;</span>
+      </a>
     </div>
 
     <noscript>
-      <p style="padding:48px 0;color:#6b6b6b;">This site needs JavaScript enabled to show the work.</p>
+      <p style="padding:48px 0;color:#9a9a9a;">this site needs JavaScript enabled to show the work.</p>
     </noscript>
 
   </main>
@@ -76,6 +83,13 @@
     <div class="lightbox-counter" id="lightbox-counter"></div>
   </div>
 
+  <!-- ===================== CUSTOM CURSOR ===================== -->
+  <!-- Replaces the native pointer site-wide (mouse/trackpad only —
+       left alone on touch). See setUpCustomCursor in main.js. -->
+  <svg class="cursor-star" id="cursor-star" viewBox="0 0 24 24" aria-hidden="true">
+    <polygon points="12,2 14.47,9.53 22,12 14.47,14.47 12,22 9.53,14.47 2,12 9.53,9.53"></polygon>
+  </svg>
+
   <!-- All project content lives here. Edit it by opening admin.html
        locally and using the "Add / edit project" tool — it rewrites
        this block directly. Editing it by hand works too: it's just
@@ -83,51 +97,92 @@
   <script id="site-data" type="application/json">
 {
   "site": {
-    "name": "elle choo",
+    "name": "ELLE CHOO",
     "tagline": "",
     "email": "choom783@newschool.edu",
     "linkedin": "https://www.linkedin.com/in/elle-choo-a069ba279/",
     "photo": "media/images/profile-633ddd57.jpg",
     "about": "It's nice to meet you, page stalker!\n\nMy name is Michelle, but I prefer cutting it in half and going by Elle.\n\nI'm a Communication Design student at Parsons School of Design in NYC. I'm a senior now, so if you're wondering how I spend my days, I'm probably stressing about my thesis project lol.\n\nI'm especially interested in data visualization, interaction design, and the weirdly fun intersection of design and code. I like taking information that feels complicated or overwhelming and turning it into something people can actually understand, explore, and interact with. Or sometimes, just making something entirely new out of it!\n\nMy background is rooted in graphic design, with a particular love for typography, visual systems, and all the tiny details that make a design feel right. I tend to be pretty intentional about my work, and I like when every choice has a reason behind it, whether that's the typeface, the way information is organized, how something moves, or what happens when someone interacts with it.\n\nThese days, I'm spending a lot of time in Figma, HTML, CSS, and JavaScript, with some recent experiments in Three.js and creative coding. I also have experience with publication design, motion graphics, and video editing, and I'm always happy to pick up a new tool when a project calls for it.\n\nOutside of design and school, you'll probably find me experimenting with new makeup looks, playing video games, or swimming in any body of water available.",
     "categories": [
-      "Data Visualization",
-      "Print"
+      "DATA VIZ",
+      "CODING",
+      "FIGMA",
+      "PRINT",
+      "PLAY"
     ]
   },
   "projects": [
     {
       "id": "example-title",
-      "title": "Example title",
+      "title": "09.03",
       "year": "2026",
-      "client": "Nobody lol",
+      "categories": [
+        "DATA VIZ",
+        "CODING"
+      ],
+      "client": "",
       "summary": "Gallery caption testing",
-      "description": "Description testing",
+      "description": "09.03 is a collection of 254 photographs taken on September 3rd across 32 years, from 1995 to 2026. Scraped from Wikimedia Commons, the project explores photographic metadata and how it can be organized and visualized. The collection begins in 1995 because earlier photographs often lacked the metadata needed for the project.\n\nThe YEAR and DEVICE layouts are inspired by tree rings, symbolizing growth and the passage of time while referencing September 3rd as my birthday. YEAR experiments with three-dimensionality, while DEVICE translates the same structure into two dimensions.",
+      "website": "https://ellechoo.github.io/256/year-tunnel/index.html",
       "thumbnail": {
-        "type": "image",
-        "src": "media/images/example-title-0a6fbfe0.png"
+        "type": "video",
+        "src": "media/images/256DEMO.mov"
       },
       "media": [
         {
+          "type": "video",
+          "src": "media/images/256DEMO.mov",
+          "caption": "Demo video of 09.03."
+        },
+        {
           "type": "image",
-          "src": "media/images/example-title-0a6fbfe0.png",
-          "caption": "Caption testing"
+          "src": "media/images/Screenshot 2026-09-28 at 6.15.43 PM.png",
+          "caption": ""
+        },
+        {
+          "type": "image",
+          "src": "media/images/Screenshot 2026-09-28 at 6.15.50 PM.png",
+          "caption": ""
+        },
+        {
+          "type": "image",
+          "src": "media/images/Screenshot 2026-09-28 at 6.16.16 PM.png",
+          "caption": ""
+        },
+        {
+          "type": "image",
+          "src": "media/images/Screenshot 2026-09-28 at 6.17.48 PM.png",
+          "caption": ""
+        },
+        {
+          "type": "image",
+          "src": "media/images/Screenshot 2026-09-28 at 6.22.28 PM.png",
+          "caption": ""
+        },
+        {
+          "type": "image",
+          "src": "media/images/Screenshot 2026-09-28 at 6.22.02 PM.png",
+          "caption": ""
+        },
+        {
+          "type": "image",
+          "src": "media/images/Screenshot 2026-09-28 at 6.20.11 PM.png",
+          "caption": ""
         }
       ],
-      "order": 1,
-      "categories": [
-        "Data Visualization"
-      ]
+      "order": 1
     },
     {
       "id": "moon-tides",
       "title": "Moon Tides",
       "year": "2025",
       "categories": [
-        "Print"
+        "PRINT"
       ],
       "client": "",
       "summary": "",
       "description": "A poster explaining the science behind the moon’s effect on tides. All graphics were created in Illustrator. Inspired by the title font and the visualization of gravitational pull, I aimed for delicate, flowing visuals built from thin, continuous lines. The layout is structured to guide the viewer through the information in a clear, intuitive sequence, balancing scientific clarity with an elegant visual style.",
+      "website": "",
       "thumbnail": {
         "type": "image",
         "src": "media/images/moon-tides-c93d2ccc.png"
@@ -136,10 +191,402 @@
         {
           "type": "image",
           "src": "media/images/moon-tides-c93d2ccc.png",
-          "caption": "27 x 40 in"
+          "caption": "27 x 40 inches."
+        },
+        {
+          "type": "image",
+          "src": "media/images/mooncollage-1.png",
+          "caption": ""
         }
       ],
       "order": 2
+    },
+    {
+      "id": "the-undersea-cable-network",
+      "title": "The Undersea Cable Network",
+      "year": "2026",
+      "categories": [
+        "DATA VIZ",
+        "CODING"
+      ],
+      "client": "",
+      "summary": "",
+      "description": "",
+      "website": "https://ellechoo.github.io/Complex-Images/index.html",
+      "thumbnail": {
+        "type": "video",
+        "src": "media/images/elle_video_for_rundgang copy.mov"
+      },
+      "media": [
+        {
+          "type": "video",
+          "src": "media/images/elle_video_for_rundgang copy.mov",
+          "caption": "Demo of The Undersea Cable Network."
+        },
+        {
+          "type": "image",
+          "src": "media/images/image4 copy.png",
+          "caption": ""
+        },
+        {
+          "type": "image",
+          "src": "media/images/image2 copy.png",
+          "caption": ""
+        },
+        {
+          "type": "image",
+          "src": "media/images/image6 copy.png",
+          "caption": ""
+        },
+        {
+          "type": "image",
+          "src": "media/images/image5 copy.png",
+          "caption": ""
+        },
+        {
+          "type": "image",
+          "src": "media/images/image1 copy.png",
+          "caption": ""
+        },
+        {
+          "type": "image",
+          "src": "media/images/image7 copy.png",
+          "caption": ""
+        },
+        {
+          "type": "image",
+          "src": "media/images/image3 copy.png",
+          "caption": ""
+        },
+        {
+          "type": "video",
+          "src": "media/images/mobilevideo copy.mp4",
+          "caption": ""
+        },
+        {
+          "type": "video",
+          "src": "media/images/mobilegallery copy.mp4",
+          "caption": ""
+        },
+        {
+          "type": "image",
+          "src": "media/images/mobileimage copy.jpg",
+          "caption": ""
+        },
+        {
+          "type": "image",
+          "src": "media/images/20260719_140919 Topaz Gigapixel 2x scale.png",
+          "caption": ""
+        },
+        {
+          "type": "image",
+          "src": "media/images/20260719_140828 Topaz Gigapixel 2x scale.png",
+          "caption": ""
+        }
+      ],
+      "order": 3
+    },
+    {
+      "id": "one-breath",
+      "title": "One Breath",
+      "year": "2025",
+      "categories": [
+        "FIGMA"
+      ],
+      "client": "",
+      "summary": "",
+      "description": "",
+      "website": "",
+      "thumbnail": {
+        "type": "image",
+        "src": "media/images/One Breath Hand Mockup.jpeg"
+      },
+      "media": [
+        {
+          "type": "image",
+          "src": "media/images/One Breath Hand Mockup.jpeg",
+          "caption": ""
+        },
+        {
+          "type": "video",
+          "src": "media/images/One Breath Demo.mp4",
+          "caption": "Demo of One Breath"
+        },
+        {
+          "type": "image",
+          "src": "media/images/new one breath mockup.png",
+          "caption": ""
+        },
+        {
+          "type": "image",
+          "src": "media/images/one breath second mockup.png",
+          "caption": ""
+        }
+      ],
+      "order": 4
+    },
+    {
+      "id": "home-is-the-sound-of-my-sister-s-viola",
+      "title": "Home is the sound of my sister's viola",
+      "year": "2025",
+      "categories": [
+        "PRINT"
+      ],
+      "client": "",
+      "summary": "",
+      "description": "",
+      "website": "",
+      "thumbnail": {
+        "type": "image",
+        "src": "media/images/HomeBookPic.png"
+      },
+      "media": [
+        {
+          "type": "image",
+          "src": "media/images/HomeBookPic.png",
+          "caption": ""
+        },
+        {
+          "type": "image",
+          "src": "media/images/zmockup-cover.png",
+          "caption": ""
+        },
+        {
+          "type": "image",
+          "src": "media/images/zmockup-start.png",
+          "caption": ""
+        },
+        {
+          "type": "image",
+          "src": "media/images/zmockup-pianolessons.png",
+          "caption": ""
+        },
+        {
+          "type": "image",
+          "src": "media/images/zmockup-intermission.png",
+          "caption": ""
+        },
+        {
+          "type": "image",
+          "src": "media/images/zmockup-reprise.png",
+          "caption": ""
+        },
+        {
+          "type": "image",
+          "src": "media/images/zmockup-swann.png",
+          "caption": ""
+        },
+        {
+          "type": "image",
+          "src": "media/images/zmockup-swann2.png",
+          "caption": ""
+        },
+        {
+          "type": "image",
+          "src": "media/images/zmockup-finale.png",
+          "caption": ""
+        }
+      ],
+      "order": 5
+    },
+    {
+      "id": "the-museum-of-elle",
+      "title": "The Museum of Elle",
+      "year": "2024",
+      "categories": [
+        "PLAY",
+        "CODING"
+      ],
+      "client": "",
+      "summary": "",
+      "description": "",
+      "website": "",
+      "thumbnail": {
+        "type": "video",
+        "src": "media/images/The Museum of Elle (for sophmore collection).mp4"
+      },
+      "media": [
+        {
+          "type": "video",
+          "src": "media/images/The Museum of Elle (for sophmore collection).mp4",
+          "caption": "Demo of The Museum of Elle."
+        },
+        {
+          "type": "image",
+          "src": "media/images/Collection New Mockup.png",
+          "caption": ""
+        }
+      ],
+      "order": 6
+    },
+    {
+      "id": "road-home",
+      "title": "Road Home",
+      "year": "2026",
+      "categories": [
+        "FIGMA",
+        "PRINT"
+      ],
+      "client": "",
+      "summary": "",
+      "description": "",
+      "website": "",
+      "thumbnail": {
+        "type": "video",
+        "src": "media/images/road home website demo copy.mov"
+      },
+      "media": [
+        {
+          "type": "video",
+          "src": "media/images/road home website demo copy.mov",
+          "caption": "Demo of the Road Home site design."
+        },
+        {
+          "type": "image",
+          "src": "media/images/Screenshot 2025-11-14 at 5.48.52 PM.png",
+          "caption": ""
+        },
+        {
+          "type": "image",
+          "src": "media/images/Screenshot 2025-11-14 at 5.50.39 PM.png",
+          "caption": ""
+        },
+        {
+          "type": "image",
+          "src": "media/images/Screenshot 2025-11-14 at 5.56.59 PM.png",
+          "caption": ""
+        },
+        {
+          "type": "image",
+          "src": "media/images/Screenshot 2025-11-14 at 5.59.51 PM.png",
+          "caption": ""
+        },
+        {
+          "type": "image",
+          "src": "media/images/Screenshot 2025-11-14 at 6.00.16 PM.png",
+          "caption": ""
+        },
+        {
+          "type": "image",
+          "src": "media/images/Screenshot 2025-11-14 at 6.01.27 PM.png",
+          "caption": ""
+        }
+      ],
+      "order": 8
+    },
+    {
+      "id": "mantra-poster",
+      "title": "Mantra Poster",
+      "year": "2024",
+      "categories": [
+        "PRINT",
+        "PLAY"
+      ],
+      "client": "",
+      "summary": "",
+      "description": "",
+      "website": "",
+      "thumbnail": {
+        "type": "image",
+        "src": "media/images/Manifesto Poster.jpeg"
+      },
+      "media": [
+        {
+          "type": "image",
+          "src": "media/images/Manifesto Poster.jpeg",
+          "caption": ""
+        },
+        {
+          "type": "image",
+          "src": "media/images/manifestocollage-1.png",
+          "caption": ""
+        },
+        {
+          "type": "image",
+          "src": "media/images/woman poster.png",
+          "caption": ""
+        }
+      ],
+      "order": 9
+    },
+    {
+      "id": "idk",
+      "title": "idk",
+      "year": "2025",
+      "categories": [
+        "PLAY",
+        "FIGMA"
+      ],
+      "client": "",
+      "summary": "",
+      "description": "",
+      "website": "",
+      "thumbnail": {
+        "type": "video",
+        "src": "media/images/Dress Up Demo Video.mov"
+      },
+      "media": [
+        {
+          "type": "video",
+          "src": "media/images/Dress Up Demo Video.mov",
+          "caption": ""
+        },
+        {
+          "type": "image",
+          "src": "media/images/Dress Up Mockup.png",
+          "caption": ""
+        }
+      ],
+      "order": 10
+    },
+    {
+      "id": "marine-life",
+      "title": "Marine Life",
+      "year": "2024",
+      "categories": [
+        "PRINT"
+      ],
+      "client": "",
+      "summary": "",
+      "description": "",
+      "website": "",
+      "thumbnail": {
+        "type": "image",
+        "src": "media/images/Book_Mockup_1.png"
+      },
+      "media": [
+        {
+          "type": "image",
+          "src": "media/images/Book_Mockup_1.png",
+          "caption": ""
+        },
+        {
+          "type": "image",
+          "src": "media/images/Book_Mockup_vert.png",
+          "caption": ""
+        },
+        {
+          "type": "image",
+          "src": "media/images/Book_Mockup_moon.png",
+          "caption": ""
+        },
+        {
+          "type": "image",
+          "src": "media/images/Book_Mockup_snake.png",
+          "caption": ""
+        },
+        {
+          "type": "image",
+          "src": "media/images/Book_Mockup_6.png",
+          "caption": ""
+        },
+        {
+          "type": "image",
+          "src": "media/images/Marine Life Square.jpeg",
+          "caption": ""
+        }
+      ],
+      "order": 11
     }
   ]
 }
