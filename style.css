@@ -498,9 +498,13 @@ button.contact-toggle {
   font-weight: 600;
   letter-spacing: -0.01em;
   line-height: 1.1;
-  margin: 0 0 14px;
+  margin: 0 0 22px;
 }
 
+/* Deliberately a bigger gap than the title-to-meta one above (22px)
+   than below the meta row here (44px) -- title/meta/tags read as one
+   tight group, then a clearer break before the body copy, for a
+   sense of hierarchy rather than everything being evenly spaced. */
 .project-meta {
   display: flex;
   align-items: center;
@@ -508,7 +512,7 @@ button.contact-toggle {
   flex-wrap: wrap;
   font-size: 13px;
   color: var(--ink);
-  margin-bottom: 32px;
+  margin-bottom: 44px;
 }
 
 .project-description {
@@ -536,6 +540,15 @@ button.contact-toggle {
   .project-sidebar {
     position: static;
     order: -1;
+  }
+  /* The fluid clamp() above is already sitting at its 32px floor
+     through most of this stacked range (viewport width, not sidebar
+     width, drives vw units, and it doesn't cross back above 32px
+     until ~842px) -- bump it up a bit specifically here rather than
+     raising the floor for every width, so the title reads a little
+     more prominent once the page has gone to a single column. */
+  .project-sidebar h1 {
+    font-size: 38px;
   }
 }
 
