@@ -344,55 +344,6 @@ button.contact-toggle {
   max-width: 100%;
 }
 
-/* Four corner brackets (like a viewfinder/crop marks) instead of the
-   thumbnail itself changing size — two 1-line gradients per corner (one
-   arm each), positioned via the four background-position corners so
-   they stay pinned to the image's own corners regardless of its size.
-   Sits just outside the image edge (negative inset) and eases in a
-   little closer on hover, like the frame is closing in. Tied only to
-   :hover, not to .is-playing — a video autoplaying in view otherwise
-   left the frame stuck on even once the mouse moved away. */
-.project-image::after {
-  content: "";
-  position: absolute;
-  inset: -14px;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.25s ease, inset 0.25s ease;
-  --frame-arm: 22px;
-  --frame-thickness: 1px;
-  --frame-color: #ffffff;
-  background-image:
-    linear-gradient(var(--frame-color), var(--frame-color)),
-    linear-gradient(var(--frame-color), var(--frame-color)),
-    linear-gradient(var(--frame-color), var(--frame-color)),
-    linear-gradient(var(--frame-color), var(--frame-color)),
-    linear-gradient(var(--frame-color), var(--frame-color)),
-    linear-gradient(var(--frame-color), var(--frame-color)),
-    linear-gradient(var(--frame-color), var(--frame-color)),
-    linear-gradient(var(--frame-color), var(--frame-color));
-  background-repeat: no-repeat;
-  background-size:
-    var(--frame-arm) var(--frame-thickness),
-    var(--frame-thickness) var(--frame-arm),
-    var(--frame-arm) var(--frame-thickness),
-    var(--frame-thickness) var(--frame-arm),
-    var(--frame-arm) var(--frame-thickness),
-    var(--frame-thickness) var(--frame-arm),
-    var(--frame-arm) var(--frame-thickness),
-    var(--frame-thickness) var(--frame-arm);
-  background-position:
-    top left, top left,
-    top right, top right,
-    bottom left, bottom left,
-    bottom right, bottom right;
-}
-
-.project-card:hover .project-image::after {
-  opacity: 1;
-  inset: -8px;
-}
-
 /* Deliberately small and quiet — just enough to identify the project,
    nothing competing with the image above it. */
 .project-caption {
