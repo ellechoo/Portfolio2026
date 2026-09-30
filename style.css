@@ -400,7 +400,12 @@ button.contact-toggle {
   display: block;
   font-size: 16px;
   font-weight: 600;
-  letter-spacing: -0.01em;
+  /* All-caps only on the gallery cards (this class isn't used on the
+     project detail page's own title, .project-sidebar h1) -- letter-
+     spacing loosened from -0.01em since tight negative tracking reads
+     cramped once the letters are capitals. */
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
   white-space: nowrap;
   flex-shrink: 0;
 }
