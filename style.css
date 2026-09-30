@@ -48,12 +48,20 @@
      width so it stays proportionate at any window size; the min/max
      just keep it from ever going absurdly small or large. Calibrated
      to match "09.03"'s video at a normal desktop width. */
-  --thumb-height: clamp(140px, 24vw, 420px);
+  --thumb-height: clamp(120px, 20vw, 360px);
+  /* Vertical gap between gallery rows only — deliberately its own
+     variable rather than reusing --gutter (that one's shared by 6
+     other things sitewide: page padding, the gallery's own side
+     padding/column-gap, project-media/project-layout gaps, and the
+     about-page gap), so it can be larger than the row-to-row column
+     gap without changing any of those. */
+  --gallery-row-gap: 64px;
 }
 
 @media (max-width: 600px) {
   :root {
     --gutter: 20px;
+    --gallery-row-gap: 32px;
   }
 }
 
@@ -304,7 +312,7 @@ button.contact-toggle {
   display: flex;
   flex-wrap: wrap;
   column-gap: var(--gutter);
-  row-gap: var(--gutter);
+  row-gap: var(--gallery-row-gap);
 }
 
 /* .project-list's own "display: flex" above would otherwise beat the
