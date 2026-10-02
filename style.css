@@ -478,17 +478,30 @@ button.contact-toggle {
 /* Two "skinny" (notably taller-than-wide) images that fall next to
    each other get grouped into one of these by main.js instead of
    each stretching to the full column width and running very tall --
-   side by side here, each takes half the row (min-width: 0 so a
-   narrow image doesn't refuse to shrink below its own intrinsic
-   width), with the standard gap echoed between them. */
+   side by side here, matching heights rather than matching widths
+   (so they read as one justified pair, like the home gallery's own
+   thumbnails, rather than two images that just happen to be the same
+   width but different heights). layoutMediaRows() in main.js does the
+   actual sizing -- it knows each image's real aspect ratio already
+   (from the same probe that decides what's "skinny"), measures this
+   row's rendered width, and sets each figure's image/video to an
+   explicit pixel width + height so the pair's combined width exactly
+   fills the row at one shared height. flex: 0 0 auto here just means
+   the figures hug whatever size that JS gives them, rather than
+   flexbox stretching or shrinking it again. */
 .project-media .media-row {
   display: flex;
   gap: var(--gutter);
 }
 
 .project-media .media-row figure {
-  flex: 1 1 0;
-  min-width: 0;
+  flex: 0 0 auto;
+}
+
+.project-media .media-row img,
+.project-media .media-row video {
+  width: auto;
+  max-width: 100%;
 }
 
 /* Halving the width again on a phone-sized screen would undercut the
@@ -498,6 +511,15 @@ button.contact-toggle {
 @media (max-width: 600px) {
   .project-media .media-row {
     flex-direction: column;
+  }
+  /* Back to the plain single-image behavior once stacked -- full
+     column width each, height following its own natural ratio.
+     layoutMediaRows() (main.js) clears the explicit pixel sizing it
+     sets for the side-by-side layout whenever it detects this stacked
+     state, so this is the only sizing in effect down here. */
+  .project-media .media-row img,
+  .project-media .media-row video {
+    width: 100%;
   }
 }
 

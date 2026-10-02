@@ -305,6 +305,10 @@
         if (isSkinny[i] && i + 1 < media.length && isSkinny[i + 1]) {
           var row = document.createElement("div");
           row.className = "media-row";
+          // Natural width:height ratio of each paired item, stashed on
+          // the row itself so layoutMediaRows() can size them without
+          // re-probing — it already has everything it needs right here.
+          row.dataset.ratios = (dims[i].w / dims[i].h) + "," + (dims[i + 1].w / dims[i + 1].h);
           row.appendChild(buildMediaFigure(media[i], i, media, project));
           row.appendChild(buildMediaFigure(media[i + 1], i + 1, media, project));
           els.projectMedia.appendChild(row);
@@ -314,6 +318,58 @@
           i += 1;
         }
       }
+      layoutMediaRows();
+    });
+  }
+
+  /* Sizes every paired row currently on the project page so its two
+     images/videos match in HEIGHT rather than just width — the same
+     "justified" idea the home gallery already uses for its thumbnails
+     (shared height, width whatever that works out to for each item's
+     own ratio), just applied to a two-item row instead of a whole
+     grid. Flexbox alone can't solve for this (growing/shrinking width
+     to fill a row doesn't know to keep each item's height in sync with
+     the other), so this does the math directly: read the row's
+     rendered width and the gap between its two items, then divide that
+     available width across both items in proportion to their ratios
+     — the height that falls out of that is exactly the shared height
+     that makes their combined width fill the row. Runs once right
+     after a project's media is built, and again (debounced) on window
+     resize, since the available width changes with the viewport (and,
+     at the 600px breakpoint, media-row itself switches to a stacked
+     column — handled below by just clearing the explicit sizing and
+     letting the plain width: 100% rule for that state take back over). */
+  function layoutMediaRows() {
+    if (!els.projectMedia) return;
+    var rows = els.projectMedia.querySelectorAll(".media-row");
+    rows.forEach(function (row) {
+      var figures = row.querySelectorAll(":scope > figure");
+      var parts = (row.dataset.ratios || "").split(",").map(Number);
+      if (figures.length !== 2 || parts.length !== 2 || !parts[0] || !parts[1]) return;
+
+      var stacked = getComputedStyle(row).flexDirection === "column";
+      if (stacked) {
+        figures.forEach(function (figure) {
+          var el = figure.querySelector("img, video");
+          if (el) {
+            el.style.width = "";
+            el.style.height = "";
+          }
+        });
+        return;
+      }
+
+      var gap = parseFloat(getComputedStyle(row).columnGap) || 0;
+      var available = row.getBoundingClientRect().width - gap;
+      if (available <= 0) return;
+      var sharedHeight = available / (parts[0] + parts[1]);
+
+      figures.forEach(function (figure, index) {
+        var el = figure.querySelector("img, video");
+        if (!el) return;
+        el.style.height = sharedHeight + "px";
+        el.style.width = sharedHeight * parts[index] + "px";
+      });
     });
   }
 
@@ -834,5 +890,22 @@
   setUpLightbox();
   setUpCustomCursor();
   window.addEventListener("hashchange", route);
+
+  // Re-run the paired-media-row sizing math (layoutMediaRows, above)
+  // whenever the viewport resizes, since the width available to each
+  // row changes with it. rAF-coalesced so a drag-resize doesn't run it
+  // dozens of times a second; harmless (and cheap) to call when the
+  // project view isn't even showing, since it just no-ops if there
+  // are no .media-row elements to find.
+  var mediaRowResizeQueued = false;
+  window.addEventListener("resize", function () {
+    if (mediaRowResizeQueued) return;
+    mediaRowResizeQueued = true;
+    requestAnimationFrame(function () {
+      mediaRowResizeQueued = false;
+      layoutMediaRows();
+    });
+  });
+
   route();
 })();
