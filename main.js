@@ -249,33 +249,51 @@
     return figure;
   }
 
-  /* A plain image stretched to the column's full width (see
-     .project-media img, width: 100%) turns any narrow/tall photo into
-     something very long on the page. When two such "skinny" images
-     fall right next to each other in the list, put them side by side
-     in one row instead — each one ends up smaller, but both are
-     visible at once without the long scroll. Only applies to
-     consecutive pairs of still images (never videos, and never a
-     skinny image next to a non-skinny one): needs real pixel
-     dimensions to know what's skinny, so every image is probed with a
-     throwaway Image() first (same URL the <img> will use, so this
-     doesn't cost extra bytes — just means the page waits for that
-     load before laying anything out, rather than images appearing
-     one by one as they stream in). */
+  /* A plain image or video stretched to the column's full width (see
+     .project-media img/video, width: 100%) turns any narrow/tall one
+     into something very long on the page. When two such "skinny"
+     items fall right next to each other in the list — any mix of
+     images and videos — put them side by side in one row instead —
+     each one ends up smaller, but both are visible at once without
+     the long scroll. Never pairs a skinny item next to a non-skinny
+     one: needs each item's real pixel dimensions to know what's
+     skinny, so every item is probed first -- a throwaway Image() for
+     a still image (same URL the real <img> will use, so no extra
+     bytes, just means layout waits for that load instead of images
+     streaming in one by one), or a throwaway <video preload="metadata">
+     for a video (this only needs to fetch enough of the file for its
+     dimensions, not the whole thing, so it's cheap). */
   function renderProjectMedia(media, project) {
     var SKINNY_RATIO = 4 / 3; // height:width -- counts as "skinny" once taller than this relative to its own width
 
+    function probeImage(src) {
+      return new Promise(function (resolve) {
+        var probe = new Image();
+        probe.onload = function () {
+          resolve({ w: probe.naturalWidth, h: probe.naturalHeight });
+        };
+        probe.onerror = function () { resolve(null); };
+        probe.src = src;
+      });
+    }
+
+    function probeVideo(src) {
+      return new Promise(function (resolve) {
+        var probe = document.createElement("video");
+        probe.preload = "metadata";
+        probe.muted = true;
+        probe.onloadedmetadata = function () {
+          resolve({ w: probe.videoWidth, h: probe.videoHeight });
+        };
+        probe.onerror = function () { resolve(null); };
+        probe.src = src;
+      });
+    }
+
     Promise.all(
       media.map(function (item) {
-        if (item.type === "video" || !item.src) return Promise.resolve(null);
-        return new Promise(function (resolve) {
-          var probe = new Image();
-          probe.onload = function () {
-            resolve({ w: probe.naturalWidth, h: probe.naturalHeight });
-          };
-          probe.onerror = function () { resolve(null); };
-          probe.src = item.src;
-        });
+        if (!item.src) return Promise.resolve(null);
+        return item.type === "video" ? probeVideo(item.src) : probeImage(item.src);
       })
     ).then(function (dims) {
       var isSkinny = dims.map(function (d) {
