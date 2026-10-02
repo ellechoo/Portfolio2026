@@ -198,6 +198,107 @@
     return wrap;
   }
 
+  /* ---------- project page media (with skinny-pair grouping) ---------- */
+
+  /* Builds one <figure> for a single media item — same video/image/
+     caption logic that used to sit directly inline in renderProject's
+     media loop, just pulled out so both the normal one-per-row path
+     and the side-by-side "skinny pair" path (below) can share it.
+     `index` is always the item's position in the FULL media array,
+     never its position within a paired row, so lightbox prev/next
+     navigation (openLightbox(media, index)) keeps working exactly as
+     before regardless of how things are visually grouped. */
+  function buildMediaFigure(item, index, media, project) {
+    var figure = document.createElement("figure");
+    var el;
+    if (item.type === "video") {
+      el = document.createElement("video");
+      el.src = item.src;
+      if (item.poster) el.poster = item.poster;
+      el.muted = true;
+      el.loop = true;
+      el.controls = true;
+      el.playsInline = true;
+      el.preload = "metadata";
+      figure.appendChild(el);
+      autoplayInView(el);
+
+      var expand = document.createElement("button");
+      expand.type = "button";
+      expand.className = "media-expand";
+      expand.setAttribute("aria-label", "View larger");
+      expand.innerHTML = '<svg viewBox="0 0 20 20"><path d="M7 3H3v4M13 3h4v4M7 17H3v-4M13 17h4v-4"/></svg>';
+      expand.addEventListener("click", function (e) {
+        e.stopPropagation();
+        openLightbox(media, index);
+      });
+      figure.appendChild(expand);
+    } else {
+      el = document.createElement("img");
+      el.src = item.src;
+      el.alt = item.caption || project.title || "";
+      el.loading = "lazy";
+      el.addEventListener("click", function () { openLightbox(media, index); });
+      figure.appendChild(el);
+    }
+    if (item.caption) {
+      var figcaption = document.createElement("figcaption");
+      figcaption.textContent = item.caption;
+      figure.appendChild(figcaption);
+    }
+    return figure;
+  }
+
+  /* A plain image stretched to the column's full width (see
+     .project-media img, width: 100%) turns any narrow/tall photo into
+     something very long on the page. When two such "skinny" images
+     fall right next to each other in the list, put them side by side
+     in one row instead — each one ends up smaller, but both are
+     visible at once without the long scroll. Only applies to
+     consecutive pairs of still images (never videos, and never a
+     skinny image next to a non-skinny one): needs real pixel
+     dimensions to know what's skinny, so every image is probed with a
+     throwaway Image() first (same URL the <img> will use, so this
+     doesn't cost extra bytes — just means the page waits for that
+     load before laying anything out, rather than images appearing
+     one by one as they stream in). */
+  function renderProjectMedia(media, project) {
+    var SKINNY_RATIO = 4 / 3; // height:width -- counts as "skinny" once taller than this relative to its own width
+
+    Promise.all(
+      media.map(function (item) {
+        if (item.type === "video" || !item.src) return Promise.resolve(null);
+        return new Promise(function (resolve) {
+          var probe = new Image();
+          probe.onload = function () {
+            resolve({ w: probe.naturalWidth, h: probe.naturalHeight });
+          };
+          probe.onerror = function () { resolve(null); };
+          probe.src = item.src;
+        });
+      })
+    ).then(function (dims) {
+      var isSkinny = dims.map(function (d) {
+        return !!d && d.w > 0 && d.h / d.w > SKINNY_RATIO;
+      });
+
+      var i = 0;
+      while (i < media.length) {
+        if (isSkinny[i] && i + 1 < media.length && isSkinny[i + 1]) {
+          var row = document.createElement("div");
+          row.className = "media-row";
+          row.appendChild(buildMediaFigure(media[i], i, media, project));
+          row.appendChild(buildMediaFigure(media[i + 1], i + 1, media, project));
+          els.projectMedia.appendChild(row);
+          i += 2;
+        } else {
+          els.projectMedia.appendChild(buildMediaFigure(media[i], i, media, project));
+          i += 1;
+        }
+      }
+    });
+  }
+
   /* Videos play automatically (muted, looped) as soon as they're on
      screen — no hover or click needed — and pause again once
      scrolled out of view, so we're not running dozens of videos at
@@ -507,46 +608,7 @@
     var media = project.media || [];
 
     els.projectMedia.innerHTML = "";
-    media.forEach(function (item, index) {
-      var figure = document.createElement("figure");
-      var el;
-      if (item.type === "video") {
-        el = document.createElement("video");
-        el.src = item.src;
-        if (item.poster) el.poster = item.poster;
-        el.muted = true;
-        el.loop = true;
-        el.controls = true;
-        el.playsInline = true;
-        el.preload = "metadata";
-        figure.appendChild(el);
-        autoplayInView(el);
-
-        var expand = document.createElement("button");
-        expand.type = "button";
-        expand.className = "media-expand";
-        expand.setAttribute("aria-label", "View larger");
-        expand.innerHTML = '<svg viewBox="0 0 20 20"><path d="M7 3H3v4M13 3h4v4M7 17H3v-4M13 17h4v-4"/></svg>';
-        expand.addEventListener("click", function (e) {
-          e.stopPropagation();
-          openLightbox(media, index);
-        });
-        figure.appendChild(expand);
-      } else {
-        el = document.createElement("img");
-        el.src = item.src;
-        el.alt = item.caption || project.title || "";
-        el.loading = "lazy";
-        el.addEventListener("click", function () { openLightbox(media, index); });
-        figure.appendChild(el);
-      }
-      if (item.caption) {
-        var figcaption = document.createElement("figcaption");
-        figcaption.textContent = item.caption;
-        figure.appendChild(figcaption);
-      }
-      els.projectMedia.appendChild(figure);
-    });
+    renderProjectMedia(media, project);
 
     // Points to whatever's next going down the same date-ordered list
     // the gallery itself uses (sortedProjects — newest year first, then

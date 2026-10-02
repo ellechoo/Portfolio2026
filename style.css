@@ -475,6 +475,32 @@ button.contact-toggle {
   margin: 0;
 }
 
+/* Two "skinny" (notably taller-than-wide) images that fall next to
+   each other get grouped into one of these by main.js instead of
+   each stretching to the full column width and running very tall --
+   side by side here, each takes half the row (min-width: 0 so a
+   narrow image doesn't refuse to shrink below its own intrinsic
+   width), with the standard gap echoed between them. */
+.project-media .media-row {
+  display: flex;
+  gap: var(--gutter);
+}
+
+.project-media .media-row figure {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+/* Halving the width again on a phone-sized screen would undercut the
+   whole point of pairing skinny images up (smaller, but still clearly
+   visible) -- past this width each pair just stacks back into two
+   full-width rows, same as an unpaired image. */
+@media (max-width: 600px) {
+  .project-media .media-row {
+    flex-direction: column;
+  }
+}
+
 .project-media img,
 .project-media video {
   width: 100%;
