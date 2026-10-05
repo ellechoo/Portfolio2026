@@ -142,14 +142,14 @@ button:focus-visible,
 .site-header a,
 .site-header button.contact-toggle {
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   text-transform: uppercase;
   color: var(--ink);
   text-decoration: none;
 }
 
 .nav-left { justify-self: start; }
-.nav-center { justify-self: center; font-weight: 600; }
+.nav-center { justify-self: center; font-weight: 700; }
 .nav-right { justify-self: end; position: relative; }
 
 .site-header a:hover,
