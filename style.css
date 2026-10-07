@@ -1174,3 +1174,84 @@ body.is-about .site-header .contact-menu {
 .about-bubble-text .g {
   display: inline-block;
 }
+
+/* ---------- About page: popping + sticky notes ---------- */
+/* Double-click a bubble: it swells and vanishes (its CSS variables --px/--py
+   freeze where it was) while a ring of droplets flies out. */
+.about-bubble.is-popping {
+  pointer-events: none;
+  transform: translate3d(var(--px), var(--py), 0);
+  animation: about-bubble-pop 0.26s ease-out forwards;
+}
+@keyframes about-bubble-pop {
+  0% { transform: translate3d(var(--px), var(--py), 0) scale(1); opacity: 1; }
+  45% { transform: translate3d(var(--px), var(--py), 0) scale(1.1); opacity: 1; }
+  100% { transform: translate3d(var(--px), var(--py), 0) scale(1.22); opacity: 0; }
+}
+.about-pop-bit {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--s);
+  height: var(--s);
+  margin: calc(var(--s) / -2) 0 0 calc(var(--s) / -2);
+  border-radius: 50%;
+  background: var(--bubble-color);
+  pointer-events: none;
+  animation: about-pop-bit 0.5s cubic-bezier(0.15, 0.7, 0.3, 1) forwards;
+}
+@keyframes about-pop-bit {
+  from { transform: translate(var(--cx), var(--cy)) scale(1); opacity: 0.9; }
+  to { transform: translate(calc(var(--cx) + var(--dx)), calc(var(--cy) + var(--dy))) scale(0.2); opacity: 0; }
+}
+
+/* The sticky notes sit in their own full-window layer, below the bubbles
+   (z 50) and above the photo; only the notes themselves take the pointer. */
+.about-notes {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  pointer-events: none;
+  overflow: hidden;
+}
+.about-note {
+  position: absolute;
+  left: 0;
+  top: 0;
+  padding: 26px 18px 20px;
+  box-sizing: border-box;
+  background: var(--note-color, #f6e58d);
+  color: #1c1c1c;
+  line-height: 1.5;
+  font-weight: 400;
+  border-radius: 2px;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.25), 0 12px 26px rgba(0, 0, 0, 0.45);
+  transform: rotate(var(--tilt, 0deg));
+  pointer-events: auto;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: grab;
+}
+/* a slightly darker strip across the top, like the sticky edge */
+.about-note::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 12px;
+  background: rgba(0, 0, 0, 0.08);
+}
+.about-note.is-new {
+  animation: about-note-in 0.3s 0.1s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+}
+@keyframes about-note-in {
+  from { transform: rotate(var(--tilt, 0deg)) scale(0.55); opacity: 0; }
+  to { transform: rotate(var(--tilt, 0deg)) scale(1); opacity: 1; }
+}
+.about-note.is-dragging {
+  cursor: grabbing;
+  transform: rotate(var(--tilt, 0deg)) scale(1.03);
+  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.25), 0 20px 36px rgba(0, 0, 0, 0.5);
+}

@@ -679,7 +679,7 @@
         }
         textEl.appendChild(w);
       });
-      return { el: el, glyphs: glyphs, canvas: lensCanvas, ctx: null, imgData: null, lut: null, lensOn: false, textEl: textEl, chars: fullText.length, x: 0, y: 0, vx: 0, vy: 0, r: 40, m: 1600, cruise: 26 + Math.random() * 16, tx: 0, ty: 0, pvx: 0, pvy: 0 };
+      return { el: el, hue: hue, text: fullText, glyphs: glyphs, canvas: lensCanvas, ctx: null, imgData: null, lut: null, lensOn: false, textEl: textEl, chars: fullText.length, x: 0, y: 0, vx: 0, vy: 0, r: 40, m: 1600, cruise: 26 + Math.random() * 16, tx: 0, ty: 0, pvx: 0, pvy: 0 };
     });
 
     // Pick the largest font (so bubble diameters follow) at which all the
@@ -998,12 +998,22 @@
     }
 
     // ----- dragging -----
+    var lastDown = { b: null, t: 0, x: 0, y: 0 };
     function onDown(e) {
       var el = e.target.closest && e.target.closest(".about-bubble");
       if (!el || held) return;
       var b = bodies.filter(function (x) { return x.el === el; })[0];
       if (!b) return;
       e.preventDefault();
+      // Second press on the same bubble within ~0.4s and about the same
+      // spot = double click / double tap: pop it.
+      if (lastDown.b === b && e.timeStamp - lastDown.t < 400 &&
+          Math.hypot(e.clientX - lastDown.x, e.clientY - lastDown.y) < 16) {
+        lastDown = { b: null, t: 0, x: 0, y: 0 };
+        popBubble(b);
+        return;
+      }
+      lastDown = { b: b, t: e.timeStamp, x: e.clientX, y: e.clientY };
       held = b;
       b.grabDX = e.clientX - b.x;
       b.grabDY = e.clientY - b.y;
@@ -1047,6 +1057,100 @@
     layer.addEventListener("pointerup", onUp);
     layer.addEventListener("pointercancel", onUp);
 
+    // ----- popping: a double click bursts the bubble and leaves a sticky
+    // note with the paragraph, flat and readable. Notes sit in their own
+    // layer (under the bubbles) and can be dragged around the window.
+    var notesLayer = els.aboutContent.querySelector(".about-notes");
+    var noteZ = 1;
+    var dragNote = null;
+    var NOTE_TOP_MARGIN = 64; // keep notes clear of the nav strip when they fit
+
+    function popBubble(b) {
+      var i = bodies.indexOf(b);
+      if (i === -1) return;
+      bodies.splice(i, 1);
+      if (held === b) held = null;
+      var x = b.x, y = b.y, r = b.r;
+      b.el.style.setProperty("--px", (x - r).toFixed(1) + "px");
+      b.el.style.setProperty("--py", (y - r).toFixed(1) + "px");
+      b.el.classList.remove("is-held");
+      b.el.style.transform = ""; // the .is-popping CSS takes over positioning
+      if (reduceMotion) {
+        b.el.remove();
+      } else {
+        b.el.classList.add("is-popping");
+        setTimeout(function () { b.el.remove(); }, 260);
+        // a ring of little droplets flying outward
+        var color = b.el.style.getPropertyValue("--bubble-color");
+        for (var k = 0; k < 14; k++) {
+          var th = (k / 14) * Math.PI * 2 + Math.random() * 0.4;
+          var dist = 28 + Math.random() * 46;
+          var bit = document.createElement("span");
+          bit.className = "about-pop-bit";
+          bit.style.setProperty("--bubble-color", color);
+          bit.style.setProperty("--s", (4 + Math.random() * 7).toFixed(1) + "px");
+          bit.style.setProperty("--cx", (x + Math.cos(th) * r).toFixed(1) + "px");
+          bit.style.setProperty("--cy", (y + Math.sin(th) * r).toFixed(1) + "px");
+          bit.style.setProperty("--dx", (Math.cos(th) * dist).toFixed(1) + "px");
+          bit.style.setProperty("--dy", (Math.sin(th) * dist).toFixed(1) + "px");
+          layer.appendChild(bit);
+          setTimeout((function (el) { return function () { el.remove(); }; })(bit), 600);
+        }
+      }
+      if (notesLayer) spawnNote(b, x, y);
+    }
+
+    function clampNote(note, x, y) {
+      var w = note.offsetWidth, h = note.offsetHeight;
+      var minY = (H - h - 8 >= NOTE_TOP_MARGIN) ? NOTE_TOP_MARGIN : 8;
+      note._x = Math.min(Math.max(x, 8), Math.max(8, W - w - 8));
+      note._y = Math.min(Math.max(y, minY), Math.max(minY, H - h - 8));
+      note.style.left = note._x + "px";
+      note.style.top = note._y + "px";
+    }
+
+    function spawnNote(b, x, y) {
+      var note = document.createElement("div");
+      note.className = "about-note";
+      note.textContent = b.text;
+      note.style.setProperty("--note-color", "hsl(" + Math.round(b.hue) + ", 78%, 86%)");
+      note.style.setProperty("--tilt", ((Math.random() - 0.5) * 6).toFixed(1) + "deg");
+      note.style.width = Math.min(300, Math.max(200, W * 0.3)) + "px";
+      note.style.fontSize = W < 600 ? "13px" : "14px";
+      note.style.zIndex = ++noteZ;
+      if (!reduceMotion) note.classList.add("is-new");
+      notesLayer.appendChild(note);
+      clampNote(note, x - note.offsetWidth / 2, y - note.offsetHeight / 2);
+    }
+
+    function onNoteDown(e) {
+      var note = e.target.closest && e.target.closest(".about-note");
+      if (!note || dragNote) return;
+      e.preventDefault();
+      dragNote = note;
+      note._gx = e.clientX - note._x;
+      note._gy = e.clientY - note._y;
+      note.style.zIndex = ++noteZ;
+      note.classList.remove("is-new");
+      note.classList.add("is-dragging");
+      try { note.setPointerCapture(e.pointerId); } catch (err) {}
+    }
+    function onNoteMove(e) {
+      if (!dragNote) return;
+      clampNote(dragNote, e.clientX - dragNote._gx, e.clientY - dragNote._gy);
+    }
+    function onNoteUp() {
+      if (!dragNote) return;
+      dragNote.classList.remove("is-dragging");
+      dragNote = null;
+    }
+    if (notesLayer) {
+      notesLayer.addEventListener("pointerdown", onNoteDown);
+      notesLayer.addEventListener("pointermove", onNoteMove);
+      notesLayer.addEventListener("pointerup", onNoteUp);
+      notesLayer.addEventListener("pointercancel", onNoteUp);
+    }
+
     // ----- resize -----
     var resizeQueued = false;
     function onResize() {
@@ -1067,6 +1171,7 @@
         });
         collide(); collide();
         bodies.forEach(clampToWindow);
+        if (notesLayer) Array.prototype.forEach.call(notesLayer.children, function (n) { clampNote(n, n._x, n._y); });
         render();
       });
     }
@@ -1085,6 +1190,12 @@
         layer.removeEventListener("pointermove", onMove);
         layer.removeEventListener("pointerup", onUp);
         layer.removeEventListener("pointercancel", onUp);
+        if (notesLayer) {
+          notesLayer.removeEventListener("pointerdown", onNoteDown);
+          notesLayer.removeEventListener("pointermove", onNoteMove);
+          notesLayer.removeEventListener("pointerup", onNoteUp);
+          notesLayer.removeEventListener("pointercancel", onNoteUp);
+        }
       }
     };
   }
@@ -1136,6 +1247,11 @@
       bubble.appendChild(text);
       bubbleLayer.appendChild(bubble);
     });
+    // Sticky notes left by popped bubbles live in their own layer, under
+    // the bubbles (see startAboutBubbles).
+    var notesLayer = document.createElement("div");
+    notesLayer.className = "about-notes";
+    els.aboutContent.appendChild(notesLayer);
     els.aboutContent.appendChild(bubbleLayer);
 
     els.aboutContent.appendChild(layout);
@@ -1351,7 +1467,7 @@
     // row) they shouldn't make the cursor look interactive, and the
     // ones on gallery cards already count via the surrounding
     // .project-card link.
-    var HOVER_TARGETS = "a, button, input, textarea, .pill, .project-card, .about-bubble";
+    var HOVER_TARGETS = "a, button, input, textarea, .pill, .project-card, .about-bubble, .about-note";
     document.addEventListener("mouseover", function (e) {
       if (e.target.closest && e.target.closest(HOVER_TARGETS)) star.classList.add("is-active");
     });
