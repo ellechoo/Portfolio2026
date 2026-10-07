@@ -150,22 +150,99 @@ button:focus-visible,
 }
 
 .nav-left { justify-self: start; }
-.nav-center { justify-self: center; font-weight: 700; }
+.nav-center { justify-self: center; }
 
-/* About page only (main.js toggles body.is-about): the nav's name
-   stands in for the page heading — bigger, and in the same heading
-   font/size as a project page's title (.project-sidebar h1), kept in
-   all caps like the nav name everywhere else. Still the same link home.
-   Deliberately the ONLY thing that changes in the header: its height
-   (and so About / Contact's position) stays identical on every page. */
-body.is-about .site-header .nav-center {
+/* The name is two stacked copies (see index.html): .nav-name--small is
+   the normal in-flow nav text, and .nav-name--big is a second copy
+   in the heading font (same as a project page's title,
+   .project-sidebar h1), positioned absolutely so it never changes the
+   header's layout — About / Contact stay put on every page. On the
+   about page (main.js toggles body.is-about) the big copy scales/fades
+   up from the small one's size and spot while the small copy fades
+   out, which is what makes the change read as one smooth morph
+   instead of a font snap. Its cap-tops are lined up with About /
+   Contact's (see --nav-big-top below). */
+.nav-center {
+  position: relative;
+  display: grid;
+  justify-items: center;
+}
+.nav-name {
+  grid-area: 1 / 1;
+  white-space: nowrap;
+  transition: opacity 0.45s ease, transform 0.55s cubic-bezier(0.22, 0.8, 0.25, 1);
+}
+.site-header {
+  /* Big name size = project-page title size. */
+  --nav-big-size: clamp(32px, 3.8vw, 48px);
+  /* Vertical offset of the big copy's line box from the link's top so
+     its capital letters start at the same height as About / Contact's
+     (measured: cap-top sits ~0.26em below the top of a line-height:1.1
+     Array line box; About's own caps sit ~6px below its box top). */
+  --nav-big-top: calc(6px - 0.26 * var(--nav-big-size));
+}
+.nav-name--big {
+  position: absolute;
+  left: 50%;
+  top: var(--nav-big-top);
   font-family: 'Array', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: clamp(32px, 3.8vw, 48px);
+  font-size: var(--nav-big-size);
   font-weight: 600;
   letter-spacing: -0.01em;
   line-height: 1.1;
-  text-transform: uppercase;
+  opacity: 0;
+  /* Shrunk to ~the small copy's size, scaling about its cap-top line
+     so the two copies' tops stay glued together during the morph. */
+  transform: translateX(-50%) scale(0.3);
+  transform-origin: 50% calc(0.26 * var(--nav-big-size));
+  pointer-events: none;
 }
+body.is-about .nav-name--big {
+  opacity: 1;
+  transform: translateX(-50%) scale(1);
+  pointer-events: auto;
+}
+body.is-about .nav-name--small {
+  opacity: 0;
+}
+
+/* Current-page indicator: a small four-pointed star (same shape as
+   the cursor) just right of the nav item for the page you're on.
+   Absolutely positioned, so it never nudges the nav's layout; fades
+   as aria-current moves between items. */
+.nav-left,
+.nav-center {
+  position: relative;
+}
+.nav-left::after,
+.nav-center::after {
+  content: "";
+  position: absolute;
+  left: 100%;
+  top: 50%;
+  width: 9px;
+  height: 9px;
+  margin: -4.5px 0 0 8px;
+  background: var(--ink);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpolygon points='12,2 14.47,9.53 22,12 14.47,14.47 12,22 9.53,14.47 2,12 9.53,9.53'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpolygon points='12,2 14.47,9.53 22,12 14.47,14.47 12,22 9.53,14.47 2,12 9.53,9.53'/%3E%3C/svg%3E") center / contain no-repeat;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  pointer-events: none;
+}
+.nav-left[aria-current="page"]::after,
+.nav-center[aria-current="page"]::after {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-name,
+  .nav-left::after,
+  .nav-center::after {
+    transition: none;
+  }
+}
+
 .nav-right { justify-self: end; position: relative; }
 
 .site-header a:hover,

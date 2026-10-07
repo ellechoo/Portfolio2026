@@ -29,6 +29,7 @@
     nextProject: document.getElementById("next-project"),
     nextProjectTitle: document.getElementById("next-project-title"),
     navCenter: document.querySelector(".nav-center"),
+    navLeft: document.querySelector(".nav-left"),
     contactToggle: document.getElementById("contact-toggle"),
     contactMenu: document.getElementById("contact-menu"),
     contactEmailLink: document.getElementById("contact-email-link"),
@@ -112,7 +113,14 @@
 
   function renderChrome() {
     document.title = DATA.site.name ? DATA.site.name + " — Design" : "Design";
-    if (els.navCenter) els.navCenter.textContent = DATA.site.name || "Portfolio";
+    // The name is drawn twice (a small and a big version, crossfaded by
+    // CSS when the about page toggles body.is-about), so set both.
+    if (els.navCenter) {
+      var nameText = DATA.site.name || "Portfolio";
+      els.navCenter.querySelectorAll(".nav-name").forEach(function (span) {
+        span.textContent = nameText;
+      });
+    }
     setUpContactMenu();
   }
 
@@ -873,6 +881,17 @@
     // Lets CSS restyle the nav's name (bigger, heading font) only while
     // the about page is showing.
     document.body.classList.toggle("is-about", name === "about");
+    // Marks which nav item matches the page (CSS draws a small star next
+    // to it): About on the about page, the name (home) on the work
+    // pages — home and individual projects alike.
+    if (els.navLeft) {
+      if (name === "about") els.navLeft.setAttribute("aria-current", "page");
+      else els.navLeft.removeAttribute("aria-current");
+    }
+    if (els.navCenter) {
+      if (name !== "about") els.navCenter.setAttribute("aria-current", "page");
+      else els.navCenter.removeAttribute("aria-current");
+    }
     window.scrollTo(0, 0);
     closeContactMenu();
     closeLightbox();
