@@ -652,11 +652,15 @@
     var bodies = els2.map(function (el, i) {
       var n = els2.length;
       var hue = n <= 1 ? (HUE_START + HUE_END) / 2 : HUE_START + (HUE_END - HUE_START) * (i / (n - 1));
-      el.style.setProperty("--bubble-color", "hsla(" + Math.round(hue) + ", 72%, 70%, 0.93)");
+      el.style.setProperty("--bubble-color", "hsla(" + Math.round(hue) + ", 72%, 70%, 0.72)");
       var textEl = el.firstChild;
       // Split the paragraph into words made of one inline-block span per
       // letter, so each letter can be bent individually (warpBubble). The
       // bubble itself carries the real text for screen readers.
+      var lensCanvas = document.createElement("canvas");
+      lensCanvas.className = "about-bubble-lens";
+      lensCanvas.setAttribute("aria-hidden", "true");
+      el.insertBefore(lensCanvas, textEl);
       var fullText = textEl.textContent;
       el.setAttribute("aria-label", fullText);
       textEl.setAttribute("aria-hidden", "true");
@@ -675,7 +679,7 @@
         }
         textEl.appendChild(w);
       });
-      return { el: el, glyphs: glyphs, textEl: textEl, chars: fullText.length, x: 0, y: 0, vx: 0, vy: 0, r: 40, m: 1600, cruise: 26 + Math.random() * 16, tx: 0, ty: 0, pvx: 0, pvy: 0 };
+      return { el: el, glyphs: glyphs, canvas: lensCanvas, ctx: null, imgData: null, lut: null, lensOn: false, textEl: textEl, chars: fullText.length, x: 0, y: 0, vx: 0, vy: 0, r: 40, m: 1600, cruise: 26 + Math.random() * 16, tx: 0, ty: 0, pvx: 0, pvy: 0 };
     });
 
     // Pick the largest font (so bubble diameters follow) at which all the
@@ -807,7 +811,94 @@
     function render() {
       bodies.forEach(function (b) {
         b.el.style.transform = "translate3d(" + (b.x - b.r).toFixed(2) + "px," + (b.y - b.r).toFixed(2) + "px,0)";
+        drawLens(b);
       });
+    }
+
+    // ----- seeing the photo through a bubble -----
+    // While a bubble sits over the photo, its canvas shows that part of the
+    // photo bent by the same glass-sphere lens as the text (magnified in
+    // the middle, squeezed toward the rim, and lining up exactly with the
+    // untouched photo at the rim so there is no seam). It is drawn per
+    // pixel on a canvas, only for bubbles currently touching the photo.
+    // If the browser won't let the page read the photo's pixels (e.g. the
+    // site opened straight from disk), the effect quietly switches off.
+    var photoEl = els.aboutContent.querySelector(".about-photo");
+    var photoImg = photoEl && photoEl.querySelector("img");
+    var LENS_SCALE = Math.min(window.devicePixelRatio || 1, 1.5);
+    var photo = null;
+    var photoFailed = !photoImg;
+
+    function preparePhoto() {
+      if (photoFailed || !photoImg.complete || !photoImg.naturalWidth) return;
+      var r = photoEl.getBoundingClientRect();
+      var w = Math.round(r.width * LENS_SCALE), h = Math.round(r.height * LENS_SCALE);
+      if (!w || !h) return;
+      try {
+        var c = document.createElement("canvas");
+        c.width = w; c.height = h;
+        var cx = c.getContext("2d");
+        var nw = photoImg.naturalWidth, nh = photoImg.naturalHeight;
+        var sc = Math.max(w / nw, h / nh); // object-fit: cover
+        cx.drawImage(photoImg, (w - nw * sc) / 2, (h - nh * sc) / 2, nw * sc, nh * sc);
+        photo = { left: r.left, top: r.top, cssW: r.width, cssH: r.height, w: w, h: h, data: cx.getImageData(0, 0, w, h).data };
+      } catch (err) {
+        photoFailed = true;
+      }
+    }
+
+    // For each pixel of a bubble's canvas: where (relative to the bubble's
+    // centre, in CSS px) the lens takes its colour from.
+    function buildLut(b) {
+      var n = Math.max(2, Math.ceil(b.r * 2 * LENS_SCALE));
+      var lx = new Float32Array(n * n), ly = new Float32Array(n * n), inside = new Uint8Array(n * n);
+      for (var py = 0; py < n; py++) {
+        for (var px = 0; px < n; px++) {
+          var ox = (px + 0.5) / n * 2 - 1, oy = (py + 0.5) / n * 2 - 1; // -1..1 across the bubble
+          var u = Math.sqrt(ox * ox + oy * oy), i = py * n + px;
+          if (u >= 1) continue;
+          var s = (1 - LENS_A) * u + LENS_A * (2 / Math.PI) * Math.asin(u); // source radius, in bubble radii
+          var k = u > 1e-6 ? s / u : 1;
+          lx[i] = ox * k * b.r;
+          ly[i] = oy * k * b.r;
+          inside[i] = 1;
+        }
+      }
+      b.lut = { n: n, r: b.r, lx: lx, ly: ly, inside: inside };
+      b.canvas.width = n;
+      b.canvas.height = n;
+      b.ctx = b.canvas.getContext("2d");
+      b.imgData = b.ctx.createImageData(n, n);
+    }
+
+    function drawLens(b) {
+      if (!photo) { preparePhoto(); if (!photo) return; }
+      var touching = !(b.x + b.r < photo.left || b.x - b.r > photo.left + photo.cssW ||
+                       b.y + b.r < photo.top || b.y - b.r > photo.top + photo.cssH);
+      if (!touching) {
+        if (b.lensOn) { b.canvas.style.display = "none"; b.lensOn = false; }
+        return;
+      }
+      if (!b.lut || b.lut.r !== b.r) buildLut(b);
+      var L = b.lut, n = L.n, out = b.imgData.data, d = photo.data, pw = photo.w, ph = photo.h;
+      var ox = b.x - photo.left, oy = b.y - photo.top, S = LENS_SCALE;
+      for (var i = 0, o = 0; i < n * n; i++, o += 4) {
+        if (!L.inside[i]) { out[o + 3] = 0; continue; }
+        var fx = (ox + L.lx[i]) * S, fy = (oy + L.ly[i]) * S;
+        if (fx < 0 || fy < 0 || fx >= pw - 1 || fy >= ph - 1) {
+          out[o] = out[o + 1] = out[o + 2] = 0; out[o + 3] = 255; // page background
+          continue;
+        }
+        var x0 = fx | 0, y0 = fy | 0, tx = fx - x0, ty = fy - y0;
+        var p = (y0 * pw + x0) * 4, q = p + pw * 4;
+        for (var c = 0; c < 3; c++) {
+          var a = d[p + c], bb = d[p + 4 + c], cc = d[q + c], dd = d[q + 4 + c];
+          out[o + c] = a + (bb - a) * tx + ((cc - a) + ((dd - cc) - (bb - a)) * tx) * ty;
+        }
+        out[o + 3] = 255;
+      }
+      b.ctx.putImageData(b.imgData, 0, 0);
+      if (!b.lensOn) { b.canvas.style.display = "block"; b.lensOn = true; }
     }
 
     function collide() {
@@ -954,6 +1045,7 @@
         W = layer.clientWidth;
         H = layer.clientHeight;
         if (!W || !H) return;
+        photo = null; // its position/size changed; re-read lazily
         sizeBubbles();
         bodies.forEach(function (b) {
           b.x *= W / ow; b.y *= H / oh;
