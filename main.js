@@ -854,7 +854,8 @@
         var nw = photoImg.naturalWidth, nh = photoImg.naturalHeight;
         var sc = Math.max(w / nw, h / nh); // object-fit: cover
         cx.drawImage(photoImg, (w - nw * sc) / 2, (h - nh * sc) / 2, nw * sc, nh * sc);
-        photo = { left: r.left, top: r.top, cssW: r.width, cssH: r.height, w: w, h: h, data: cx.getImageData(0, 0, w, h).data };
+        cx.getImageData(0, 0, 1, 1); // throws right here if the photo's pixels are off-limits
+        photo = { left: r.left, top: r.top, cssW: r.width, cssH: r.height, canvas: c };
       } catch (err) {
         photoFailed = true;
       }
@@ -884,29 +885,97 @@
       b.imgData = b.ctx.createImageData(n, n);
     }
 
+    // The lens looks at a small "backdrop" picture of whatever lies under
+    // the bubble (the photo and any sticky notes, on the black page), drawn
+    // fresh each frame on a scratch canvas, and bends that. Notes are DOM
+    // text, so each one is drawn from a cached bitmap that copies its colors
+    // and the position of every word.
+    var patchCanvas = document.createElement("canvas");
+    var patchCtx = patchCanvas.getContext("2d", { willReadFrequently: true });
+
+    function noteBitmap(note) {
+      if (note._bmp) return note._bmp;
+      var w = note.offsetWidth, h = note.offsetHeight, S = LENS_SCALE;
+      var c = document.createElement("canvas");
+      c.width = Math.ceil(w * S);
+      c.height = Math.ceil(h * S);
+      var x = c.getContext("2d");
+      x.scale(S, S);
+      x.fillStyle = note.style.getPropertyValue("--note-color") || "#f6e58d";
+      x.fillRect(0, 0, w, h);
+      x.fillStyle = "rgba(0,0,0,0.08)";
+      x.fillRect(0, 0, w, 12);
+      var cs = getComputedStyle(note);
+      x.font = cs.fontWeight + " " + cs.fontSize + " " + cs.fontFamily;
+      x.fillStyle = "#1c1c1c";
+      x.textBaseline = "alphabetic";
+      var asc = x.measureText("Hg").fontBoundingBoxAscent || parseFloat(cs.fontSize) * 0.95;
+      Array.prototype.forEach.call(note.querySelectorAll("span"), function (sp) {
+        x.fillText(sp.textContent, sp.offsetLeft, sp.offsetTop + asc);
+      });
+      if (!document.fonts || document.fonts.status === "loaded") note._bmp = c; // else redo once fonts arrive
+      return c;
+    }
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(function () {
+        if (notesLayer) Array.prototype.forEach.call(notesLayer.children, function (n) { n._bmp = null; });
+      });
+    }
+
     function drawLens(b) {
-      if (!photo) { preparePhoto(); if (!photo) return; }
-      var touching = !(b.x + b.r < photo.left || b.x - b.r > photo.left + photo.cssW ||
-                       b.y + b.r < photo.top || b.y - b.r > photo.top + photo.cssH);
-      if (!touching) {
+      if (!photo && !photoFailed) preparePhoto();
+      var bl = b.x - b.r, bt = b.y - b.r, br = b.x + b.r, bb2 = b.y + b.r;
+      var pr = photo ? { l: photo.left, t: photo.top, r: photo.left + photo.cssW, b: photo.top + photo.cssH }
+             : photoEl ? (function (rc) { return { l: rc.left, t: rc.top, r: rc.right, b: rc.bottom }; })(photoEl.getBoundingClientRect())
+             : null;
+      var overPhoto = !!pr && !(br < pr.l || bl > pr.r || bb2 < pr.t || bt > pr.b);
+      var over = [];
+      if (notesLayer) {
+        Array.prototype.forEach.call(notesLayer.children, function (n) {
+          var nw = n._w, nh = n._h;
+          if (n._x + nw > bl && n._x < br && n._y + nh > bt && n._y < bb2) over.push(n);
+        });
+      }
+      // Over the photo but its pixels aren't readable (or not loaded yet):
+      // no lens for this bubble rather than a wrong one.
+      var usePhoto = overPhoto && !!photo;
+      if ((overPhoto && !photo) || (!usePhoto && !over.length)) {
         if (b.lensOn) { b.canvas.style.display = "none"; b.lensOn = false; }
         return;
       }
       if (!b.lut || b.lut.r !== b.r) buildLut(b);
-      var L = b.lut, n = L.n, out = b.imgData.data, d = photo.data, pw = photo.w, ph = photo.h;
-      var ox = b.x - photo.left, oy = b.y - photo.top, S = LENS_SCALE;
+      var L = b.lut, n = L.n, out = b.imgData.data, S = n / (2 * b.r);
+
+      // 1) paint the backdrop under the bubble
+      if (patchCanvas.width !== n) { patchCanvas.width = n; patchCanvas.height = n; }
+      patchCtx.setTransform(1, 0, 0, 1, 0, 0);
+      patchCtx.fillStyle = "#000";
+      patchCtx.fillRect(0, 0, n, n);
+      patchCtx.setTransform(S, 0, 0, S, -bl * S, -bt * S);
+      if (usePhoto) patchCtx.drawImage(photo.canvas, photo.left, photo.top, photo.cssW, photo.cssH);
+      over.sort(function (p, q) { return (parseInt(p.style.zIndex, 10) || 0) - (parseInt(q.style.zIndex, 10) || 0); });
+      over.forEach(function (note) {
+        var nw = note._w, nh = note._h;
+        patchCtx.save();
+        patchCtx.translate(note._x + nw / 2, note._y + nh / 2);
+        patchCtx.rotate(note._tilt || 0);
+        patchCtx.drawImage(noteBitmap(note), -nw / 2, -nh / 2, nw, nh);
+        patchCtx.restore();
+      });
+      var d = patchCtx.getImageData(0, 0, n, n).data;
+
+      // 2) bend it
+      var lim = n - 1.001;
       for (var i = 0, o = 0; i < n * n; i++, o += 4) {
         if (!L.inside[i]) { out[o + 3] = 0; continue; }
-        var fx = (ox + L.lx[i]) * S, fy = (oy + L.ly[i]) * S;
-        if (fx < 0 || fy < 0 || fx >= pw - 1 || fy >= ph - 1) {
-          out[o] = out[o + 1] = out[o + 2] = 0; out[o + 3] = 255; // page background
-          continue;
-        }
+        var fx = (b.r + L.lx[i]) * S, fy = (b.r + L.ly[i]) * S;
+        fx = fx < 0 ? 0 : fx > lim ? lim : fx;
+        fy = fy < 0 ? 0 : fy > lim ? lim : fy;
         var x0 = fx | 0, y0 = fy | 0, tx = fx - x0, ty = fy - y0;
-        var p = (y0 * pw + x0) * 4, q = p + pw * 4;
+        var p = (y0 * n + x0) * 4, q = p + n * 4;
         for (var c = 0; c < 3; c++) {
-          var a = d[p + c], bb = d[p + 4 + c], cc = d[q + c], dd = d[q + 4 + c];
-          out[o + c] = a + (bb - a) * tx + ((cc - a) + ((dd - cc) - (bb - a)) * tx) * ty;
+          var a = d[p + c], bq = d[p + 4 + c], cc = d[q + c], dd = d[q + 4 + c];
+          out[o + c] = a + (bq - a) * tx + ((cc - a) + ((dd - cc) - (bq - a)) * tx) * ty;
         }
         out[o + 3] = 255;
       }
@@ -1102,6 +1171,7 @@
 
     function clampNote(note, x, y) {
       var w = note.offsetWidth, h = note.offsetHeight;
+      note._w = w; note._h = h; // cached: drawLens reads these every frame
       var minY = (H - h - 8 >= NOTE_TOP_MARGIN) ? NOTE_TOP_MARGIN : 8;
       note._x = Math.min(Math.max(x, 8), Math.max(8, W - w - 8));
       note._y = Math.min(Math.max(y, minY), Math.max(minY, H - h - 8));
@@ -1112,9 +1182,17 @@
     function spawnNote(b, x, y) {
       var note = document.createElement("div");
       note.className = "about-note";
-      note.textContent = b.text;
+      // One span per word (so the lens can copy where each word sits).
+      b.text.split(" ").forEach(function (word, wi) {
+        if (wi > 0) note.appendChild(document.createTextNode(" "));
+        var sp = document.createElement("span");
+        sp.textContent = word;
+        note.appendChild(sp);
+      });
       note.style.setProperty("--note-color", "hsl(" + Math.round(b.hue) + ", 78%, 86%)");
-      note.style.setProperty("--tilt", ((Math.random() - 0.5) * 6).toFixed(1) + "deg");
+      var tiltDeg = (Math.random() - 0.5) * 6;
+      note._tilt = tiltDeg * Math.PI / 180;
+      note.style.setProperty("--tilt", tiltDeg.toFixed(1) + "deg");
       note.style.width = Math.min(300, Math.max(200, W * 0.3)) + "px";
       note.style.fontSize = W < 600 ? "13px" : "14px";
       note.style.zIndex = ++noteZ;
