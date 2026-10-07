@@ -1151,3 +1151,12 @@ body.is-about .site-header .contact-menu {
   font-weight: 500;
   pointer-events: none;
 }
+
+/* One inline-block span per letter so main.js can bend each one (see
+   warpBubble). Words stay unbroken; the spaces between them wrap. */
+.about-bubble-text .w {
+  white-space: nowrap;
+}
+.about-bubble-text .g {
+  display: inline-block;
+}

@@ -654,7 +654,28 @@
       var hue = n <= 1 ? (HUE_START + HUE_END) / 2 : HUE_START + (HUE_END - HUE_START) * (i / (n - 1));
       el.style.setProperty("--bubble-color", "hsla(" + Math.round(hue) + ", 72%, 70%, 0.93)");
       var textEl = el.firstChild;
-      return { el: el, textEl: textEl, chars: textEl.textContent.length, x: 0, y: 0, vx: 0, vy: 0, r: 40, m: 1600, cruise: 26 + Math.random() * 16, tx: 0, ty: 0, pvx: 0, pvy: 0 };
+      // Split the paragraph into words made of one inline-block span per
+      // letter, so each letter can be bent individually (warpBubble). The
+      // bubble itself carries the real text for screen readers.
+      var fullText = textEl.textContent;
+      el.setAttribute("aria-label", fullText);
+      textEl.setAttribute("aria-hidden", "true");
+      textEl.textContent = "";
+      var glyphs = [];
+      fullText.split(" ").forEach(function (word, wi) {
+        if (wi > 0) textEl.appendChild(document.createTextNode(" "));
+        var w = document.createElement("span");
+        w.className = "w";
+        for (var ci = 0; ci < word.length; ci++) {
+          var g = document.createElement("span");
+          g.className = "g";
+          g.textContent = word.charAt(ci);
+          w.appendChild(g);
+          glyphs.push(g);
+        }
+        textEl.appendChild(w);
+      });
+      return { el: el, glyphs: glyphs, textEl: textEl, chars: fullText.length, x: 0, y: 0, vx: 0, vy: 0, r: 40, m: 1600, cruise: 26 + Math.random() * 16, tx: 0, ty: 0, pvx: 0, pvy: 0 };
     });
 
     // Pick the largest font (so bubble diameters follow) at which all the
@@ -673,6 +694,7 @@
       bodies.forEach(function (b) {
         var d = diameterFor(b, f);
         var fs = f;
+        b.glyphs.forEach(function (g) { g.style.transform = ""; }); // measure the flat text
         b.el.style.width = b.el.style.height = d + "px";
         b.textEl.style.width = d * INNER + "px";
         b.textEl.style.fontSize = fs + "px";
@@ -682,7 +704,60 @@
         }
         b.r = d / 2;
         b.m = b.r * b.r;
+        warpBubble(b);
       });
+    }
+
+    // Bend the text as if it sat inside a glass sphere: letters near the
+    // middle are magnified a little, and the further out they are the more
+    // they get squeezed toward the rim (radially) and spread around it
+    // (tangentially), like looking through a fish-eye lens. Each letter
+    // gets one rigid transform (position, rotation, squeeze), which is
+    // computed once per layout, not per frame.
+    function warpBubble(b) {
+      b.glyphs.forEach(function (g) { g.style.transform = ""; });
+      var br = b.el.getBoundingClientRect();
+      var cx = br.left + br.width / 2, cy = br.top + br.height / 2, R = br.width / 2;
+      b.glyphs.forEach(function (g) {
+        var gr = g.getBoundingClientRect();
+        var px = gr.left + gr.width / 2 - cx, py = gr.top + gr.height / 2 - cy;
+        var rho = Math.sqrt(px * px + py * py) / R;
+        if (rho < 1e-3) return;
+        var lens = lensAt(Math.min(rho, 0.985));
+        var th = Math.atan2(py, px);
+        var ox = Math.cos(th) * lens.out * R, oy = Math.sin(th) * lens.out * R;
+        var deg = th * 180 / Math.PI;
+        g.style.transform =
+          "translate(" + (ox - px).toFixed(2) + "px," + (oy - py).toFixed(2) + "px) " +
+          "rotate(" + deg.toFixed(2) + "deg) scale(" + lens.radial.toFixed(3) + "," + lens.tangent.toFixed(3) + ") rotate(" + (-deg).toFixed(2) + "deg)";
+      });
+    }
+    // Lens profile. Going from the bubble's rim inward, source radius is
+    // s(u) = (1-A)u + A(2/pi)asin(u) (A=0 is no warp, A=1 a full sphere);
+    // we need the inverse (where a letter at source radius rho lands), which
+    // is tabulated once and looked up by linear interpolation.
+    var LENS_A = 0.85;
+    var LENS_FIT = 0.93; // keeps even the corner letters inside the rim
+    var lensTable = [];
+    for (var li = 0; li <= 800; li++) {
+      var u = li / 800 * 0.99995;
+      lensTable.push([(1 - LENS_A) * u + LENS_A * (2 / Math.PI) * Math.asin(u), u]);
+    }
+    function lensAt(rho) {
+      var lo = 0, hi = lensTable.length - 1;
+      while (hi - lo > 1) {
+        var mid = (lo + hi) >> 1;
+        if (lensTable[mid][0] < rho) lo = mid; else hi = mid;
+      }
+      var a = lensTable[lo], c = lensTable[hi];
+      var t = (rho - a[0]) / (c[0] - a[0] || 1);
+      var u = a[1] + (c[1] - a[1]) * t;
+      var slope = (c[1] - a[1]) / (c[0] - a[0] || 1); // du/drho
+      return {
+        out: u * LENS_FIT,
+        radial: Math.max(0.2, slope) * LENS_FIT,
+        tangent: (u / rho) * LENS_FIT
+      };
     }
     function diameterFor(b, f) {
       var textArea = b.chars * 0.54 * f * 1.4 * f * 1.15;
