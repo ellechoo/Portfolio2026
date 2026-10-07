@@ -172,7 +172,9 @@ button:focus-visible,
   white-space: nowrap;
   transition: opacity 0.45s ease, transform 0.55s cubic-bezier(0.22, 0.8, 0.25, 1);
 }
-.site-header {
+/* On :root (not just the header) so the about page can size its photo
+   from the same variable. */
+:root {
   /* Big name size = project-page title size. */
   --nav-big-size: clamp(32px, 3.8vw, 48px);
   /* Vertical offset of the big copy's line box from the link's top so
@@ -239,7 +241,7 @@ body.is-about .nav-name--small {
    keyboard focus. main.js sets data-tip on .nav-center depending on the
    page. */
 .nav-center::before {
-  content: attr(data-tip);
+  content: "\2190\00a0\00a0" attr(data-tip);
   position: absolute;
   /* past the star: 9px gap + 13px star + 10px breathing room */
   left: calc(100% + 32px);
@@ -270,7 +272,7 @@ body.is-about .nav-center::before {
 }
 .nav-center[data-tip]:hover::before,
 .nav-center[data-tip]:focus-visible::before {
-  opacity: 1;
+  opacity: 0.85;
   transform: translate(0, -50%);
   transition-delay: 0.15s;
 }
@@ -1035,18 +1037,24 @@ button.contact-toggle {
 
 .about-main {
   min-height: 50vh;
-  padding: 48px 0 120px;
+  /* Photo sits close under the nav name: ~24px below its letters (their
+     bottoms are ~27px + 0.6em from the page top), while the bio below
+     is further away (see .about-layout gap). */
+  padding: calc(0.6 * var(--nav-big-size) - 13px) 0 120px;
 }
 
 .about-layout {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 40px;
+  gap: 64px;
 }
 
+/* Photo is exactly as wide as the nav name's letters (~4.906em wide in
+   Array), and shifted left a hair so its centre lines up with theirs. */
 .about-left {
-  width: min(320px, 100%);
+  width: min(calc(var(--nav-big-size) * 4.906), 100%);
+  transform: translateX(calc(var(--nav-big-size) * -0.036));
 }
 
 .about-right {
