@@ -235,13 +235,15 @@ body.is-about .nav-name--small {
   opacity: 1;
 }
 
-/* Small note under the name on hover / keyboard focus. main.js sets
-   data-tip on .nav-center depending on the page. */
+/* Small note to the right of the name (and its star) on hover /
+   keyboard focus. main.js sets data-tip on .nav-center depending on the
+   page. */
 .nav-center::before {
   content: attr(data-tip);
   position: absolute;
-  left: 50%;
-  top: calc(100% + 10px);
+  /* past the star: 9px gap + 13px star + 10px breathing room */
+  left: calc(100% + 32px);
+  top: 50%;
   z-index: 20;
   padding: 6px 10px;
   border-radius: 999px;
@@ -255,20 +257,26 @@ body.is-about .nav-name--small {
   text-transform: none;
   white-space: nowrap;
   opacity: 0;
-  transform: translate(-50%, -4px);
+  transform: translate(-4px, -50%);
   transition: opacity 0.2s ease, transform 0.25s ease;
   pointer-events: none;
 }
-/* On the about page the big name hangs below the link box, so push the
-   note down beneath it. */
+/* On the about page the star lives at ABOUT and the big name is wider
+   than the link box, so start the note just past the big name's right
+   edge (it is ~4.98x the font size wide) and centre it on the big name. */
 body.is-about .nav-center::before {
-  top: calc(var(--nav-big-top) + var(--nav-big-size) * 1.1 + 6px);
+  left: calc(50% + var(--nav-big-size) * 2.49 + 16px);
+  top: calc(var(--nav-big-top) + var(--nav-big-size) * 0.55);
 }
 .nav-center[data-tip]:hover::before,
 .nav-center[data-tip]:focus-visible::before {
   opacity: 1;
-  transform: translate(-50%, 0);
+  transform: translate(0, -50%);
   transition-delay: 0.15s;
+}
+/* Not enough room beside a centred name on narrow screens. */
+@media (max-width: 800px) {
+  .nav-center::before { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
