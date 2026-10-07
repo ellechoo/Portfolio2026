@@ -611,6 +611,298 @@
 
   /* ---------- about ---------- */
 
+  /* ---------- About page: floating bubbles ----------
+     Each bio paragraph is a circle that drifts slowly around the window,
+     bounces off the window edges and off the other bubbles (equal-ish
+     "balloon" collisions: momentum is exchanged by mass, so big bubbles
+     shove small ones), and can be grabbed, dragged and thrown. Bubble
+     colors are spread across the same hue range as the gallery filter
+     pills (HUE_START..HUE_END, categoryColor above). The markup is built
+     by renderAbout(); startAboutBubbles() sizes and animates it once the
+     about view is actually visible (so the layer has real dimensions). */
+
+  var aboutBubbles = null;
+
+  function stopAboutBubbles() {
+    if (aboutBubbles) {
+      aboutBubbles.stop();
+      aboutBubbles = null;
+    }
+  }
+
+  function startAboutBubbles() {
+    stopAboutBubbles();
+    var layer = els.aboutContent.querySelector(".about-bubbles");
+    if (!layer) return;
+    var els2 = Array.prototype.slice.call(layer.querySelectorAll(".about-bubble"));
+    if (!els2.length) return;
+
+    var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var RESTITUTION = 0.9; // how bouncy bubble-bubble and bubble-wall hits are
+    var COVERAGE = 0.34; // share of the window the bubbles may fill
+    var MIN_FONT = 9;
+    var MAX_FONT = 14;
+    var INNER = 0.7; // text box side as a share of the diameter (largest square inside a circle)
+    var W = layer.clientWidth;
+    var H = layer.clientHeight;
+    var rafId = 0;
+    var lastT = 0;
+    var held = null;
+
+    var bodies = els2.map(function (el, i) {
+      var n = els2.length;
+      var hue = n <= 1 ? (HUE_START + HUE_END) / 2 : HUE_START + (HUE_END - HUE_START) * (i / (n - 1));
+      el.style.setProperty("--bubble-color", "hsla(" + Math.round(hue) + ", 72%, 70%, 0.93)");
+      var textEl = el.firstChild;
+      return { el: el, textEl: textEl, chars: textEl.textContent.length, x: 0, y: 0, vx: 0, vy: 0, r: 40, m: 1600, cruise: 26 + Math.random() * 16, tx: 0, ty: 0, pvx: 0, pvy: 0 };
+    });
+
+    // Pick the largest font (so bubble diameters follow) at which all the
+    // bubbles together fit in COVERAGE of the window, then size each bubble
+    // to its text and shrink its font if the text still overflows.
+    function sizeBubbles() {
+      var f, total;
+      for (f = MAX_FONT; f >= MIN_FONT; f -= 0.5) {
+        total = 0;
+        bodies.forEach(function (b) {
+          var d = diameterFor(b, f);
+          total += Math.PI * d * d / 4;
+        });
+        if (total <= W * H * COVERAGE) break;
+      }
+      bodies.forEach(function (b) {
+        var d = diameterFor(b, f);
+        var fs = f;
+        b.el.style.width = b.el.style.height = d + "px";
+        b.textEl.style.width = d * INNER + "px";
+        b.textEl.style.fontSize = fs + "px";
+        while (b.textEl.scrollHeight > d * INNER + 1 && fs > 7.5) {
+          fs -= 0.5;
+          b.textEl.style.fontSize = fs + "px";
+        }
+        b.r = d / 2;
+        b.m = b.r * b.r;
+      });
+    }
+    function diameterFor(b, f) {
+      var textArea = b.chars * 0.54 * f * 1.4 * f * 1.15;
+      var d = Math.sqrt(textArea) / INNER;
+      d = Math.max(d, 8 * f); // short lines still get a decent bubble
+      return Math.min(d, Math.min(W, H) * 0.85);
+    }
+
+    function clampToWindow(b) {
+      if (b.x < b.r) b.x = b.r;
+      if (b.x > W - b.r) b.x = Math.max(b.r, W - b.r);
+      if (b.y < b.r) b.y = b.r;
+      if (b.y > H - b.r) b.y = Math.max(b.r, H - b.r);
+    }
+
+    function placeBubbles() {
+      var order = bodies.slice().sort(function (a, b) { return b.r - a.r; });
+      var placed = [];
+      order.forEach(function (b) {
+        var best = null;
+        for (var tries = 0; tries < 300; tries++) {
+          var x = b.r + Math.random() * Math.max(1, W - 2 * b.r);
+          var y = b.r + Math.random() * Math.max(1, H - 2 * b.r);
+          var ok = placed.every(function (p) {
+            var dx = p.x - x, dy = p.y - y, min = p.r + b.r + 6;
+            return dx * dx + dy * dy >= min * min;
+          });
+          if (ok) { best = { x: x, y: y }; break; }
+          if (!best) best = { x: x, y: y };
+        }
+        b.x = best.x;
+        b.y = best.y;
+        var ang = Math.random() * Math.PI * 2;
+        var sp = reduceMotion ? 0 : b.cruise;
+        b.vx = Math.cos(ang) * sp;
+        b.vy = Math.sin(ang) * sp;
+        placed.push(b);
+      });
+    }
+
+    function render() {
+      bodies.forEach(function (b) {
+        b.el.style.transform = "translate3d(" + (b.x - b.r).toFixed(2) + "px," + (b.y - b.r).toFixed(2) + "px,0)";
+      });
+    }
+
+    function collide() {
+      for (var i = 0; i < bodies.length; i++) {
+        for (var j = i + 1; j < bodies.length; j++) {
+          var a = bodies[i], b = bodies[j];
+          var dx = b.x - a.x, dy = b.y - a.y;
+          var min = a.r + b.r;
+          var d2 = dx * dx + dy * dy;
+          if (d2 >= min * min) continue;
+          var dist = Math.sqrt(d2);
+          var nx, ny;
+          if (dist < 1e-4) { var ang = Math.random() * Math.PI * 2; nx = Math.cos(ang); ny = Math.sin(ang); dist = 0; }
+          else { nx = dx / dist; ny = dy / dist; }
+          var ia = a === held ? 0 : 1 / a.m;
+          var ib = b === held ? 0 : 1 / b.m;
+          var sum = ia + ib;
+          if (sum === 0) continue;
+          var overlap = min - dist;
+          a.x -= nx * overlap * ia / sum; a.y -= ny * overlap * ia / sum;
+          b.x += nx * overlap * ib / sum; b.y += ny * overlap * ib / sum;
+          var rv = (b.vx - a.vx) * nx + (b.vy - a.vy) * ny;
+          if (rv < 0) {
+            var imp = -(1 + RESTITUTION) * rv / sum;
+            a.vx -= imp * ia * nx; a.vy -= imp * ia * ny;
+            b.vx += imp * ib * nx; b.vy += imp * ib * ny;
+          }
+        }
+      }
+    }
+
+    function step(dt) {
+      var sub = 2, h = dt / sub;
+      for (var s = 0; s < sub; s++) {
+        bodies.forEach(function (b) {
+          if (b === held) {
+            // Follow the pointer; its velocity (for shoving others / the
+            // throw on release) is derived from how far it moved.
+            var nvx = (b.tx - b.x) / h, nvy = (b.ty - b.y) / h;
+            b.vx = b.vx * 0.5 + nvx * 0.5;
+            b.vy = b.vy * 0.5 + nvy * 0.5;
+            b.x = b.tx; b.y = b.ty;
+            return;
+          }
+          // Ease the speed back toward a slow cruise (so a throw settles
+          // down after a couple of seconds) and let the heading wander a
+          // little so the drift never looks mechanical.
+          var sp = Math.sqrt(b.vx * b.vx + b.vy * b.vy);
+          var target = reduceMotion ? 0 : b.cruise;
+          if (sp < 0.5 && target > 0) {
+            var a0 = Math.random() * Math.PI * 2;
+            b.vx = Math.cos(a0) * target; b.vy = Math.sin(a0) * target;
+            sp = target;
+          }
+          if (sp > 0) {
+            var rate = reduceMotion ? 1.6 : 0.5;
+            var ns = sp + (target - sp) * (1 - Math.exp(-rate * h));
+            var turn = reduceMotion ? 0 : (Math.random() - 0.5) * 1.2 * h;
+            var cos = Math.cos(turn), sin = Math.sin(turn);
+            var ux = (b.vx * cos - b.vy * sin) / sp, uy = (b.vx * sin + b.vy * cos) / sp;
+            b.vx = ux * ns; b.vy = uy * ns;
+          }
+          b.x += b.vx * h;
+          b.y += b.vy * h;
+          // Window edges: reflect.
+          if (b.x < b.r) { b.x = b.r; b.vx = Math.abs(b.vx) * RESTITUTION; }
+          else if (b.x > W - b.r) { b.x = W - b.r; b.vx = -Math.abs(b.vx) * RESTITUTION; }
+          if (b.y < b.r) { b.y = b.r; b.vy = Math.abs(b.vy) * RESTITUTION; }
+          else if (b.y > H - b.r) { b.y = H - b.r; b.vy = -Math.abs(b.vy) * RESTITUTION; }
+        });
+        collide();
+        collide();
+        bodies.forEach(function (b) { if (b !== held) clampToWindow(b); });
+      }
+    }
+
+    function frame(t) {
+      rafId = requestAnimationFrame(frame);
+      var dt = lastT ? Math.min((t - lastT) / 1000, 1 / 30) : 1 / 60;
+      lastT = t;
+      if (dt <= 0) return;
+      step(dt);
+      render();
+    }
+
+    // ----- dragging -----
+    function onDown(e) {
+      var el = e.target.closest && e.target.closest(".about-bubble");
+      if (!el || held) return;
+      var b = bodies.filter(function (x) { return x.el === el; })[0];
+      if (!b) return;
+      e.preventDefault();
+      held = b;
+      b.grabDX = e.clientX - b.x;
+      b.grabDY = e.clientY - b.y;
+      b.tx = b.x; b.ty = b.y;
+      b.vx = b.vy = 0;
+      b.lastMoveT = e.timeStamp;
+      b.samples = [{ t: e.timeStamp, x: e.clientX, y: e.clientY }];
+      el.classList.add("is-held");
+      try { el.setPointerCapture(e.pointerId); } catch (err) {}
+    }
+    function onMove(e) {
+      if (!held || !held.el.hasPointerCapture || !held.el.hasPointerCapture(e.pointerId)) return;
+      held.tx = Math.min(Math.max(e.clientX - held.grabDX, held.r), Math.max(held.r, W - held.r));
+      held.ty = Math.min(Math.max(e.clientY - held.grabDY, held.r), Math.max(held.r, H - held.r));
+      held.lastMoveT = e.timeStamp;
+      held.samples.push({ t: e.timeStamp, x: e.clientX, y: e.clientY });
+      if (held.samples.length > 12) held.samples.shift();
+    }
+    function onUp(e) {
+      if (!held) return;
+      var b = held;
+      held = null;
+      b.el.classList.remove("is-held");
+      // Throw velocity comes from the pointer's last ~120ms of travel (not
+      // from the bubble's own smoothed speed, which dips between events).
+      // If the pointer sat still before release, don't fling it.
+      var recent = b.samples.filter(function (s) { return e.timeStamp - s.t <= 120; });
+      var vx = 0, vy = 0;
+      if (recent.length >= 2 && e.timeStamp - b.lastMoveT <= 90) {
+        var first = recent[0], last = recent[recent.length - 1];
+        var span = (last.t - first.t) / 1000;
+        if (span > 0.004) { vx = (last.x - first.x) / span; vy = (last.y - first.y) / span; }
+      }
+      var sp = Math.sqrt(vx * vx + vy * vy), MAX = 900;
+      if (sp > MAX) { vx *= MAX / sp; vy *= MAX / sp; }
+      b.vx = vx;
+      b.vy = vy;
+    }
+    layer.addEventListener("pointerdown", onDown);
+    layer.addEventListener("pointermove", onMove);
+    layer.addEventListener("pointerup", onUp);
+    layer.addEventListener("pointercancel", onUp);
+
+    // ----- resize -----
+    var resizeQueued = false;
+    function onResize() {
+      if (resizeQueued) return;
+      resizeQueued = true;
+      requestAnimationFrame(function () {
+        resizeQueued = false;
+        var ow = W, oh = H;
+        W = layer.clientWidth;
+        H = layer.clientHeight;
+        if (!W || !H) return;
+        sizeBubbles();
+        bodies.forEach(function (b) {
+          b.x *= W / ow; b.y *= H / oh;
+          clampToWindow(b);
+          b.tx = b.x; b.ty = b.y;
+        });
+        collide(); collide();
+        bodies.forEach(clampToWindow);
+        render();
+      });
+    }
+    window.addEventListener("resize", onResize);
+
+    sizeBubbles();
+    placeBubbles();
+    render();
+    rafId = requestAnimationFrame(frame);
+
+    aboutBubbles = {
+      stop: function () {
+        cancelAnimationFrame(rafId);
+        window.removeEventListener("resize", onResize);
+        layer.removeEventListener("pointerdown", onDown);
+        layer.removeEventListener("pointermove", onMove);
+        layer.removeEventListener("pointerup", onUp);
+        layer.removeEventListener("pointercancel", onUp);
+      }
+    };
+  }
+
   function renderAbout() {
     var site = DATA.site;
     els.aboutContent.innerHTML = "";
@@ -639,16 +931,26 @@
 
     layout.appendChild(left);
 
-    // Right: bio. (No email here — the Contact menu in the nav
-    // already covers that.)
-    var right = document.createElement("div");
-    right.className = "about-right";
-
-    var p = document.createElement("p");
-    p.textContent = site.about || "";
-    right.appendChild(p);
-
-    layout.appendChild(right);
+    // The bio is no longer a text column: startAboutBubbles() (below)
+    // turns each paragraph into a floating, draggable bubble inside this
+    // fixed full-window layer. (No email here — the Contact menu in the
+    // nav already covers that.)
+    var bubbleLayer = document.createElement("div");
+    bubbleLayer.className = "about-bubbles";
+    bubbleLayer.setAttribute("role", "list");
+    (site.about || "").split(/\n\s*\n/).forEach(function (para) {
+      para = para.replace(/\s+/g, " ").trim();
+      if (!para) return;
+      var bubble = document.createElement("div");
+      bubble.className = "about-bubble";
+      bubble.setAttribute("role", "listitem");
+      var text = document.createElement("div");
+      text.className = "about-bubble-text";
+      text.textContent = para;
+      bubble.appendChild(text);
+      bubbleLayer.appendChild(bubble);
+    });
+    els.aboutContent.appendChild(bubbleLayer);
 
     els.aboutContent.appendChild(layout);
   }
@@ -863,7 +1165,7 @@
     // row) they shouldn't make the cursor look interactive, and the
     // ones on gallery cards already count via the surrounding
     // .project-card link.
-    var HOVER_TARGETS = "a, button, input, textarea, .pill, .project-card";
+    var HOVER_TARGETS = "a, button, input, textarea, .pill, .project-card, .about-bubble";
     document.addEventListener("mouseover", function (e) {
       if (e.target.closest && e.target.closest(HOVER_TARGETS)) star.classList.add("is-active");
     });
@@ -881,6 +1183,9 @@
     // Lets CSS restyle the nav's name (bigger, heading font) only while
     // the about page is showing.
     document.body.classList.toggle("is-about", name === "about");
+    // The about page never scrolls (the bubbles fill the window).
+    document.documentElement.classList.toggle("is-about", name === "about");
+    if (name !== "about") stopAboutBubbles();
     // Marks which nav item matches the page (CSS draws a small star next
     // to it): About on the about page, the name (home) on the work
     // pages — home and individual projects alike.
@@ -906,6 +1211,7 @@
     if (hash === "#about") {
       renderAbout();
       showView("about");
+      startAboutBubbles();
     } else if (hash.indexOf("#p/") === 0) {
       var id = decodeURIComponent(hash.slice(3));
       if (renderProject(id)) showView("project");

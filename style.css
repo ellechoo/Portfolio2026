@@ -1036,18 +1036,17 @@ button.contact-toggle {
    comfortable-width column. */
 
 .about-main {
-  min-height: 50vh;
   /* Photo sits close under the nav name: ~24px below its letters (their
-     bottoms are ~27px + 0.6em from the page top), while the bio below
-     is further away (see .about-layout gap). */
-  padding: calc(0.6 * var(--nav-big-size) - 13px) 0 120px;
+     bottoms are ~27px + 0.6em from the page top). The bio is now
+     floating bubbles (see the bottom of this section), not in the flow. */
+  padding: calc(0.6 * var(--nav-big-size) - 13px) 0 0;
 }
 
 .about-layout {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 64px;
+  gap: 0;
 }
 
 /* Photo is exactly as wide as the nav name's letters (~4.906em wide in
@@ -1055,11 +1054,6 @@ button.contact-toggle {
 .about-left {
   width: min(calc(var(--nav-big-size) * 4.906), 100%);
   transform: translateX(calc(var(--nav-big-size) * -0.036));
-}
-
-.about-right {
-  width: min(600px, 100%);
-  min-width: 0;
 }
 
 .about-photo {
@@ -1087,9 +1081,73 @@ button.contact-toggle {
   line-height: 1.4;
 }
 
-.about-right p {
-  font-size: 16px;
-  color: var(--ink);
-  white-space: pre-line;
-  margin: 0;
+/* ---------- About page: floating bubbles ---------- */
+/* The page itself never scrolls; the bubbles live in a fixed layer that
+   covers the whole window, above the photo (z 50) but below the header
+   (z 100: nav buttons + contact menu). The layer ignores the pointer so
+   the nav and photo stay usable; only the bubbles catch it. */
+html.is-about,
+html.is-about body {
+  overflow: hidden;
+  height: 100%;
+}
+
+/* So the bubbles can drift under the nav (the header normally paints an
+   opaque black strip), make it see-through on this page and let clicks
+   fall through everywhere except the nav items themselves. */
+body.is-about .site-header {
+  background: transparent;
+  pointer-events: none;
+}
+body.is-about .site-header .nav-left,
+body.is-about .site-header .nav-center,
+body.is-about .site-header .nav-right,
+body.is-about .site-header .contact-menu {
+  pointer-events: auto;
+}
+
+.about-bubbles {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.about-bubble {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: #111;
+  background:
+    radial-gradient(circle at 32% 26%, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0) 46%),
+    var(--bubble-color, hsla(240, 72%, 70%, 0.93));
+  box-shadow:
+    inset 0 -10px 22px rgba(0, 0, 0, 0.12),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.28);
+  pointer-events: auto;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: grab;
+  will-change: transform;
+}
+
+.about-bubble.is-held {
+  cursor: grabbing;
+  box-shadow:
+    inset 0 -10px 22px rgba(0, 0, 0, 0.12),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.4),
+    0 10px 30px rgba(0, 0, 0, 0.45);
+}
+
+.about-bubble-text {
+  text-align: center;
+  line-height: 1.38;
+  font-weight: 500;
+  pointer-events: none;
 }
