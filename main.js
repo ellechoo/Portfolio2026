@@ -848,11 +848,16 @@
       star.classList.remove("is-visible");
     });
 
-    // Grows the star over anything clickable — links, buttons, pills,
-    // gallery cards, form fields. Delegated on document so it keeps
-    // working for pills/cards that get rebuilt (filters, project list)
-    // after this runs once at startup.
-    var HOVER_TARGETS = "a, button, input, textarea, .pill, .pill-tag, .project-card";
+    // Grows the star over anything clickable — links, buttons, filter
+    // pills, gallery cards, form fields. Delegated on document so it
+    // keeps working for pills/cards that get rebuilt (filters, project
+    // list) after this runs once at startup. Deliberately NOT
+    // .pill-tag: those read-only category badges aren't clickable on
+    // their own — on the project page (where they sit in the meta
+    // row) they shouldn't make the cursor look interactive, and the
+    // ones on gallery cards already count via the surrounding
+    // .project-card link.
+    var HOVER_TARGETS = "a, button, input, textarea, .pill, .project-card";
     document.addEventListener("mouseover", function (e) {
       if (e.target.closest && e.target.closest(HOVER_TARGETS)) star.classList.add("is-active");
     });
