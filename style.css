@@ -1160,6 +1160,10 @@ body.is-about .site-header .contact-menu {
 .about-bubble-text {
   position: relative;
   z-index: 2;
+  /* The box is deliberately wider than the bubble (see INNER in main.js);
+     without this the flex container would shrink it to the bubble's
+     width, leaving empty bands at the left and right. */
+  flex: none;
   text-align: center;
   text-transform: uppercase; /* sticky notes keep normal case */
   line-height: 1.38;
