@@ -291,10 +291,19 @@ body.is-about .nav-center::before {
 
 .nav-right { justify-self: end; position: relative; }
 
+/* Hover: the text turns the same light blue as the DATA VIZ filter pill
+   (the first category's hue in main.js: hsl(212, 72%, 70%)) instead of
+   getting an underline. */
+.site-header a,
+.site-header button.contact-toggle {
+  transition: color 0.2s ease;
+}
 .site-header a:hover,
-.site-header button.contact-toggle:hover {
-  text-decoration: underline;
-  text-underline-offset: 4px;
+.site-header a:focus-visible,
+.site-header button.contact-toggle:hover,
+.site-header button.contact-toggle:focus-visible {
+  color: hsl(212, 72%, 70%);
+  text-decoration: none;
 }
 
 button.contact-toggle {
