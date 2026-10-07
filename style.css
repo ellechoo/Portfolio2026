@@ -6,8 +6,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;1,500;1,600&display=swap');
 
 /* Array (Frode Helland, via Fontshare — free for personal/commercial
-   use) — used for headings only (Semibold), see .about-left h1 /
-   .project-sidebar h1 below. Everything else stays Inter. */
+   use) — used for headings only (Semibold), see .project-sidebar h1 /
+   .next-project-title below, plus the nav name on the about page
+   (body.is-about .nav-center). Everything else stays Inter. */
 @font-face {
   font-family: 'Array';
   src: url('fonts/Array-Regular.woff2') format('woff2');
@@ -150,6 +151,23 @@ button:focus-visible,
 
 .nav-left { justify-self: start; }
 .nav-center { justify-self: center; font-weight: 700; }
+
+/* About page only (main.js toggles body.is-about): the nav's name
+   stands in for the page heading — bigger, and in the same heading
+   font/size as a project page's title (.project-sidebar h1), no longer
+   forced uppercase. Still the same link home. Header gets a bit more
+   height so the larger text isn't cramped against its edges. */
+body.is-about .site-header {
+  height: 88px;
+}
+body.is-about .site-header .nav-center {
+  font-family: 'Array', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: clamp(32px, 3.8vw, 48px);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+  text-transform: none;
+}
 .nav-right { justify-self: end; position: relative; }
 
 .site-header a:hover,
@@ -881,20 +899,21 @@ button.contact-toggle {
 }
 
 /* ---------- About page ---------- */
-/* Photo + name on the left, the bio to its right — so the (fairly
-   long) bio text doesn't just run on below a photo, and reads more
-   like the project pages (media on the left, text alongside it). */
+/* The name now lives in the nav (see body.is-about above), so this is
+   just photo + bio, side by side and centered under it — the photo
+   a bit larger than before since it no longer shares its column with
+   a heading. */
 
 .about-main {
   min-height: 50vh;
-  padding: 64px 0 120px;
-  max-width: 820px;
+  padding: 40px 0 120px;
 }
 
 .about-layout {
   display: grid;
-  grid-template-columns: 240px 1fr;
-  gap: var(--gutter);
+  grid-template-columns: minmax(220px, 320px) minmax(0, 600px);
+  justify-content: center;
+  gap: calc(var(--gutter) * 1.5);
   align-items: start;
 }
 
@@ -904,11 +923,10 @@ button.contact-toggle {
 }
 
 .about-photo {
-  width: 213px;
-  height: 213px;
+  width: 100%;
+  aspect-ratio: 1;
   overflow: hidden;
   background: var(--surface);
-  margin: 0 0 20px;
 }
 
 .about-photo img {
@@ -929,16 +947,6 @@ button.contact-toggle {
   line-height: 1.4;
 }
 
-.about-left h1 {
-  font-family: 'Array', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: clamp(32px, 3.8vw, 48px);
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  line-height: 1.1;
-  margin: 0;
-  width: fit-content;
-}
-
 .about-right p {
   font-size: 16px;
   color: var(--ink);
@@ -946,8 +954,12 @@ button.contact-toggle {
   margin: 0;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 760px) {
   .about-layout {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 32px;
+  }
+  .about-photo {
+    max-width: 320px;
   }
 }

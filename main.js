@@ -610,7 +610,9 @@
     var layout = document.createElement("div");
     layout.className = "about-layout";
 
-    // Left: photo + name.
+    // Left: photo. (The name used to sit under it; on this page it now
+    // lives up in the nav instead — see the body.is-about rules in
+    // style.css.)
     var left = document.createElement("div");
     left.className = "about-left";
 
@@ -626,10 +628,6 @@
       photoWrap.textContent = "Add a photo via admin.html";
     }
     left.appendChild(photoWrap);
-
-    var h1 = document.createElement("h1");
-    h1.textContent = site.name || "About";
-    left.appendChild(h1);
 
     layout.appendChild(left);
 
@@ -872,6 +870,9 @@
     els.home.hidden = name !== "home";
     els.about.hidden = name !== "about";
     els.project.hidden = name !== "project";
+    // Lets CSS restyle the nav's name (bigger, heading font) only while
+    // the about page is showing.
+    document.body.classList.toggle("is-about", name === "about");
     window.scrollTo(0, 0);
     closeContactMenu();
     closeLightbox();
