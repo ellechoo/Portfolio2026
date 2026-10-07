@@ -155,11 +155,9 @@ button:focus-visible,
 /* About page only (main.js toggles body.is-about): the nav's name
    stands in for the page heading — bigger, and in the same heading
    font/size as a project page's title (.project-sidebar h1), kept in
-   all caps like the nav name everywhere else. Still the same link home. Header gets a bit more
-   height so the larger text isn't cramped against its edges. */
-body.is-about .site-header {
-  height: 88px;
-}
+   all caps like the nav name everywhere else. Still the same link home.
+   Deliberately the ONLY thing that changes in the header: its height
+   (and so About / Contact's position) stays identical on every page. */
 body.is-about .site-header .nav-center {
   font-family: 'Array', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   font-size: clamp(32px, 3.8vw, 48px);
@@ -899,26 +897,28 @@ button.contact-toggle {
 }
 
 /* ---------- About page ---------- */
-/* The name now lives in the nav (see body.is-about above), so this is
-   just photo + bio, side by side and centered under it — the photo
-   a bit larger than before since it no longer shares its column with
-   a heading. */
+/* The name lives in the nav (see body.is-about above), so this is just
+   the photo, centered right under it, with the bio below in a
+   comfortable-width column. */
 
 .about-main {
   min-height: 50vh;
-  padding: 40px 0 120px;
+  padding: 48px 0 120px;
 }
 
 .about-layout {
-  display: grid;
-  grid-template-columns: minmax(220px, 320px) minmax(0, 600px);
-  justify-content: center;
-  gap: calc(var(--gutter) * 1.5);
-  align-items: start;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 40px;
 }
 
-.about-left,
+.about-left {
+  width: min(320px, 100%);
+}
+
 .about-right {
+  width: min(600px, 100%);
   min-width: 0;
 }
 
@@ -952,14 +952,4 @@ button.contact-toggle {
   color: var(--ink);
   white-space: pre-line;
   margin: 0;
-}
-
-@media (max-width: 760px) {
-  .about-layout {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 32px;
-  }
-  .about-photo {
-    max-width: 320px;
-  }
 }
