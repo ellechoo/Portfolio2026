@@ -1161,6 +1161,7 @@ body.is-about .site-header .contact-menu {
   position: relative;
   z-index: 2;
   text-align: center;
+  text-transform: uppercase; /* sticky notes keep normal case */
   line-height: 1.38;
   font-weight: 500;
   pointer-events: none;

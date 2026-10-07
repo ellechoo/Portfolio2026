@@ -783,7 +783,7 @@
       };
     }
     function diameterFor(b, f) {
-      var textArea = b.chars * 0.54 * f * 1.4 * f * 1.15;
+      var textArea = b.chars * 0.66 * f * 1.4 * f * 1.15; // 0.66em: average width of an all-caps letter
       var d = Math.sqrt(textArea) / INNER;
       d = Math.max(d, 5.5 * f, 88); // short paragraphs still get a bubble you can grab
       return Math.min(d, Math.min(W, H) * 0.85);
