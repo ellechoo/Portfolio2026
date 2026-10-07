@@ -154,8 +154,8 @@ button:focus-visible,
 
 /* About page only (main.js toggles body.is-about): the nav's name
    stands in for the page heading — bigger, and in the same heading
-   font/size as a project page's title (.project-sidebar h1), no longer
-   forced uppercase. Still the same link home. Header gets a bit more
+   font/size as a project page's title (.project-sidebar h1), kept in
+   all caps like the nav name everywhere else. Still the same link home. Header gets a bit more
    height so the larger text isn't cramped against its edges. */
 body.is-about .site-header {
   height: 88px;
@@ -166,7 +166,7 @@ body.is-about .site-header .nav-center {
   font-weight: 600;
   letter-spacing: -0.01em;
   line-height: 1.1;
-  text-transform: none;
+  text-transform: uppercase;
 }
 .nav-right { justify-self: end; position: relative; }
 
