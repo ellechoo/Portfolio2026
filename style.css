@@ -235,10 +235,47 @@ body.is-about .nav-name--small {
   opacity: 1;
 }
 
+/* Small note under the name on hover / keyboard focus. main.js sets
+   data-tip on .nav-center depending on the page. */
+.nav-center::before {
+  content: attr(data-tip);
+  position: absolute;
+  left: 50%;
+  top: calc(100% + 10px);
+  z-index: 20;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--bg, #fff);
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: 0;
+  text-transform: none;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translate(-50%, -4px);
+  transition: opacity 0.2s ease, transform 0.25s ease;
+  pointer-events: none;
+}
+/* On the about page the big name hangs below the link box, so push the
+   note down beneath it. */
+body.is-about .nav-center::before {
+  top: calc(var(--nav-big-top) + var(--nav-big-size) * 1.1 + 6px);
+}
+.nav-center[data-tip]:hover::before,
+.nav-center[data-tip]:focus-visible::before {
+  opacity: 1;
+  transform: translate(-50%, 0);
+  transition-delay: 0.15s;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .nav-name,
   .nav-left::after,
-  .nav-center::after {
+  .nav-center::after,
+  .nav-center::before {
     transition: none;
   }
 }
