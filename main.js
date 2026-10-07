@@ -891,8 +891,10 @@
     if (els.navCenter) {
       if (name !== "about") els.navCenter.setAttribute("aria-current", "page");
       else els.navCenter.removeAttribute("aria-current");
-      // Hover note: says where the name leads, or that you're already there.
-      els.navCenter.setAttribute("data-tip", name === "home" ? "you are on my gallery page" : "go back to my gallery page");
+      // Hover note: on the about and project pages it says where the name
+      // leads. On the gallery page there is no note.
+      if (name === "home") els.navCenter.removeAttribute("data-tip");
+      else els.navCenter.setAttribute("data-tip", "go back to my gallery page");
     }
     window.scrollTo(0, 0);
     closeContactMenu();

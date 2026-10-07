@@ -274,6 +274,7 @@ body.is-about .nav-center::before {
   transform: translate(0, -50%);
   transition-delay: 0.15s;
 }
+.nav-center:not([data-tip])::before { display: none; }
 /* Not enough room beside a centred name on narrow screens. */
 @media (max-width: 800px) {
   .nav-center::before { display: none; }
