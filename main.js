@@ -653,6 +653,8 @@
       var n = els2.length;
       var hue = n <= 1 ? (HUE_START + HUE_END) / 2 : HUE_START + (HUE_END - HUE_START) * (i / (n - 1));
       el.style.setProperty("--bubble-color", "hsla(" + Math.round(hue) + ", 72%, 70%, 0.72)");
+      // The text is the same color as the bubble, but fully opaque.
+      el.style.setProperty("--bubble-ink", "hsl(" + Math.round(hue) + ", 72%, 70%)");
       var textEl = el.firstChild;
       // Split the paragraph into words made of one inline-block span per
       // letter, so each letter can be bent individually (warpBubble). The
@@ -783,7 +785,7 @@
       };
     }
     function diameterFor(b, f) {
-      var textArea = b.chars * 0.66 * f * 1.4 * f * 1.15; // 0.66em: average width of an all-caps letter
+      var textArea = b.chars * 0.72 * f * 1.4 * f * 1.15; // 0.72em: average width of a bold all-caps letter
       var d = Math.sqrt(textArea) / INNER;
       d = Math.max(d, 5.5 * f, 88); // short paragraphs still get a bubble you can grab
       return Math.min(d, Math.min(W, H) * 0.85);

@@ -1124,7 +1124,7 @@ body.is-about .site-header .contact-menu {
   border-radius: 50%;
   /* Text that overshoots the circle (see INNER in main.js) is cut off here. */
   overflow: hidden;
-  color: rgba(17, 17, 17, 0.6);
+  color: var(--bubble-ink, #fff);
   pointer-events: auto;
   touch-action: none;
   user-select: none;
@@ -1163,7 +1163,7 @@ body.is-about .site-header .contact-menu {
   text-align: center;
   text-transform: uppercase; /* sticky notes keep normal case */
   line-height: 1.38;
-  font-weight: 500;
+  font-weight: 700;
   pointer-events: none;
 }
 
