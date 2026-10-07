@@ -641,8 +641,8 @@
     var RESTITUTION = 0.9; // how bouncy bubble-bubble and bubble-wall hits are
     var COVERAGE = 0.34; // share of the window the bubbles may fill
     var MIN_FONT = 9;
-    var MAX_FONT = 18;
-    var INNER = 0.92; // text box side as a share of the diameter. Bigger than the largest square that fits in the circle (0.707), so the text fills the bubble and the far corners get clipped by the rim.
+    var MAX_FONT = 24;
+    var INNER = 1.3; // text box side as a share of the diameter. The box is bigger than the bubble (a circle only fits a 0.707 square) so the text runs right up to the rim on every side; the lens squeezes the overshoot in and the rim clips the far corners.
     var W = layer.clientWidth;
     var H = layer.clientHeight;
     var rafId = 0;
@@ -697,15 +697,27 @@
       }
       bodies.forEach(function (b) {
         var d = diameterFor(b, f);
-        var fs = f;
         b.glyphs.forEach(function (g) { g.style.transform = ""; }); // measure the flat text
         b.el.style.width = b.el.style.height = d + "px";
-        b.textEl.style.width = d * INNER + "px";
-        b.textEl.style.fontSize = fs + "px";
-        while (b.textEl.scrollHeight > d * INNER + 1 && fs > 7.5) {
-          fs -= 0.5;
-          b.textEl.style.fontSize = fs + "px";
+        var box = d * INNER;
+        b.textEl.style.width = box + "px";
+        b.textEl.style.lineHeight = "";
+        // Largest font whose text block still fits the box's height
+        // (binary search; short paragraphs may grow up to 1.5x the shared size)...
+        var lo = 7.5, hi = f * 1.5;
+        for (var it = 0; it < 12; it++) {
+          var mid = (lo + hi) / 2;
+          b.textEl.style.fontSize = mid + "px";
+          if (b.textEl.scrollHeight <= box) lo = mid; else hi = mid;
         }
+        var fs = lo;
+        b.textEl.style.fontSize = fs + "px";
+        // ...then spread the lines so the block is exactly as tall as the box:
+        // no empty band above or below the text.
+        var natural = b.textEl.scrollHeight;
+        var lines = Math.max(1, Math.round(natural / (fs * 1.38)));
+        var lh = box / lines;
+        b.textEl.style.lineHeight = Math.min(Math.max(lh, fs * 1.15), fs * 2.1) + "px";
         b.r = d / 2;
         b.m = b.r * b.r;
         warpBubble(b);
@@ -745,13 +757,14 @@
     // s(u) = (1-A)u + A(2/pi)asin(u) (A=0 is no warp, A=1 a full sphere);
     // we need the inverse (where a letter at source radius rho lands), which
     // is tabulated once and looked up by linear interpolation.
-    var LENS_A = 0.85;
+    var LENS_A = 0.85; // photo lens strength (used further down)
+    var TEXT_LENS_A = 0.93; // text warp strength: 0 = flat, 1 = full sphere
     var LENS_FIT = 1; // output radius multiplier (1 = the lens fills the whole bubble)
-    var LENS_REACH = 1.2; // flat-text radius (in bubble radii) that lands on the rim
+    var LENS_REACH = 1.3; // flat-text radius (in bubble radii) that lands on the rim
     var lensTable = [];
     for (var li = 0; li <= 800; li++) {
       var u = li / 800 * 0.99995;
-      lensTable.push([(1 - LENS_A) * u + LENS_A * (2 / Math.PI) * Math.asin(u), u]);
+      lensTable.push([(1 - TEXT_LENS_A) * u + TEXT_LENS_A * (2 / Math.PI) * Math.asin(u), u]);
     }
     function lensAt(rho) {
       var lo = 0, hi = lensTable.length - 1;
@@ -772,7 +785,7 @@
     function diameterFor(b, f) {
       var textArea = b.chars * 0.54 * f * 1.4 * f * 1.15;
       var d = Math.sqrt(textArea) / INNER;
-      d = Math.max(d, 8 * f); // short lines still get a decent bubble
+      d = Math.max(d, 5.5 * f, 88); // short paragraphs still get a bubble you can grab
       return Math.min(d, Math.min(W, H) * 0.85);
     }
 
