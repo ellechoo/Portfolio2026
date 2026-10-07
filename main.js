@@ -641,8 +641,8 @@
     var RESTITUTION = 0.9; // how bouncy bubble-bubble and bubble-wall hits are
     var COVERAGE = 0.34; // share of the window the bubbles may fill
     var MIN_FONT = 9;
-    var MAX_FONT = 14;
-    var INNER = 0.7; // text box side as a share of the diameter (largest square inside a circle)
+    var MAX_FONT = 18;
+    var INNER = 0.92; // text box side as a share of the diameter. Bigger than the largest square that fits in the circle (0.707), so the text fills the bubble and the far corners get clipped by the rim.
     var W = layer.clientWidth;
     var H = layer.clientHeight;
     var rafId = 0;
@@ -723,7 +723,12 @@
         var px = gr.left + gr.width / 2 - cx, py = gr.top + gr.height / 2 - cy;
         var rho = Math.sqrt(px * px + py * py) / R;
         if (rho < 1e-3) return;
-        var lens = lensAt(Math.min(rho, 0.985));
+        // q: how far out the letter is, as a share of the part of the flat
+        // text the bubble shows (LENS_REACH radii). Letters past the rim
+        // (q > 1) are hidden; they're cut off by the bubble's edge.
+        var q = rho / LENS_REACH;
+        g.style.visibility = q > 1.04 ? "hidden" : "";
+        var lens = lensAt(Math.min(q, 0.9999));
         var th = Math.atan2(py, px);
         var ox = Math.cos(th) * lens.out * R, oy = Math.sin(th) * lens.out * R;
         var deg = th * 180 / Math.PI;
@@ -737,7 +742,8 @@
     // we need the inverse (where a letter at source radius rho lands), which
     // is tabulated once and looked up by linear interpolation.
     var LENS_A = 0.85;
-    var LENS_FIT = 0.93; // keeps even the corner letters inside the rim
+    var LENS_FIT = 1; // output radius multiplier (1 = the lens fills the whole bubble)
+    var LENS_REACH = 1.2; // flat-text radius (in bubble radii) that lands on the rim
     var lensTable = [];
     for (var li = 0; li <= 800; li++) {
       var u = li / 800 * 0.99995;
@@ -755,8 +761,8 @@
       var slope = (c[1] - a[1]) / (c[0] - a[0] || 1); // du/drho
       return {
         out: u * LENS_FIT,
-        radial: Math.max(0.2, slope) * LENS_FIT,
-        tangent: (u / rho) * LENS_FIT
+        radial: Math.max(0.15, slope / LENS_REACH) * LENS_FIT,
+        tangent: (u / rho / LENS_REACH) * LENS_FIT
       };
     }
     function diameterFor(b, f) {
