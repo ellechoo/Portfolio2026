@@ -1223,8 +1223,9 @@ body.is-about .site-header .contact-menu {
   position: absolute;
   left: 0;
   top: 0;
-  padding: 26px 18px 20px;
+  padding: 20px 18px;
   box-sizing: border-box;
+  text-wrap: pretty; /* no one-word last lines where supported (main.js also guards it) */
   background: var(--note-color, #f6e58d);
   color: #1c1c1c;
   line-height: 1.5;
@@ -1238,16 +1239,6 @@ body.is-about .site-header .contact-menu {
   -webkit-user-select: none;
   cursor: grab;
 }
-/* a slightly darker strip across the top, like the sticky edge */
-.about-note::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  height: 12px;
-  background: rgba(0, 0, 0, 0.08);
-}
 .about-note.is-new {
   animation: about-note-in 0.3s 0.1s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
 }
@@ -1259,4 +1250,22 @@ body.is-about .site-header .contact-menu {
   cursor: grabbing;
   transform: rotate(var(--tilt, 0deg)) scale(1.03);
   box-shadow: 0 2px 2px rgba(0, 0, 0, 0.25), 0 20px 36px rgba(0, 0, 0, 0.5);
+}
+
+/* ---------- About page: instructions ---------- */
+.about-hint {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 22px;
+  z-index: 30; /* under the notes and bubbles */
+  margin: 0;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink);
+  opacity: 0.55;
+  pointer-events: none;
 }

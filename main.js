@@ -905,8 +905,6 @@
       x.scale(S, S);
       x.fillStyle = note.style.getPropertyValue("--note-color") || "#f6e58d";
       x.fillRect(0, 0, w, h);
-      x.fillStyle = "rgba(0,0,0,0.08)";
-      x.fillRect(0, 0, w, 12);
       var cs = getComputedStyle(note);
       x.font = cs.fontWeight + " " + cs.fontSize + " " + cs.fontFamily;
       x.fillStyle = "#1c1c1c";
@@ -1185,8 +1183,17 @@
       var note = document.createElement("div");
       note.className = "about-note";
       // One span per word (so the lens can copy where each word sits).
-      b.text.split(" ").forEach(function (word, wi) {
-        if (wi > 0) note.appendChild(document.createTextNode(" "));
+      // The last words are joined by non-breaking spaces so the final line
+      // is never a single stray word (an "orphan"): two words, or three
+      // when the last two are short.
+      var noteWords = b.text.split(" ");
+      var glue = noteWords.length;
+      if (glue >= 3) {
+        glue = noteWords.length - 2;
+        if (noteWords[noteWords.length - 1].length + noteWords[noteWords.length - 2].length < 11 && noteWords.length >= 4) glue--;
+      }
+      noteWords.forEach(function (word, wi) {
+        if (wi > 0) note.appendChild(document.createTextNode(wi > glue ? "\u00a0" : " "));
         var sp = document.createElement("span");
         sp.textContent = word;
         note.appendChild(sp);
@@ -1332,6 +1339,11 @@
     var notesLayer = document.createElement("div");
     notesLayer.className = "about-notes";
     els.aboutContent.appendChild(notesLayer);
+    var hint = document.createElement("p");
+    hint.className = "about-hint";
+    var coarse = window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
+    hint.textContent = coarse ? "double tap a bubble to pop it" : "double click a bubble to pop it";
+    els.aboutContent.appendChild(hint);
     els.aboutContent.appendChild(bubbleLayer);
 
     els.aboutContent.appendChild(layout);
