@@ -475,6 +475,7 @@ button.contact-toggle {
 }
 
 .project-card {
+  position: relative;
   cursor: pointer;
   flex: 0 0 auto;
   max-width: 100%;
@@ -1285,4 +1286,46 @@ body.is-about .site-header .contact-menu {
 }
 .about-hint.is-gone {
   opacity: 0;
+}
+
+/* ---------- Gallery: filter pops ---------- */
+/* Cards leaving swell and fade (with a ring of droplets, like a popped
+   bubble); cards arriving pop in with a little overshoot. */
+.project-card.is-popping-out {
+  pointer-events: none;
+  z-index: 2;
+  animation: card-pop-out 0.3s ease-out forwards;
+}
+@keyframes card-pop-out {
+  0% { transform: scale(1); opacity: 1; }
+  40% { transform: scale(1.05); opacity: 1; }
+  100% { transform: scale(1.14); opacity: 0; }
+}
+.project-card.is-popping-in {
+  animation: card-pop-in 0.46s cubic-bezier(0.2, 0.9, 0.3, 1.25) both;
+  animation-delay: var(--pop-delay, 0s);
+}
+@keyframes card-pop-in {
+  0% { transform: scale(0.6); opacity: 0; }
+  60% { transform: scale(1.04); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.card-pop-bit {
+  position: absolute;
+  left: 0;
+  top: 0;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: card-pop-bit 0.5s cubic-bezier(0.15, 0.7, 0.3, 1) forwards;
+}
+@keyframes card-pop-bit {
+  from { transform: translate(var(--cx), var(--cy)) scale(1); opacity: 0.9; }
+  to { transform: translate(calc(var(--cx) + var(--dx)), calc(var(--cy) + var(--dy))) scale(0.2); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .project-card.is-popping-out,
+  .project-card.is-popping-in,
+  .card-pop-bit {
+    animation: none;
+  }
 }

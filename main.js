@@ -466,7 +466,7 @@
     var allPill = makePill("All", activeCategory === null, "var(--ink)", function () {
       activeCategory = null;
       renderCategoryFilter();
-      applyCategoryFilter();
+      applyCategoryFilter(true);
     });
     bar.appendChild(allPill);
     trackHover(allPill);
@@ -476,7 +476,7 @@
       var pill = makePill(cat, isActive, categoryColor(cat), function () {
         activeCategory = isActive ? null : cat;
         renderCategoryFilter();
-        applyCategoryFilter();
+        applyCategoryFilter(true);
       });
       bar.appendChild(pill);
       trackHover(pill);
@@ -587,26 +587,110 @@
   // Shows/hides the already-built cards to match activeCategory —
   // no DOM is created or destroyed, so no image ever reloads/redecodes
   // and no card ever changes size. Safe to call on every filter click.
-  function applyCategoryFilter() {
-    var cards = els.list.querySelectorAll(".project-card");
+  /* Show/hide the cards for the active category. With animate=true (a
+     filter was just clicked) the change "pops": cards leaving swell and
+     burst into droplets, the cards that stay glide to their new spots,
+     and cards arriving pop in — the same language as the About bubbles.
+     Without it (first render) cards simply appear. */
+  var filterTimer = 0;
+
+  function applyCategoryFilter(animate) {
+    var cards = Array.prototype.slice.call(els.list.querySelectorAll(".project-card"));
     if (cards.length === 0) return; // nothing built (no projects at all)
 
-    var anyVisible = false;
+    // Stop whatever a previous click had in flight (it leaves cards in a
+    // consistent visible/hidden state, which is all we read below).
+    clearTimeout(filterTimer);
     cards.forEach(function (card) {
-      var cats = card.dataset.categories ? card.dataset.categories.split("|") : [];
-      var show = activeCategory === null || cats.indexOf(activeCategory) !== -1;
-      card.hidden = !show;
-      if (show) anyVisible = true;
+      card.getAnimations().forEach(function (a) { a.cancel(); });
+      card.classList.remove("is-popping-out", "is-popping-in", "is-pre-pop");
+      Array.prototype.forEach.call(card.querySelectorAll(".card-pop-bit"), function (b) { b.remove(); });
     });
 
-    if (anyVisible) {
-      els.list.hidden = false;
-      els.empty.hidden = true;
-    } else {
-      els.list.hidden = true;
-      els.empty.hidden = false;
-      if (els.emptyMessage) els.emptyMessage.textContent = "No projects in this category yet.";
+    var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var showFlags = cards.map(function (card) {
+      var cats = card.dataset.categories ? card.dataset.categories.split("|") : [];
+      return activeCategory === null || cats.indexOf(activeCategory) !== -1;
+    });
+    var anyVisible = showFlags.some(Boolean);
+
+    function setListVisibility() {
+      if (anyVisible) {
+        els.list.hidden = false;
+        els.empty.hidden = true;
+      } else {
+        els.list.hidden = true;
+        els.empty.hidden = false;
+        if (els.emptyMessage) els.emptyMessage.textContent = "No projects in this category yet.";
+      }
     }
+
+    if (!animate || reduceMotion || els.list.hidden) {
+      cards.forEach(function (card, i) { card.hidden = !showFlags[i]; });
+      setListVisibility();
+      return;
+    }
+
+    var leaving = [], staying = [], entering = [];
+    cards.forEach(function (card, i) {
+      if (!card.hidden && !showFlags[i]) leaving.push(card);
+      else if (!card.hidden && showFlags[i]) staying.push(card);
+      else if (card.hidden && showFlags[i]) entering.push(card);
+    });
+
+    // Phase 1: leaving cards swell and burst.
+    leaving.forEach(function (card) {
+      card.classList.add("is-popping-out");
+      var w = card.offsetWidth, h = card.offsetHeight;
+      var cats = card.dataset.categories ? card.dataset.categories.split("|") : [];
+      var color = cats.length ? categoryColor(cats[0]) : "var(--ink)";
+      for (var k = 0; k < 12; k++) {
+        var th = (k / 12) * Math.PI * 2 + Math.random() * 0.4;
+        var dist = 30 + Math.random() * 50;
+        var bit = document.createElement("span");
+        bit.className = "card-pop-bit";
+        bit.style.background = color;
+        var s = 5 + Math.random() * 8;
+        bit.style.width = bit.style.height = s + "px";
+        bit.style.setProperty("--cx", (w / 2 + Math.cos(th) * w / 2 - s / 2).toFixed(1) + "px");
+        bit.style.setProperty("--cy", (h / 2 + Math.sin(th) * h / 2 - s / 2).toFixed(1) + "px");
+        bit.style.setProperty("--dx", (Math.cos(th) * dist).toFixed(1) + "px");
+        bit.style.setProperty("--dy", (Math.sin(th) * dist).toFixed(1) + "px");
+        card.appendChild(bit);
+      }
+    });
+
+    // Phase 2 (after the pops, or at once if nothing is leaving): hide the
+    // leavers, glide the stayers to their new places (FLIP), pop in newcomers.
+    function phaseTwo() {
+      var first = staying.map(function (c) { return c.getBoundingClientRect(); });
+      leaving.forEach(function (card) {
+        card.hidden = true;
+        card.classList.remove("is-popping-out");
+        Array.prototype.forEach.call(card.querySelectorAll(".card-pop-bit"), function (b) { b.remove(); });
+      });
+      entering.forEach(function (card, i) {
+        card.hidden = false;
+        card.style.setProperty("--pop-delay", (i * 0.05).toFixed(2) + "s");
+        card.classList.add("is-popping-in");
+      });
+      setListVisibility();
+      staying.forEach(function (card, i) {
+        var last = card.getBoundingClientRect();
+        var dx = first[i].left - last.left, dy = first[i].top - last.top;
+        if (Math.abs(dx) < 1 && Math.abs(dy) < 1) return;
+        card.animate(
+          [{ transform: "translate(" + dx + "px," + dy + "px)" }, { transform: "none" }],
+          { duration: 420, easing: "cubic-bezier(0.22, 0.8, 0.25, 1)" }
+        );
+      });
+      filterTimer = setTimeout(function () {
+        entering.forEach(function (card) { card.classList.remove("is-popping-in"); });
+      }, 450 + entering.length * 50);
+    }
+
+    if (leaving.length) filterTimer = setTimeout(phaseTwo, 300);
+    else phaseTwo();
   }
 
   /* ---------- about ---------- */
