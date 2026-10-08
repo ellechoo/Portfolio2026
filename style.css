@@ -366,8 +366,7 @@ button.contact-toggle {
   display: flex;
 }
 
-/* Each link is its own pill, same shape and type as the filter pills
-   (first = the blue end of the filter colours, second = the violet end). */
+/* Each link is its own white pill, same shape and type as the filter pills. */
 .contact-menu a {
   display: block;
   white-space: nowrap;
@@ -386,8 +385,8 @@ button.contact-toggle {
   transition: outline-color 0.15s ease;
   animation: contact-pill-in 0.25s cubic-bezier(0.25, 0.8, 0.3, 1) both;
 }
-.contact-menu a:nth-child(1) { --pill-color: hsl(212, 72%, 70%); }
-.contact-menu a:nth-child(2) { --pill-color: hsl(285, 72%, 70%); animation-delay: 0.05s; }
+.contact-menu a { --pill-color: #ffffff; }
+.contact-menu a:nth-child(2) { animation-delay: 0.05s; }
 /* Hover: the same white ring the filter pills show (the text stays dark
    — the header's blue-on-hover text colour would vanish on the fill). */
 .contact-menu a:hover,
