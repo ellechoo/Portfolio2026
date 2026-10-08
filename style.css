@@ -345,10 +345,10 @@ button.contact-toggle {
 .contact-menu {
   display: none;
   position: absolute;
-  top: calc(100% + 8px);
+  top: calc(100% + 18px);
   right: 0;
   align-items: flex-end;
-  gap: 8px;
+  gap: 12px;
   flex-direction: column;
 }
 
@@ -358,11 +358,12 @@ button.contact-toggle {
   top: 100%;
   right: 0;
   width: 160px; /* matches .contact-menu's min-width */
-  height: 8px; /* matches the gap above */
+  height: 18px; /* matches the gap above */
 }
 
 .nav-right:hover .contact-menu,
-.contact-menu.is-open {
+.contact-menu.is-open,
+.contact-menu.is-lingering {
   display: flex;
 }
 
