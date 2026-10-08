@@ -1167,6 +1167,11 @@
         }
       }
       if (notesLayer) spawnNote(b, x, y);
+      // Last bubble gone: the instructions have done their job, so fade them out.
+      if (!bodies.length) {
+        var hintEl = els.aboutContent.querySelector(".about-hint");
+        if (hintEl) hintEl.classList.add("is-gone");
+      }
     }
 
     function clampNote(note, x, y) {

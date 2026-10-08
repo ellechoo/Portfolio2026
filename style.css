@@ -1267,5 +1267,9 @@ body.is-about .site-header .contact-menu {
   text-transform: uppercase;
   color: var(--ink);
   opacity: 0.55;
+  transition: opacity 0.8s ease;
   pointer-events: none;
+}
+.about-hint.is-gone {
+  opacity: 0;
 }
