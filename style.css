@@ -795,11 +795,27 @@ button.contact-toggle {
   align-items: baseline;
   justify-content: space-between;
   gap: 16px;
+  position: relative;
   margin-top: 64px;
   padding: 28px 0;
-  border-top: 1px solid var(--line);
   color: var(--ink);
   text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+/* Squiggly rule above the footer (a wavy line cut out of --line's color
+   with a mask, repeating along the width). */
+.next-project::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -5px;
+  height: 10px;
+  background: var(--line);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='10' viewBox='0 0 24 10'%3E%3Cpath d='M0 5 Q6 -0.5 12 5 T24 5' fill='none' stroke='black' stroke-width='1.6'/%3E%3C/svg%3E") 0 0 / 24px 10px repeat-x;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='10' viewBox='0 0 24 10'%3E%3Cpath d='M0 5 Q6 -0.5 12 5 T24 5' fill='none' stroke='black' stroke-width='1.6'/%3E%3C/svg%3E") 0 0 / 24px 10px repeat-x;
+  pointer-events: none;
 }
 
 .next-project[hidden] {
@@ -812,7 +828,7 @@ button.contact-toggle {
   font-weight: 500;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--ink);
+  color: inherit;
 }
 
 .next-project-title {
@@ -820,7 +836,7 @@ button.contact-toggle {
   min-width: 0;
   text-align: right;
   font-family: 'Array', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: clamp(22px, 2.6vw, 32px);
+  font-size: clamp(18px, 2.1vw, 26px);
   font-weight: 600;
   letter-spacing: -0.01em;
   line-height: 1.1;
@@ -831,17 +847,14 @@ button.contact-toggle {
 
 .next-project-arrow {
   flex: 0 0 auto;
-  font-size: 20px;
-  transition: transform 0.15s ease;
+  font-size: 18px;
 }
 
-.next-project:hover .next-project-title {
-  text-decoration: underline;
-  text-underline-offset: 4px;
-}
-
-.next-project:hover .next-project-arrow {
-  transform: translateX(4px);
+/* Hover/focus: the whole link turns the same light blue as the main nav
+   (the DATA VIZ hue) instead of underlining. The arrow stays put. */
+.next-project:hover,
+.next-project:focus-visible {
+  color: hsl(212, 72%, 70%);
 }
 
 @media (max-width: 600px) {
