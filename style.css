@@ -347,12 +347,8 @@ button.contact-toggle {
   position: absolute;
   top: calc(100% + 8px);
   right: 0;
-  min-width: 160px;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  box-shadow: 0 16px 32px -16px rgba(0, 0, 0, 0.6);
-  padding: 6px;
+  align-items: flex-end;
+  gap: 8px;
   flex-direction: column;
 }
 
@@ -370,15 +366,43 @@ button.contact-toggle {
   display: flex;
 }
 
+/* Each link is its own pill, same shape and type as the filter pills
+   (first = the blue end of the filter colours, second = the violet end). */
 .contact-menu a {
-  padding: 9px 12px;
-  border-radius: 5px;
-  font-size: 14px;
+  display: block;
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--pill-color);
+  background: var(--pill-color);
+  color: var(--bg);
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  transition: outline-color 0.15s ease;
+  animation: contact-pill-in 0.25s cubic-bezier(0.25, 0.8, 0.3, 1) both;
 }
-
-.contact-menu a:hover {
-  background: var(--surface-hover);
+.contact-menu a:nth-child(1) { --pill-color: hsl(212, 72%, 70%); }
+.contact-menu a:nth-child(2) { --pill-color: hsl(285, 72%, 70%); animation-delay: 0.05s; }
+/* Hover: the same white ring the filter pills show (the text stays dark
+   — the header's blue-on-hover text colour would vanish on the fill). */
+.contact-menu a:hover,
+.contact-menu a:focus-visible {
+  color: var(--bg);
+  outline-color: #ffffff;
   opacity: 1;
+}
+.contact-menu a[hidden] { display: none; }
+@keyframes contact-pill-in {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .contact-menu a { animation: none; }
 }
 
 /* ---------- Home: empty state ---------- */
