@@ -130,19 +130,7 @@
      is what makes it usable on touch, and keeps it open once opened
      even if the pointer drifts off the button. */
 
-  /* After the pointer leaves the Contact area the pills hang around for
-     a few seconds (.is-lingering), so there's time to aim at one. */
-  var CONTACT_LINGER_MS = 3000;
-  var contactLingerTimer = 0;
-
-  function stopContactLinger() {
-    clearTimeout(contactLingerTimer);
-    contactLingerTimer = 0;
-    if (els.contactMenu) els.contactMenu.classList.remove("is-lingering");
-  }
-
   function closeContactMenu() {
-    stopContactLinger();
     var toggle = els.contactToggle, menu = els.contactMenu;
     if (!menu || !menu.classList.contains("is-open")) return;
     menu.classList.remove("is-open");
@@ -176,15 +164,6 @@
     } else if (els.contactLinkedinLink) {
       els.contactLinkedinLink.hidden = true;
     }
-
-    var navRight = toggle.closest(".nav-right") || toggle.parentNode;
-    navRight.addEventListener("mouseenter", stopContactLinger);
-    navRight.addEventListener("mouseleave", function (e) {
-      if (menu.classList.contains("is-open")) return; // clicked open: stays until closed
-      menu.classList.add("is-lingering");
-      clearTimeout(contactLingerTimer);
-      contactLingerTimer = setTimeout(stopContactLinger, CONTACT_LINGER_MS);
-    });
 
     toggle.addEventListener("click", function (e) {
       e.stopPropagation();
