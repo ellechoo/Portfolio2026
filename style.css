@@ -267,6 +267,11 @@ body.is-about .nav-name--small {
 /* On the about page the star lives at ABOUT and the big name is wider
    than the link box, so start the note just past the big name's right
    edge (it is ~4.98x the font size wide) and centre it on the big name. */
+/* About's star only ever shows on the about page, where its note is off,
+   so the About note sits snug against the word instead. */
+.nav-left::before {
+  left: calc(100% + 14px);
+}
 body.is-about .nav-center::before {
   left: calc(50% + var(--nav-big-size) * 2.49 + 16px);
   top: calc(var(--nav-big-top) + var(--nav-big-size) * 0.55);
