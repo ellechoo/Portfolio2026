@@ -745,7 +745,7 @@
     }
   }
 
-  function startAboutBubbles() {
+  function startAboutBubbles(intro) {
     stopAboutBubbles();
     var layer = els.aboutContent.querySelector(".about-bubbles");
     if (!layer) return;
@@ -938,11 +938,36 @@
       });
     }
 
+    // Arriving from the gallery: the bubbles swell out of the middle of the
+    // photo one after another and glide to wherever they actually are (the
+    // physics runs underneath as normal). INTRO_MS is each bubble's flight.
+    var INTRO_MS = 800, introStart = 0, introOrigin = { x: W / 2, y: H * 0.3 };
+    function introDone() {
+      return !introStart || performance.now() - introStart > INTRO_MS + 80 * bodies.length + 200;
+    }
+
     function render() {
-      bodies.forEach(function (b) {
-        b.el.style.transform = "translate3d(" + (b.x - b.r).toFixed(2) + "px," + (b.y - b.r).toFixed(2) + "px,0)";
-        drawLens(b);
+      var now = introStart ? performance.now() : 0;
+      bodies.forEach(function (b, i) {
+        var x = b.x, y = b.y, s = 1, op = "";
+        if (introStart) {
+          var k = (now - introStart - 120 - i * 80) / INTRO_MS;
+          if (k < 1) {
+            k = Math.max(0, k);
+            var e = 1 - Math.pow(1 - k, 3);
+            // ease-out-back for the swell, so it overshoots a touch
+            var c1 = 1.7, kb = k - 1;
+            s = 0.15 + 0.85 * (1 + (c1 + 1) * kb * kb * kb + c1 * kb * kb);
+            x = introOrigin.x + (b.x - introOrigin.x) * e;
+            y = introOrigin.y + (b.y - introOrigin.y) * e;
+            op = Math.min(1, k * 3).toFixed(3);
+          }
+        }
+        b.el.style.transform = "translate3d(" + (x - b.r).toFixed(2) + "px," + (y - b.r).toFixed(2) + "px,0)" + (s !== 1 ? " scale(" + s.toFixed(3) + ")" : "");
+        b.el.style.opacity = op;
+        if (!introStart || introDone() || s === 1) drawLens(b);
       });
+      if (introStart && introDone()) introStart = 0;
     }
 
     // ----- seeing the photo through a bubble -----
@@ -1386,6 +1411,11 @@
 
     sizeBubbles();
     placeBubbles();
+    if (intro && !reduceMotion) {
+      var pr = photoEl && photoEl.getBoundingClientRect();
+      if (pr && pr.width) introOrigin = { x: pr.left + pr.width / 2, y: pr.top + pr.height / 2 };
+      introStart = performance.now();
+    }
     render();
     rafId = requestAnimationFrame(frame);
 
@@ -2008,16 +2038,9 @@
 
   function playEnter(to) {
     if (to === "about") {
-      var bubbles = els.aboutContent.querySelectorAll(".about-bubble");
-      Array.prototype.forEach.call(bubbles, function (b, i) {
-        b.style.setProperty("--in-delay", (0.08 + i * 0.07).toFixed(2) + "s");
-        b.classList.add("is-entering");
-      });
+      // (The bubbles' own entrance runs inside startAboutBubbles.)
       els.about.classList.add("is-entering");
-      setTimeout(function () {
-        els.about.classList.remove("is-entering");
-        Array.prototype.forEach.call(bubbles, function (b) { b.classList.remove("is-entering"); });
-      }, 1100 + bubbles.length * 70);
+      setTimeout(function () { els.about.classList.remove("is-entering"); }, 700);
     } else if (to === "home") {
       var vh = window.innerHeight;
       var shown = Array.prototype.filter.call(els.list.querySelectorAll(".project-card"), function (c) {
@@ -2069,7 +2092,7 @@
     if (hash === "#about") {
       renderAbout();
       showView("about");
-      startAboutBubbles();
+      startAboutBubbles(enterFx === "about");
       if (enterFx === "about") playEnter("about");
     } else if (hash.indexOf("#p/") === 0) {
       var id = decodeURIComponent(hash.slice(3));
