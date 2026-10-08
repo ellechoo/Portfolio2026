@@ -620,6 +620,30 @@
      Without it (first render) cards simply appear. */
   var filterTimer = 0;
 
+  /* One card swells and bursts into a ring of droplets in its category
+     colour (used by the filter pops and by the gallery -> about leave). */
+  function burstCard(card) {
+    card.classList.add("is-popping-out");
+    var w = card.offsetWidth, h = card.offsetHeight;
+    var cats = card.dataset.categories ? card.dataset.categories.split("|") : [];
+    var color = cats.length ? categoryColor(cats[0]) : "var(--ink)";
+    for (var k = 0; k < 12; k++) {
+      var th = (k / 12) * Math.PI * 2 + Math.random() * 0.4;
+      var dist = 30 + Math.random() * 50;
+      var bit = document.createElement("span");
+      bit.className = "card-pop-bit";
+      bit.style.background = color;
+      var s = 5 + Math.random() * 8;
+      bit.style.width = bit.style.height = s + "px";
+      bit.style.setProperty("--cx", (w / 2 + Math.cos(th) * w / 2 - s / 2).toFixed(1) + "px");
+      bit.style.setProperty("--cy", (h / 2 + Math.sin(th) * h / 2 - s / 2).toFixed(1) + "px");
+      bit.style.setProperty("--dx", (Math.cos(th) * dist).toFixed(1) + "px");
+      bit.style.setProperty("--dy", (Math.sin(th) * dist).toFixed(1) + "px");
+      card.appendChild(bit);
+    }
+  }
+
+
   function applyCategoryFilter(animate) {
     var cards = Array.prototype.slice.call(els.list.querySelectorAll(".project-card"));
     if (cards.length === 0) return; // nothing built (no projects at all)
@@ -665,26 +689,7 @@
     });
 
     // Phase 1: leaving cards swell and burst.
-    leaving.forEach(function (card) {
-      card.classList.add("is-popping-out");
-      var w = card.offsetWidth, h = card.offsetHeight;
-      var cats = card.dataset.categories ? card.dataset.categories.split("|") : [];
-      var color = cats.length ? categoryColor(cats[0]) : "var(--ink)";
-      for (var k = 0; k < 12; k++) {
-        var th = (k / 12) * Math.PI * 2 + Math.random() * 0.4;
-        var dist = 30 + Math.random() * 50;
-        var bit = document.createElement("span");
-        bit.className = "card-pop-bit";
-        bit.style.background = color;
-        var s = 5 + Math.random() * 8;
-        bit.style.width = bit.style.height = s + "px";
-        bit.style.setProperty("--cx", (w / 2 + Math.cos(th) * w / 2 - s / 2).toFixed(1) + "px");
-        bit.style.setProperty("--cy", (h / 2 + Math.sin(th) * h / 2 - s / 2).toFixed(1) + "px");
-        bit.style.setProperty("--dx", (Math.cos(th) * dist).toFixed(1) + "px");
-        bit.style.setProperty("--dy", (Math.sin(th) * dist).toFixed(1) + "px");
-        card.appendChild(bit);
-      }
-    });
+    leaving.forEach(burstCard);
 
     // Phase 2 (after the pops, or at once if nothing is leaving): hide the
     // leavers, glide the stayers to their new places (FLIP), pop in newcomers.
@@ -1244,7 +1249,7 @@
     var dragNote = null;
     var NOTE_TOP_MARGIN = 64; // keep notes clear of the nav strip when they fit
 
-    function popBubble(b) {
+    function popBubble(b, noNote) {
       var i = bodies.indexOf(b);
       if (i === -1) return;
       bodies.splice(i, 1);
@@ -1276,7 +1281,7 @@
           setTimeout((function (el) { return function () { el.remove(); }; })(bit), 600);
         }
       }
-      if (notesLayer) spawnNote(b, x, y);
+      if (notesLayer && !noNote) spawnNote(b, x, y);
       // Last bubble gone: the instructions have done their job, so fade them out.
       if (!bodies.length) {
         var hintEl = els.aboutContent.querySelector(".about-hint");
@@ -1385,6 +1390,10 @@
     rafId = requestAnimationFrame(frame);
 
     aboutBubbles = {
+      // Leaving the page: pop every bubble (no sticky notes left behind).
+      popAll: function () {
+        bodies.slice().forEach(function (b) { popBubble(b, true); });
+      },
       stop: function () {
         cancelAnimationFrame(rafId);
         window.removeEventListener("resize", onResize);
@@ -1921,7 +1930,10 @@
 
   /* ---------- router ---------- */
 
+  var currentView = null;
+
   function showView(name) {
+    currentView = name;
     els.home.hidden = name !== "home";
     els.about.hidden = name !== "about";
     els.project.hidden = name !== "project";
@@ -1956,7 +1968,100 @@
     closeLightbox();
   }
 
+  /* ---------- gallery <-> about: pop out, pop in ----------
+     Leaving the gallery, the cards on screen burst like the filter pops;
+     leaving About, the bubbles pop (leaving no notes behind). Then the
+     new page arrives with its own pop-in: cards pop up in turn, bubbles
+     swell in. Anything else (projects, first load, reduced motion)
+     swaps instantly as before. */
+
+  var leaveTimer = 0;
+
+  function prefersReducedMotion() {
+    return window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  }
+
+  function clearLeaveFx() {
+    els.about.classList.remove("is-leaving");
+    if (els.categoryFilter) els.categoryFilter.classList.remove("is-fx-out");
+  }
+
+  function playLeave(from) {
+    if (from === "home") {
+      var vh = window.innerHeight;
+      var shown = Array.prototype.filter.call(els.list.querySelectorAll(".project-card"), function (c) {
+        if (c.hidden) return false;
+        var r = c.getBoundingClientRect();
+        return r.bottom > 0 && r.top < vh;
+      });
+      shown.forEach(burstCard);
+      if (els.categoryFilter) els.categoryFilter.classList.add("is-fx-out");
+      return 300;
+    }
+    if (from === "about" && aboutBubbles && aboutBubbles.popAll) {
+      aboutBubbles.popAll();
+      els.about.classList.add("is-leaving");
+      return 300;
+    }
+    return 0;
+  }
+
+  function playEnter(to) {
+    if (to === "about") {
+      var bubbles = els.aboutContent.querySelectorAll(".about-bubble");
+      Array.prototype.forEach.call(bubbles, function (b, i) {
+        b.style.setProperty("--in-delay", (0.08 + i * 0.07).toFixed(2) + "s");
+        b.classList.add("is-entering");
+      });
+      els.about.classList.add("is-entering");
+      setTimeout(function () {
+        els.about.classList.remove("is-entering");
+        Array.prototype.forEach.call(bubbles, function (b) { b.classList.remove("is-entering"); });
+      }, 1100 + bubbles.length * 70);
+    } else if (to === "home") {
+      var vh = window.innerHeight;
+      var shown = Array.prototype.filter.call(els.list.querySelectorAll(".project-card"), function (c) {
+        if (c.hidden) return false;
+        var r = c.getBoundingClientRect();
+        return r.bottom > 0 && r.top < vh;
+      });
+      shown.forEach(function (c, i) {
+        c.style.setProperty("--pop-delay", (i * 0.05).toFixed(2) + "s");
+        c.classList.add("is-popping-in");
+      });
+      if (els.categoryFilter) els.categoryFilter.classList.add("is-fx-in");
+      setTimeout(function () {
+        shown.forEach(function (c) { c.classList.remove("is-popping-in"); });
+        if (els.categoryFilter) els.categoryFilter.classList.remove("is-fx-in");
+      }, 600 + shown.length * 50);
+    }
+  }
+
   function route() {
+    var hash = location.hash || "#";
+    var to = hash === "#about" ? "about" : hash.indexOf("#p/") === 0 ? "project" : "home";
+    var from = currentView;
+    if (leaveTimer) {
+      clearTimeout(leaveTimer);
+      leaveTimer = 0;
+      clearLeaveFx();
+    }
+    var between = (from === "home" && to === "about") || (from === "about" && to === "home");
+    if (between && !prefersReducedMotion()) {
+      var wait = playLeave(from);
+      if (wait) {
+        leaveTimer = setTimeout(function () {
+          leaveTimer = 0;
+          clearLeaveFx();
+          doRoute(to);
+        }, wait);
+        return;
+      }
+    }
+    doRoute(null);
+  }
+
+  function doRoute(enterFx) {
     var hash = location.hash || "#";
     if (hash.indexOf("#p/") !== 0) cancelHero();
     if (hash.indexOf("#p/") !== 0 && hash !== "#about") captureReturnHero();
@@ -1965,6 +2070,7 @@
       renderAbout();
       showView("about");
       startAboutBubbles();
+      if (enterFx === "about") playEnter("about");
     } else if (hash.indexOf("#p/") === 0) {
       var id = decodeURIComponent(hash.slice(3));
       cancelHero();
@@ -1978,6 +2084,7 @@
       renderHome();
       showView("home");
       runHeroReturn();
+      if (enterFx === "home") playEnter("home");
     }
   }
 
