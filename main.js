@@ -271,6 +271,8 @@
      streaming in one by one), or a throwaway <video preload="metadata">
      for a video (this only needs to fetch enough of the file for its
      dimensions, not the whole thing, so it's cheap). */
+  var mediaRenderToken = 0;
+
   function renderProjectMedia(media, project) {
     var SKINNY_RATIO = 4 / 3; // height:width -- counts as "skinny" once taller than this relative to its own width
 
@@ -298,36 +300,60 @@
       });
     }
 
-    Promise.all(
-      media.map(function (item) {
-        if (!item.src) return Promise.resolve(null);
-        return item.type === "video" ? probeVideo(item.src) : probeImage(item.src);
-      })
-    ).then(function (dims) {
-      var isSkinny = dims.map(function (d) {
-        return !!d && d.w > 0 && d.h / d.w > SKINNY_RATIO;
-      });
-
-      var i = 0;
-      while (i < media.length) {
-        if (isSkinny[i] && i + 1 < media.length && isSkinny[i + 1]) {
-          var row = document.createElement("div");
-          row.className = "media-row";
-          // Natural width:height ratio of each paired item, stashed on
-          // the row itself so layoutMediaRows() can size them without
-          // re-probing — it already has everything it needs right here.
-          row.dataset.ratios = (dims[i].w / dims[i].h) + "," + (dims[i + 1].w / dims[i + 1].h);
-          row.appendChild(buildMediaFigure(media[i], i, media, project));
-          row.appendChild(buildMediaFigure(media[i + 1], i + 1, media, project));
-          els.projectMedia.appendChild(row);
-          i += 2;
-        } else {
-          els.projectMedia.appendChild(buildMediaFigure(media[i], i, media, project));
-          i += 1;
-        }
-      }
-      layoutMediaRows();
+    // Items are appended in order as soon as the probes they depend on
+    // finish (all probes start at once), rather than waiting for every
+    // item on the page: the first image shows up as soon as it is known,
+    // even when a later one is huge. The token drops late results if the
+    // visitor has already moved on to another project.
+    var token = ++mediaRenderToken;
+    var probes = media.map(function (item) {
+      if (!item.src) return Promise.resolve(null);
+      return item.type === "video" ? probeVideo(item.src) : probeImage(item.src);
     });
+    function skinny(d) { return !!d && d.w > 0 && d.h / d.w > SKINNY_RATIO; }
+
+    function appendSingle(i, d) {
+      var figure = buildMediaFigure(media[i], i, media, project);
+      var el = figure.querySelector("img, video");
+      // Reserve the right height straight away (no collapsed box while
+      // the file streams in), which is also what lets the gallery ->
+      // project transition know where the first image will land.
+      if (el && d && d.w > 0 && d.h > 0) el.style.aspectRatio = d.w + " / " + d.h;
+      els.projectMedia.appendChild(figure);
+    }
+
+    function step(i) {
+      if (token !== mediaRenderToken) return;
+      if (i >= media.length) { layoutMediaRows(); return; }
+      probes[i].then(function (d0) {
+        if (token !== mediaRenderToken) return;
+        if (!skinny(d0) || i + 1 >= media.length) {
+          appendSingle(i, d0);
+          step(i + 1);
+          return;
+        }
+        probes[i + 1].then(function (d1) {
+          if (token !== mediaRenderToken) return;
+          if (skinny(d1)) {
+            var row = document.createElement("div");
+            row.className = "media-row";
+            // Natural width:height ratio of each paired item, stashed on
+            // the row itself so layoutMediaRows() can size them without
+            // re-probing — it already has everything it needs right here.
+            row.dataset.ratios = (d0.w / d0.h) + "," + (d1.w / d1.h);
+            row.appendChild(buildMediaFigure(media[i], i, media, project));
+            row.appendChild(buildMediaFigure(media[i + 1], i + 1, media, project));
+            els.projectMedia.appendChild(row);
+            layoutMediaRows();
+            step(i + 2);
+          } else {
+            appendSingle(i, d0);
+            step(i + 1);
+          }
+        });
+      });
+    }
+    step(0);
   }
 
   /* Sizes every paired row currently on the project page so its two
@@ -1499,6 +1525,132 @@
     return true;
   }
 
+  /* ---------- gallery -> project: the thumbnail flies into place ----------
+     Clicking a gallery card remembers where its thumbnail sits on screen.
+     When the project page opens, a copy of that thumbnail is laid exactly
+     over the original and glides to where the project's first image sits,
+     while the rest of the page fades in around it; then the real image
+     takes over. Skipped for reduced motion, modified clicks, thumbnails
+     that aren't ready to copy, or when the first image never shows up. */
+
+  var heroPending = null; // { id, rect, kind, src, video, t } set by a gallery click
+  var heroState = null;   // the flight in progress
+
+  function cancelHero() {
+    if (!heroState) return;
+    cancelAnimationFrame(heroState.raf);
+    clearTimeout(heroState.timer);
+    if (heroState.anim) heroState.anim.cancel();
+    heroState.clone.remove();
+    if (heroState.target) heroState.target.style.visibility = "";
+    els.project.classList.remove("is-hero-entering");
+    heroState = null;
+  }
+
+  function rememberHero(e) {
+    heroPending = null;
+    if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    var card = e.target.closest && e.target.closest(".project-card");
+    if (!card) return;
+    var el = card.querySelector(".project-image img, .project-image video");
+    if (!el) return;
+    var r = el.getBoundingClientRect();
+    if (r.width < 2 || r.height < 2) return;
+    var id = decodeURIComponent((card.getAttribute("href") || "").replace(/^#p\//, ""));
+    heroPending = {
+      id: id,
+      rect: { left: r.left, top: r.top, width: r.width, height: r.height },
+      kind: el.tagName === "VIDEO" ? "video" : "img",
+      src: el.currentSrc || el.src,
+      video: el.tagName === "VIDEO" ? el : null,
+      t: Date.now()
+    };
+  }
+
+  function makeHeroClone(pt) {
+    var clone;
+    if (pt.kind === "img") {
+      clone = document.createElement("img");
+      clone.src = pt.src;
+      clone.alt = "";
+    } else {
+      // A video can't be duplicated mid-play; copy its current frame.
+      var v = pt.video;
+      if (!v || v.readyState < 2 || !v.videoWidth) return null;
+      clone = document.createElement("canvas");
+      var dpr = Math.min(window.devicePixelRatio || 1, 2);
+      clone.width = Math.round(pt.rect.width * dpr);
+      clone.height = Math.round(pt.rect.height * dpr);
+      try {
+        clone.getContext("2d").drawImage(v, 0, 0, clone.width, clone.height);
+      } catch (err) {
+        return null;
+      }
+    }
+    clone.className = "hero-clone";
+    clone.style.left = pt.rect.left + "px";
+    clone.style.top = pt.rect.top + "px";
+    clone.style.width = pt.rect.width + "px";
+    clone.style.height = pt.rect.height + "px";
+    return clone;
+  }
+
+  function runHero(id) {
+    var pt = heroPending;
+    heroPending = null;
+    if (!pt || pt.id !== id || Date.now() - pt.t > 2000) return;
+    if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    var clone = makeHeroClone(pt);
+    if (!clone) return;
+
+    // The page smooth-scrolls to the top on navigation (see showView); the
+    // target has to be measured at its final position, so jump there now.
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+
+    document.body.appendChild(clone);
+    els.project.classList.add("is-hero-entering");
+    var state = { clone: clone, target: null, raf: 0, timer: 0, anim: null };
+    heroState = state;
+    var started = performance.now();
+
+    function finish() {
+      if (heroState !== state) return;
+      clone.remove();
+      if (state.target) state.target.style.visibility = "";
+      els.project.classList.remove("is-hero-entering");
+      heroState = null;
+    }
+
+    function poll() {
+      if (heroState !== state) return;
+      var target = els.projectMedia.querySelector("img, video");
+      if (window.scrollY !== 0) window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+      var r = target && target.getBoundingClientRect();
+      if (r && r.width > 0 && r.height > 0) {
+        state.target = target;
+        target.style.visibility = "hidden";
+        state.anim = clone.animate(
+          [
+            { left: pt.rect.left + "px", top: pt.rect.top + "px", width: pt.rect.width + "px", height: pt.rect.height + "px" },
+            { left: r.left + "px", top: r.top + "px", width: r.width + "px", height: r.height + "px" }
+          ],
+          { duration: 650, easing: "cubic-bezier(0.22, 0.8, 0.25, 1)", fill: "forwards" }
+        );
+        state.anim.onfinish = finish;
+        state.anim.oncancel = finish;
+        return;
+      }
+      if (performance.now() - started > 1800) {
+        // The first image never appeared: let the copy fade away instead.
+        state.anim = clone.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 250, fill: "forwards" });
+        state.anim.onfinish = finish;
+        return;
+      }
+      state.raf = requestAnimationFrame(poll);
+    }
+    poll();
+  }
+
   /* ---------- lightbox ---------- */
   /* A simple zoomed-in viewer for a project's media, with a carousel
      when there's more than one item. Shown via the .is-open class
@@ -1684,26 +1836,35 @@
       if (name === "home") els.navCenter.removeAttribute("data-tip");
       else els.navCenter.setAttribute("data-tip", "go back to my gallery page");
     }
-    window.scrollTo(0, 0);
+    // A hero flight (gallery thumbnail -> project image) needs the page at
+    // its final scroll position straight away, so skip the smooth scroll.
+    window.scrollTo({ top: 0, left: 0, behavior: heroPending ? "instant" : "auto" });
     closeContactMenu();
     closeLightbox();
   }
 
   function route() {
     var hash = location.hash || "#";
+    if (hash.indexOf("#p/") !== 0) cancelHero();
     if (hash === "#about") {
       renderAbout();
       showView("about");
       startAboutBubbles();
     } else if (hash.indexOf("#p/") === 0) {
       var id = decodeURIComponent(hash.slice(3));
-      if (renderProject(id)) showView("project");
+      cancelHero();
+      if (renderProject(id)) {
+        showView("project");
+        runHero(id);
+      }
     } else {
+      heroPending = null;
       renderHome();
       showView("home");
     }
   }
 
+  els.list.addEventListener("click", rememberHero, true);
   renderChrome();
   setUpLightbox();
   setUpCustomCursor();

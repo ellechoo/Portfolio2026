@@ -1329,3 +1329,25 @@ body.is-about .site-header .contact-menu {
     animation: none;
   }
 }
+
+/* ---------- Gallery -> project transition ---------- */
+/* The flying copy of the clicked thumbnail (positioned/animated by
+   main.js; sits above everything but the lightbox). */
+.hero-clone {
+  position: fixed;
+  z-index: 900;
+  margin: 0;
+  object-fit: cover;
+  pointer-events: none;
+}
+/* The project page fades up around the flying image. */
+#project-view.is-hero-entering {
+  animation: hero-view-in 0.5s ease both;
+}
+@keyframes hero-view-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #project-view.is-hero-entering { animation: none; }
+}
