@@ -629,7 +629,7 @@
     var color = cats.length ? categoryColor(cats[0]) : "var(--ink)";
     for (var k = 0; k < 12; k++) {
       var th = (k / 12) * Math.PI * 2 + Math.random() * 0.4;
-      var dist = 30 + Math.random() * 50;
+      var dist = 10 + Math.random() * 14;
       var bit = document.createElement("span");
       bit.className = "card-pop-bit";
       bit.style.background = color;
