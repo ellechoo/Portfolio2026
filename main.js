@@ -1543,7 +1543,7 @@
     if (heroState.anim) heroState.anim.cancel();
     heroState.clone.remove();
     if (heroState.target) heroState.target.style.visibility = "";
-    els.project.classList.remove("is-hero-entering");
+    heroState.view.classList.remove("is-hero-entering");
     heroState = null;
   }
 
@@ -1609,7 +1609,7 @@
 
     document.body.appendChild(clone);
     els.project.classList.add("is-hero-entering");
-    var state = { clone: clone, target: null, raf: 0, timer: 0, anim: null };
+    var state = { clone: clone, target: null, raf: 0, timer: 0, anim: null, view: els.project };
     heroState = state;
     var started = performance.now();
 
@@ -1649,6 +1649,116 @@
       state.raf = requestAnimationFrame(poll);
     }
     poll();
+  }
+
+
+  /* ---------- project -> gallery: the first image shrinks back ----------
+     The reverse trip. When the project page is left for the gallery, the
+     first image is copied just before the page is swapped, and the copy
+     glides down onto that project's thumbnail in the freshly built
+     gallery. The landing spot is re-read every frame, because the
+     gallery's thumbnails are still loading and can nudge the layout. */
+
+  var currentProjectId = null; // the project being shown, if any
+  var heroReturn = null;       // { id, clone, rect } captured on the way out
+
+  function captureReturnHero() {
+    var id = currentProjectId;
+    currentProjectId = null;
+    heroReturn = null;
+    if (!id || els.project.hidden) return;
+    if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    var el = els.projectMedia.querySelector("img, video");
+    if (!el) return;
+    if (el.tagName === "IMG" && !(el.complete && el.naturalWidth)) return;
+    var r = el.getBoundingClientRect();
+    // Only worth flying if the image is actually on screen.
+    if (r.width < 2 || r.height < 2 || r.bottom < 60 || r.top > window.innerHeight - 60) return;
+    var pt = {
+      rect: { left: r.left, top: r.top, width: r.width, height: r.height },
+      kind: el.tagName === "VIDEO" ? "video" : "img",
+      src: el.currentSrc || el.src,
+      video: el.tagName === "VIDEO" ? el : null
+    };
+    var clone = makeHeroClone(pt);
+    if (!clone) return;
+    heroReturn = { id: id, clone: clone, rect: pt.rect, t: Date.now() };
+  }
+
+  function runHeroReturn() {
+    var pt = heroReturn;
+    heroReturn = null;
+    if (!pt) return;
+    var clone = pt.clone;
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+
+    var card = null;
+    Array.prototype.forEach.call(els.list.querySelectorAll(".project-card"), function (c) {
+      var cid = decodeURIComponent((c.getAttribute("href") || "").replace(/^#p\//, ""));
+      if (cid === pt.id) card = c;
+    });
+    var target = card && !card.hidden && card.querySelector(".project-image img, .project-image video");
+    if (!target) return;
+    // Lazy thumbnails below the fold wouldn't load otherwise.
+    if (target.tagName === "IMG") target.loading = "eager";
+
+    document.body.appendChild(clone);
+    els.home.classList.add("is-hero-entering");
+    var state = { clone: clone, target: target, raf: 0, timer: 0, anim: null, view: els.home };
+    heroState = state;
+    target.style.visibility = "hidden";
+    var started = performance.now();
+    var flightStart = 0, scrolled = false, DURATION = 650;
+
+    function finish() {
+      if (heroState !== state) return;
+      clone.remove();
+      target.style.visibility = "";
+      els.home.classList.remove("is-hero-entering");
+      heroState = null;
+    }
+
+    function place(r) {
+      clone.style.left = r.left + "px";
+      clone.style.top = r.top + "px";
+      clone.style.width = r.width + "px";
+      clone.style.height = r.height + "px";
+    }
+
+    function tick(now) {
+      if (heroState !== state) return;
+      var r = target.getBoundingClientRect();
+      var ready = r.width > 2 && r.height > 2 && (target.tagName !== "IMG" || target.complete);
+      if (!ready) {
+        if (now - started > 1800) {
+          state.anim = clone.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 250, fill: "forwards" });
+          state.anim.onfinish = finish;
+          return;
+        }
+        state.raf = requestAnimationFrame(tick);
+        return;
+      }
+      if (!scrolled) {
+        scrolled = true;
+        if (r.top < 70 || r.bottom > window.innerHeight - 20) {
+          target.scrollIntoView({ block: "center", behavior: "instant" });
+          r = target.getBoundingClientRect();
+        }
+      }
+      if (!flightStart) flightStart = now;
+      var t = Math.min(1, (now - flightStart) / DURATION);
+      var e = 1 - Math.pow(1 - t, 3.2);
+      var a = pt.rect;
+      place({
+        left: a.left + (r.left - a.left) * e,
+        top: a.top + (r.top - a.top) * e,
+        width: a.width + (r.width - a.width) * e,
+        height: a.height + (r.height - a.height) * e
+      });
+      if (t >= 1) { finish(); return; }
+      state.raf = requestAnimationFrame(tick);
+    }
+    state.raf = requestAnimationFrame(tick);
   }
 
   /* ---------- lightbox ---------- */
@@ -1827,6 +1937,9 @@
     if (els.navLeft) {
       if (name === "about") els.navLeft.setAttribute("aria-current", "page");
       else els.navLeft.removeAttribute("aria-current");
+      // Hover note: away from the about page, it says what About leads to.
+      if (name === "about") els.navLeft.removeAttribute("data-tip");
+      else els.navLeft.setAttribute("data-tip", "get to know me");
     }
     if (els.navCenter) {
       if (name !== "about") els.navCenter.setAttribute("aria-current", "page");
@@ -1838,7 +1951,7 @@
     }
     // A hero flight (gallery thumbnail -> project image) needs the page at
     // its final scroll position straight away, so skip the smooth scroll.
-    window.scrollTo({ top: 0, left: 0, behavior: heroPending ? "instant" : "auto" });
+    window.scrollTo({ top: 0, left: 0, behavior: (heroPending || heroReturn) ? "instant" : "auto" });
     closeContactMenu();
     closeLightbox();
   }
@@ -1846,6 +1959,8 @@
   function route() {
     var hash = location.hash || "#";
     if (hash.indexOf("#p/") !== 0) cancelHero();
+    if (hash.indexOf("#p/") !== 0 && hash !== "#about") captureReturnHero();
+    else { currentProjectId = null; heroReturn = null; }
     if (hash === "#about") {
       renderAbout();
       showView("about");
@@ -1854,6 +1969,7 @@
       var id = decodeURIComponent(hash.slice(3));
       cancelHero();
       if (renderProject(id)) {
+        currentProjectId = id;
         showView("project");
         runHero(id);
       }
@@ -1861,6 +1977,7 @@
       heroPending = null;
       renderHome();
       showView("home");
+      runHeroReturn();
     }
   }
 

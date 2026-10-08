@@ -237,9 +237,10 @@ body.is-about .nav-name--small {
   opacity: 1;
 }
 
-/* Small note to the right of the name (and its star) on hover /
-   keyboard focus. main.js sets data-tip on .nav-center depending on the
-   page. */
+/* Small note to the right of a nav item (and its star) on hover /
+   keyboard focus. main.js sets data-tip on .nav-center (and on
+   .nav-left away from the about page) depending on the page. */
+.nav-left::before,
 .nav-center::before {
   content: "\2190\00a0\00a0" attr(data-tip);
   position: absolute;
@@ -270,21 +271,26 @@ body.is-about .nav-center::before {
   left: calc(50% + var(--nav-big-size) * 2.49 + 16px);
   top: calc(var(--nav-big-top) + var(--nav-big-size) * 0.55);
 }
+.nav-left[data-tip]:hover::before,
+.nav-left[data-tip]:focus-visible::before,
 .nav-center[data-tip]:hover::before,
 .nav-center[data-tip]:focus-visible::before {
   opacity: 0.85;
   transform: translate(0, -50%);
   transition-delay: 0.15s;
 }
+.nav-left:not([data-tip])::before,
 .nav-center:not([data-tip])::before { display: none; }
-/* Not enough room beside a centred name on narrow screens. */
+/* Not enough room beside the nav items on narrow screens. */
 @media (max-width: 800px) {
+  .nav-left::before,
   .nav-center::before { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .nav-name,
   .nav-left::after,
+  .nav-left::before,
   .nav-center::after,
   .nav-center::before {
     transition: none;
@@ -1341,7 +1347,8 @@ body.is-about .site-header .contact-menu {
   pointer-events: none;
 }
 /* The project page fades up around the flying image. */
-#project-view.is-hero-entering {
+#project-view.is-hero-entering,
+#home-view.is-hero-entering {
   animation: hero-view-in 0.5s ease both;
 }
 @keyframes hero-view-in {
@@ -1349,5 +1356,6 @@ body.is-about .site-header .contact-menu {
   to { opacity: 1; }
 }
 @media (prefers-reduced-motion: reduce) {
-  #project-view.is-hero-entering { animation: none; }
+  #project-view.is-hero-entering,
+  #home-view.is-hero-entering { animation: none; }
 }
