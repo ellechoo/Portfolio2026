@@ -217,7 +217,7 @@ body.is-about .nav-name--small {
   opacity: 0;
 }
 
-/* Current-page indicator: a small four-pointed star (same shape as
+/* Current-page indicator: a small starfish (same shape as
    the cursor) just right of the nav item for the page you're on.
    Absolutely positioned, so it never nudges the nav's layout; fades
    as aria-current moves between items. */
@@ -235,8 +235,8 @@ body.is-about .nav-name--small {
   height: 13px;
   margin: -6.5px 0 0 6px;
   background: var(--ink);
-  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpolygon points='12,2 14.47,9.53 22,12 14.47,14.47 12,22 9.53,14.47 2,12 9.53,9.53'/%3E%3C/svg%3E") center / contain no-repeat;
-  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpolygon points='12,2 14.47,9.53 22,12 14.47,14.47 12,22 9.53,14.47 2,12 9.53,9.53'/%3E%3C/svg%3E") center / contain no-repeat;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12.00 3.50 Q14.76 9.00 20.84 9.93 Q16.47 14.25 17.47 20.32 Q12.00 17.50 6.53 20.32 Q7.53 14.25 3.16 9.93 Q9.24 9.00 12.00 3.50Z' stroke='black' stroke-width='2' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12.00 3.50 Q14.76 9.00 20.84 9.93 Q16.47 14.25 17.47 20.32 Q12.00 17.50 6.53 20.32 Q7.53 14.25 3.16 9.93 Q9.24 9.00 12.00 3.50Z' stroke='black' stroke-width='2' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
   opacity: 0;
   transition: opacity 0.35s ease;
   pointer-events: none;
@@ -250,8 +250,8 @@ body.is-about .nav-name--small {
   height: 13px;
   margin: -6.5px 6px 0 0;
   background: var(--ink);
-  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpolygon points='12,2 14.47,9.53 22,12 14.47,14.47 12,22 9.53,14.47 2,12 9.53,9.53'/%3E%3C/svg%3E") center / contain no-repeat;
-  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpolygon points='12,2 14.47,9.53 22,12 14.47,14.47 12,22 9.53,14.47 2,12 9.53,9.53'/%3E%3C/svg%3E") center / contain no-repeat;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12.00 3.50 Q14.76 9.00 20.84 9.93 Q16.47 14.25 17.47 20.32 Q12.00 17.50 6.53 20.32 Q7.53 14.25 3.16 9.93 Q9.24 9.00 12.00 3.50Z' stroke='black' stroke-width='2' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12.00 3.50 Q14.76 9.00 20.84 9.93 Q16.47 14.25 17.47 20.32 Q12.00 17.50 6.53 20.32 Q7.53 14.25 3.16 9.93 Q9.24 9.00 12.00 3.50Z' stroke='black' stroke-width='2' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
   pointer-events: none;
 }
 .nav-left[aria-current="page"]::after,
@@ -1105,7 +1105,7 @@ button.contact-toggle {
 }
 
 /* ---------- Custom cursor ---------- */
-/* A single four-pointed star tracks the mouse exactly (no lag/easing —
+/* A single starfish tracks the mouse exactly (no lag/easing —
    this replaces the old dot-plus-separate-lagging-ring setup),
    replacing the native pointer on a real mouse/trackpad (see the
    (hover: hover) media query below); touch devices are left
@@ -1135,7 +1135,7 @@ button.contact-toggle {
   transition: width 0.2s ease, height 0.2s ease, opacity 0.15s ease;
 }
 
-.cursor-star polygon {
+.cursor-star path {
   fill: #ffffff;
   stroke: #ffffff;
   stroke-width: 1.5;
@@ -1147,7 +1147,7 @@ button.contact-toggle {
   height: 36px;
 }
 
-.cursor-star.is-active polygon {
+.cursor-star.is-active path {
   fill: none;
 }
 
@@ -1173,7 +1173,7 @@ button.contact-toggle {
   animation: cursor-echo-fade 1.3s ease-out forwards;
 }
 
-.cursor-echo polygon {
+.cursor-echo path {
   fill: none;
   stroke: #ffffff;
   stroke-width: 1.5;
