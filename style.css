@@ -1667,14 +1667,13 @@ body.is-contact .contact-menu { display: none !important; }
     opacity: 1;
   }
 
-  /* Filter pills always on one line, spread across the full width: the
-     type stays close to its normal size (only easing down on the very
-     smallest screens), and any spare width becomes space between pills. */
+  /* Filter pills always on one line, sized like the desktop ones (same
+     proportions, same airy gaps) but scaled so the row spans the screen:
+     everything inside is in em of --pf. Capped at the desktop size. */
   .category-filter {
-    --pf: clamp(9px, 2.85vw, 11px);
+    --pf: min(13px, calc((100vw - 40px) / 33.8));
     flex-wrap: nowrap;
-    justify-content: space-between;
-    gap: 4px;
+    gap: calc(var(--pf) * 0.8);
     overflow-x: auto;
     scrollbar-width: none;
     /* room for the selected pill's ring, which would otherwise be clipped */
@@ -1685,7 +1684,7 @@ body.is-contact .contact-menu { display: none !important; }
   .pill {
     flex: 0 0 auto;
     font-size: var(--pf);
-    padding: calc(var(--pf) * 0.45) calc(var(--pf) * 0.6);
+    padding: calc(var(--pf) * 0.46) calc(var(--pf) * 0.8);
   }
   .project-list { padding-top: 30px; }
 
