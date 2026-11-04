@@ -879,6 +879,8 @@ button.contact-toggle {
   .project-description {
     flex-basis: 100%;
     margin: 16px 0 0;
+    font-size: 13.5px;
+    line-height: 1.55;
   }
 }
 
