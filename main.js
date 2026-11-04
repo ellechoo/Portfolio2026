@@ -2238,7 +2238,7 @@
      is the fallback for the rest: the last two words of a text block are
      joined with a non-breaking space so the last line is never one word.
      Runs on whatever the page builds, as it builds it. */
-  var ORPHAN_SELECTOR = "p, figcaption, h1, h2, h3, .summary, .project-description, .about-hint, .media-caption, .caption";
+  var ORPHAN_SELECTOR = "p, figcaption, h2, h3, .summary, .project-description, .about-hint, .media-caption, .caption";
   function glueLastWords(el) {
     if (el.closest && el.closest(".about-bubble, .about-note, script, style, textarea")) return;
     var node = el.lastChild;
