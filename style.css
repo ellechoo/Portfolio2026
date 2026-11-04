@@ -900,7 +900,10 @@ button.contact-toggle {
 
 .next-project {
   display: flex;
-  align-items: baseline;
+  /* Aligned by their top edges (all three share the same 18px line box)
+     rather than by baseline: browsers disagree about the baseline of a
+     box with overflow hidden (the title), which nudged it up on iOS. */
+  align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
   position: relative;
@@ -956,7 +959,7 @@ button.contact-toggle {
 .next-project-arrow {
   flex: 0 0 auto;
   font-size: 14px;
-  line-height: 1;
+  line-height: 18px;
 }
 
 /* Hover/focus: the whole link turns the same light blue as the main nav
