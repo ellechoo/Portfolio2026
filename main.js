@@ -1307,11 +1307,9 @@
         }
       }
       if (notesLayer && !noNote) spawnNote(b, x, y);
-      // Last bubble gone: the instructions have done their job, so fade them out.
-      if (!bodies.length) {
-        var hintEl = els.aboutContent.querySelector(".about-hint");
-        if (hintEl) hintEl.classList.add("is-gone");
-      }
+      // First pop: the speech bubble has done its job (they get it now), so fade it out.
+      var hintEl = els.aboutContent.querySelector(".about-hint");
+      if (hintEl) hintEl.classList.add("is-gone");
     }
 
     function clampNote(note, x, y) {
@@ -1385,6 +1383,25 @@
 
     // ----- resize -----
     var resizeQueued = false;
+    // The hint is a speech bubble coming out of the photo: to its right
+    // when there's room, otherwise just below it (tail pointing up).
+    var hintEl = els.aboutContent.querySelector(".about-hint");
+    function positionHint() {
+      if (!hintEl || !photoEl) return;
+      var pr = photoEl.getBoundingClientRect();
+      if (!pr.width) return;
+      var hw = hintEl.offsetWidth, vw = window.innerWidth;
+      var side = pr.right + 20 + hw <= vw - 12;
+      hintEl.classList.toggle("is-below", !side);
+      if (side) {
+        hintEl.style.left = (pr.right + 20) + "px";
+        hintEl.style.top = (pr.top + pr.height * 0.12) + "px";
+      } else {
+        hintEl.style.left = Math.max(12, Math.min(vw - hw - 12, pr.left + pr.width * 0.5 - 30)) + "px";
+        hintEl.style.top = (pr.bottom + 16) + "px";
+      }
+    }
+
     function onResize() {
       if (resizeQueued) return;
       resizeQueued = true;
@@ -1395,6 +1412,7 @@
         H = layer.clientHeight;
         if (!W || !H) return;
         photo = null; // its position/size changed; re-read lazily
+        positionHint();
         sizeBubbles();
         bodies.forEach(function (b) {
           b.x *= W / ow; b.y *= H / oh;
@@ -1415,6 +1433,11 @@
       var pr = photoEl && photoEl.getBoundingClientRect();
       if (pr && pr.width) introOrigin = { x: pr.left + pr.width / 2, y: pr.top + pr.height / 2 };
       introStart = performance.now();
+    }
+    if (hintEl) {
+      // Appears once the bubbles have settled in (later when they're flying out of the photo).
+      hintEl.style.setProperty("--hint-delay", (introStart ? 1.5 : 0.6) + "s");
+      positionHint();
     }
     render();
     rafId = requestAnimationFrame(frame);

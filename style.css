@@ -1311,22 +1311,58 @@ body.is-about .site-header .contact-menu {
 .about-hint {
   position: fixed;
   left: 0;
-  right: 0;
-  bottom: 22px;
-  z-index: 30; /* under the notes and bubbles */
+  top: 0;
+  z-index: 55; /* over the bubbles so it stays readable; under the nav (100) */
+  width: max-content;
+  max-width: 172px;
   margin: 0;
-  text-align: center;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--ink);
-  opacity: 0.55;
-  transition: opacity 0.8s ease;
+  padding: 10px 16px;
+  border-radius: 18px;
+  background: #ffffff;
+  color: var(--bg);
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+  text-align: left;
+  text-transform: none;
+  box-shadow: 0 8px 22px -8px rgba(0, 0, 0, 0.6);
+  transform-origin: 0 55%;
+  opacity: 1;
+  transition: opacity 0.5s ease;
+  animation: about-hint-in 0.45s cubic-bezier(0.25, 0.9, 0.3, 1.2) backwards;
+  animation-delay: var(--hint-delay, 0.6s);
   pointer-events: none;
+}
+/* The speech bubble's tail: a small diamond poking toward the photo. */
+.about-hint::after {
+  content: "";
+  position: absolute;
+  left: -5px;
+  top: calc(50% - 6px);
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  background: #ffffff;
+  transform: rotate(45deg);
+}
+.about-hint.is-below {
+  transform-origin: 30px 0;
+}
+.about-hint.is-below::after {
+  left: 24px;
+  top: -5px;
 }
 .about-hint.is-gone {
   opacity: 0;
+}
+@keyframes about-hint-in {
+  from { opacity: 0; transform: scale(0.5); }
+  to { opacity: 1; transform: scale(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .about-hint { animation: none; }
 }
 
 /* ---------- Gallery: filter pops ---------- */
