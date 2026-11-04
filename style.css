@@ -1409,7 +1409,7 @@ body.is-about .site-header .contact-menu {
 }
 @media (max-width: 600px) {
   .about-note {
-    font-size: 12px;
+    font-size: 10px;
     line-height: 1.6;
   }
 }
