@@ -318,6 +318,15 @@
       </div>
       <div class="field-row">
         <div class="field">
+          <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+            <input type="checkbox" id="p-outline" style="width:auto; margin:0;">
+            Faint outline around images and videos
+          </label>
+          <p class="hint">For projects that are mostly black, so they don't melt into the page. Adds a hairline edge on the gallery card and the project page.</p>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
           <label>Categories</label>
           <div id="p-categories" style="display:flex; flex-wrap:wrap; gap:8px;"></div>
           <p class="hint" id="p-categories-empty-hint" hidden>No categories yet — add some above in Site info.</p>
@@ -416,7 +425,7 @@
    "site-photo-preview", "site-photo-pick-btn", "site-photo-remove-btn", "site-photo-input",
    "category-list", "new-category-input", "add-category-btn",
    "admin-project-list", "add-project-btn",
-   "editor", "editor-title", "p-title", "p-gallery-title", "p-year", "p-categories", "p-categories-empty-hint", "p-client", "p-summary", "p-description", "p-website",
+   "editor", "editor-title", "p-title", "p-gallery-title", "p-outline", "p-year", "p-categories", "p-categories-empty-hint", "p-client", "p-summary", "p-description", "p-website",
    "dropzone", "file-input", "pick-existing-btn", "media-list",
    "save-project-btn", "cancel-edit-btn", "delete-project-btn",
    "toast"].forEach(function (id) { el[id] = document.getElementById(id); });
@@ -1056,6 +1065,7 @@
     el["editor-title"].textContent = project ? "Edit project" : "Add project";
     el["p-title"].value = project ? project.title || "" : "";
     el["p-gallery-title"].value = project ? project.galleryTitle || "" : "";
+    el["p-outline"].checked = !!(project && project.outline);
     el["p-year"].value = project ? project.year || String(new Date().getFullYear()) : String(new Date().getFullYear());
     el["p-client"].value = project ? project.client || "" : "";
     el["p-summary"].value = project ? project.summary || "" : "";
@@ -1442,6 +1452,7 @@
         id: id,
         title: title,
         galleryTitle: el["p-gallery-title"].value.trim(),
+        outline: el["p-outline"].checked,
         year: el["p-year"].value.trim(),
         categories: state.categoriesDraft.slice(),
         client: el["p-client"].value.trim(),

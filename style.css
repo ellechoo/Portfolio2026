@@ -1686,6 +1686,17 @@ h1, h2, h3 {
   text-wrap: pretty;
 }
 
+/* ---------- Faint outline (projects whose images are mostly black) ---------- */
+/* Switched on per project in admin ("Faint outline"); a 1px hairline just
+   inside the edge of the thumbnail and of the images/videos on its page. */
+.project-card.has-outline .project-image img,
+.project-card.has-outline .project-image video,
+.project-media.has-outline img,
+.project-media.has-outline video {
+  outline: 1px solid rgba(255, 255, 255, 0.14);
+  outline-offset: -1px;
+}
+
 /* ---------- Gallery footer: back to top ---------- */
 .home-footer {
   position: relative;

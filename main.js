@@ -612,7 +612,7 @@
 
     allProjects.forEach(function (project) {
       var card = document.createElement("a");
-      card.className = "project-card";
+      card.className = "project-card" + (project.outline ? " has-outline" : "");
       card.href = "#p/" + encodeURIComponent(project.id);
 
       var cats = project.categories || [];
@@ -1620,6 +1620,7 @@
     var media = project.media || [];
 
     els.projectMedia.innerHTML = "";
+    els.projectMedia.classList.toggle("has-outline", !!project.outline);
     renderProjectMedia(media, project);
 
     // Points to whatever's next going down the same date-ordered list
