@@ -855,8 +855,8 @@ button.contact-toggle {
   .project-sidebar {
     display: flex;
     flex-wrap: wrap;
-    align-items: baseline;
-    column-gap: 14px;
+    align-items: center;
+    column-gap: 22px;
     row-gap: 12px;
   }
   .project-sidebar h1 {
