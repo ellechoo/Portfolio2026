@@ -1415,6 +1415,20 @@
       if (!pr.width) return;
       var vw = window.innerWidth, gap = 16, FULL = 172;
       var narrow = vw <= 600, edge = narrow ? 24 : 10, MIN = narrow ? 104 : 112;
+      if (narrow) {
+        // Phones: centred under the photo, tail pointing up at it.
+        hintEl.classList.remove("is-left");
+        hintEl.classList.add("is-below");
+        hintEl.style.maxWidth = "";
+        var bw = hintEl.offsetWidth;
+        var cx = pr.left + pr.width / 2;
+        var bx = Math.max(edge, Math.min(vw - bw - edge, cx - bw / 2));
+        hintEl.style.left = bx + "px";
+        hintEl.style.top = (pr.bottom + 14) + "px";
+        hintEl.style.setProperty("--tail-x", Math.max(16, Math.min(bw - 16, cx - bx)) + "px");
+        return;
+      }
+      hintEl.classList.remove("is-below");
       var roomR = vw - pr.right - gap - edge, roomL = pr.left - gap - edge;
       var onLeft = roomR < FULL && roomL > roomR;
       hintEl.classList.toggle("is-left", onLeft);

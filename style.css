@@ -1381,6 +1381,18 @@ body.is-about .site-header .contact-menu {
     font-size: 12px;
   }
 }
+/* Phones: the bubble sits under the photo (there's more height than width
+   to spare), on one line, with its tail pointing up at the photo. */
+.about-hint.is-below {
+  max-width: none;
+  white-space: nowrap;
+  transform-origin: var(--tail-x, 50%) 0;
+}
+.about-hint.is-below::after {
+  left: calc(var(--tail-x, 50%) - 6px);
+  top: -5px;
+  right: auto;
+}
 .about-hint.is-gone {
   opacity: 0;
 }
@@ -1655,12 +1667,14 @@ body.is-contact .contact-menu { display: none !important; }
     opacity: 1;
   }
 
-  /* Filter pills always on one line: their size follows the screen width
-     (everything inside is in em of --pf), so six pills fit down to 320px. */
+  /* Filter pills always on one line, spread across the full width: the
+     type stays close to its normal size (only easing down on the very
+     smallest screens), and any spare width becomes space between pills. */
   .category-filter {
-    --pf: min(11px, calc((100vw - 40px) / 34));
+    --pf: clamp(9px, 2.85vw, 11px);
     flex-wrap: nowrap;
-    gap: calc(var(--pf) * 0.55);
+    justify-content: space-between;
+    gap: 4px;
     overflow-x: auto;
     scrollbar-width: none;
     /* room for the selected pill's ring, which would otherwise be clipped */
@@ -1671,7 +1685,7 @@ body.is-contact .contact-menu { display: none !important; }
   .pill {
     flex: 0 0 auto;
     font-size: var(--pf);
-    padding: calc(var(--pf) * 0.45) calc(var(--pf) * 0.9);
+    padding: calc(var(--pf) * 0.45) calc(var(--pf) * 0.6);
   }
   .project-list { padding-top: 30px; }
 
