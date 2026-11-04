@@ -1383,23 +1383,23 @@
 
     // ----- resize -----
     var resizeQueued = false;
-    // The hint is a speech bubble coming out of the photo: to its right
-    // when there's room, otherwise just below it (tail pointing up).
+    // The hint is a speech bubble coming out of the photo: to its right, or
+    // to its left when that side has more room (narrow screens). On a very
+    // narrow screen it shrinks to fit and may tuck a little over the photo's edge.
     var hintEl = els.aboutContent.querySelector(".about-hint");
     function positionHint() {
       if (!hintEl || !photoEl) return;
       var pr = photoEl.getBoundingClientRect();
       if (!pr.width) return;
-      var hw = hintEl.offsetWidth, vw = window.innerWidth;
-      var side = pr.right + 20 + hw <= vw - 12;
-      hintEl.classList.toggle("is-below", !side);
-      if (side) {
-        hintEl.style.left = (pr.right + 20) + "px";
-        hintEl.style.top = (pr.top + pr.height * 0.12) + "px";
-      } else {
-        hintEl.style.left = Math.max(12, Math.min(vw - hw - 12, pr.left + pr.width * 0.5 - 30)) + "px";
-        hintEl.style.top = (pr.bottom + 16) + "px";
-      }
+      var vw = window.innerWidth, gap = 16, edge = 10, FULL = 172, MIN = 112;
+      var roomR = vw - pr.right - gap - edge, roomL = pr.left - gap - edge;
+      var onLeft = roomR < FULL && roomL > roomR;
+      hintEl.classList.toggle("is-left", onLeft);
+      hintEl.style.maxWidth = Math.max(MIN, Math.min(FULL, onLeft ? roomL : roomR)) + "px";
+      var hw = hintEl.offsetWidth;
+      var x = onLeft ? pr.left - gap - hw : pr.right + gap;
+      hintEl.style.left = Math.max(edge, Math.min(vw - hw - edge, x)) + "px";
+      hintEl.style.top = (pr.top + pr.height * 0.12) + "px";
     }
 
     function onResize() {

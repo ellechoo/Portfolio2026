@@ -1347,12 +1347,18 @@ body.is-about .site-header .contact-menu {
   background: #ffffff;
   transform: rotate(45deg);
 }
-.about-hint.is-below {
-  transform-origin: 30px 0;
+.about-hint.is-left {
+  transform-origin: 100% 55%;
 }
-.about-hint.is-below::after {
-  left: 24px;
-  top: -5px;
+.about-hint.is-left::after {
+  left: auto;
+  right: -5px;
+}
+@media (max-width: 600px) {
+  .about-hint {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
 }
 .about-hint.is-gone {
   opacity: 0;
