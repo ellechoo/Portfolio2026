@@ -231,12 +231,12 @@ body.is-about .nav-name--small {
   position: absolute;
   left: 100%;
   top: 50%;
-  width: 13px;
-  height: 13px;
-  margin: -6.5px 0 0 6px;
+  width: 15px;
+  height: 15px;
+  margin: -7.5px 0 0 6px;
   background: var(--ink);
-  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12.00 3.50 Q14.76 9.00 20.84 9.93 Q16.47 14.25 17.47 20.32 Q12.00 17.50 6.53 20.32 Q7.53 14.25 3.16 9.93 Q9.24 9.00 12.00 3.50Z' stroke='black' stroke-width='2' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
-  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12.00 3.50 Q14.76 9.00 20.84 9.93 Q16.47 14.25 17.47 20.32 Q12.00 17.50 6.53 20.32 Q7.53 14.25 3.16 9.93 Q9.24 9.00 12.00 3.50Z' stroke='black' stroke-width='2' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M10.18 10.19 C11.71 9.08 9.70 8.10 10.75 2.70 A1.25 1.25 0 0 1 13.25 2.70 C14.30 8.10 12.29 9.08 13.82 10.19 C15.36 11.31 15.67 9.09 21.12 8.42 A1.25 1.25 0 0 1 21.90 10.80 C17.09 13.47 15.54 11.85 14.95 13.66 C14.36 15.46 16.56 15.07 18.89 20.06 A1.25 1.25 0 0 1 16.87 21.52 C12.84 17.77 13.90 15.80 12.00 15.80 C10.10 15.80 11.16 17.77 7.13 21.52 A1.25 1.25 0 0 1 5.11 20.06 C7.44 15.07 9.64 15.46 9.05 13.66 C8.46 11.85 6.91 13.47 2.10 10.80 A1.25 1.25 0 0 1 2.88 8.42 C8.33 9.09 8.64 11.31 10.18 10.19Z' stroke='black' stroke-width='0.9' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M10.18 10.19 C11.71 9.08 9.70 8.10 10.75 2.70 A1.25 1.25 0 0 1 13.25 2.70 C14.30 8.10 12.29 9.08 13.82 10.19 C15.36 11.31 15.67 9.09 21.12 8.42 A1.25 1.25 0 0 1 21.90 10.80 C17.09 13.47 15.54 11.85 14.95 13.66 C14.36 15.46 16.56 15.07 18.89 20.06 A1.25 1.25 0 0 1 16.87 21.52 C12.84 17.77 13.90 15.80 12.00 15.80 C10.10 15.80 11.16 17.77 7.13 21.52 A1.25 1.25 0 0 1 5.11 20.06 C7.44 15.07 9.64 15.46 9.05 13.66 C8.46 11.85 6.91 13.47 2.10 10.80 A1.25 1.25 0 0 1 2.88 8.42 C8.33 9.09 8.64 11.31 10.18 10.19Z' stroke='black' stroke-width='0.9' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
   opacity: 0;
   transition: opacity 0.35s ease;
   pointer-events: none;
@@ -246,12 +246,12 @@ body.is-about .nav-name--small {
   position: absolute;
   right: 100%;
   top: 50%;
-  width: 13px;
-  height: 13px;
-  margin: -6.5px 6px 0 0;
+  width: 15px;
+  height: 15px;
+  margin: -7.5px 6px 0 0;
   background: var(--ink);
-  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12.00 3.50 Q14.76 9.00 20.84 9.93 Q16.47 14.25 17.47 20.32 Q12.00 17.50 6.53 20.32 Q7.53 14.25 3.16 9.93 Q9.24 9.00 12.00 3.50Z' stroke='black' stroke-width='2' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
-  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12.00 3.50 Q14.76 9.00 20.84 9.93 Q16.47 14.25 17.47 20.32 Q12.00 17.50 6.53 20.32 Q7.53 14.25 3.16 9.93 Q9.24 9.00 12.00 3.50Z' stroke='black' stroke-width='2' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M10.18 10.19 C11.71 9.08 9.70 8.10 10.75 2.70 A1.25 1.25 0 0 1 13.25 2.70 C14.30 8.10 12.29 9.08 13.82 10.19 C15.36 11.31 15.67 9.09 21.12 8.42 A1.25 1.25 0 0 1 21.90 10.80 C17.09 13.47 15.54 11.85 14.95 13.66 C14.36 15.46 16.56 15.07 18.89 20.06 A1.25 1.25 0 0 1 16.87 21.52 C12.84 17.77 13.90 15.80 12.00 15.80 C10.10 15.80 11.16 17.77 7.13 21.52 A1.25 1.25 0 0 1 5.11 20.06 C7.44 15.07 9.64 15.46 9.05 13.66 C8.46 11.85 6.91 13.47 2.10 10.80 A1.25 1.25 0 0 1 2.88 8.42 C8.33 9.09 8.64 11.31 10.18 10.19Z' stroke='black' stroke-width='0.9' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M10.18 10.19 C11.71 9.08 9.70 8.10 10.75 2.70 A1.25 1.25 0 0 1 13.25 2.70 C14.30 8.10 12.29 9.08 13.82 10.19 C15.36 11.31 15.67 9.09 21.12 8.42 A1.25 1.25 0 0 1 21.90 10.80 C17.09 13.47 15.54 11.85 14.95 13.66 C14.36 15.46 16.56 15.07 18.89 20.06 A1.25 1.25 0 0 1 16.87 21.52 C12.84 17.77 13.90 15.80 12.00 15.80 C10.10 15.80 11.16 17.77 7.13 21.52 A1.25 1.25 0 0 1 5.11 20.06 C7.44 15.07 9.64 15.46 9.05 13.66 C8.46 11.85 6.91 13.47 2.10 10.80 A1.25 1.25 0 0 1 2.88 8.42 C8.33 9.09 8.64 11.31 10.18 10.19Z' stroke='black' stroke-width='0.9' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
   pointer-events: none;
 }
 .nav-left[aria-current="page"]::after,
@@ -1138,7 +1138,7 @@ button.contact-toggle {
 .cursor-star path {
   fill: #ffffff;
   stroke: #ffffff;
-  stroke-width: 1.5;
+  stroke-width: 0.5;
   stroke-linejoin: round;
 }
 
@@ -1149,6 +1149,7 @@ button.contact-toggle {
 
 .cursor-star.is-active path {
   fill: none;
+  stroke-width: 1.1;
 }
 
 /* JS only adds .is-visible once the cursor is actually moving inside
@@ -1176,7 +1177,7 @@ button.contact-toggle {
 .cursor-echo path {
   fill: none;
   stroke: #ffffff;
-  stroke-width: 1.5;
+  stroke-width: 1.1;
   stroke-linejoin: round;
 }
 
