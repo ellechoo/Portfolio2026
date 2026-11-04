@@ -1404,6 +1404,28 @@ body.is-about .site-header .contact-menu {
   pointer-events: none;
   overflow: hidden;
 }
+/* Thin lines in each note's colour, from the note back to the photo. */
+.about-lines {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 39; /* under the notes (40) so a line disappears behind its note */
+  overflow: hidden;
+  pointer-events: none;
+}
+.about-line {
+  stroke-width: 1px;
+  stroke-linecap: round;
+  animation: about-line-in 0.4s 0.2s ease both;
+}
+@keyframes about-line-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .about-line { animation: none; }
+}
 .about-note {
   position: absolute;
   left: 0;
@@ -1573,6 +1595,7 @@ body.is-about .site-header .contact-menu {
 /* Leaving About: the photo, notes and hint fade as the bubbles pop. */
 #about-view.is-leaving .about-layout,
 #about-view.is-leaving .about-notes,
+#about-view.is-leaving .about-lines,
 #about-view.is-leaving .about-hint {
   opacity: 0;
   transition: opacity 0.3s ease;

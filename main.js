@@ -1350,6 +1350,32 @@
     // note with the paragraph, flat and readable. Notes sit in their own
     // layer (under the bubbles) and can be dragged around the window.
     var notesLayer = els.aboutContent.querySelector(".about-notes");
+    // Thin lines (one per note, in the note's colour) tie each sticky note
+    // back to the photo. They live in an SVG just under the notes layer.
+    var linesLayer = els.aboutContent.querySelector(".about-lines");
+    var SVGNS = "http://www.w3.org/2000/svg";
+    function updateNoteLine(note) {
+      var ln = note._line;
+      if (!ln || !photoEl) return;
+      var pr = photoEl.getBoundingClientRect();
+      var ncx = note._x + note._w / 2, ncy = note._y + note._h / 2;
+      // No line while the note's centre sits on the photo itself.
+      if (!pr.width || (ncx > pr.left && ncx < pr.right && ncy > pr.top && ncy < pr.bottom)) {
+        ln.style.display = "none";
+        return;
+      }
+      var dx = (pr.left + pr.width / 2) - ncx, dy = (pr.top + pr.height / 2) - ncy;
+      // From the note's centre (the note covers its own end of the line) to
+      // the point where the line meets the photo's edge.
+      var tx = dx > 0 ? (pr.left - ncx) / dx : dx < 0 ? (pr.right - ncx) / dx : -Infinity;
+      var ty = dy > 0 ? (pr.top - ncy) / dy : dy < 0 ? (pr.bottom - ncy) / dy : -Infinity;
+      var t = Math.max(tx, ty, 0);
+      ln.style.display = "";
+      ln.setAttribute("x1", ncx.toFixed(1));
+      ln.setAttribute("y1", ncy.toFixed(1));
+      ln.setAttribute("x2", (ncx + dx * t).toFixed(1));
+      ln.setAttribute("y2", (ncy + dy * t).toFixed(1));
+    }
     var noteZ = 1;
     var dragNote = null;
     var NOTE_TOP_MARGIN = 64; // keep notes clear of the nav strip when they fit
@@ -1400,6 +1426,7 @@
       note._y = Math.min(Math.max(y, minY), Math.max(minY, H - h - 8));
       note.style.left = note._x + "px";
       note.style.top = note._y + "px";
+      updateNoteLine(note);
     }
 
     function spawnNote(b, x, y) {
@@ -1435,6 +1462,13 @@
       note.style.zIndex = ++noteZ;
       if (!reduceMotion) note.classList.add("is-new");
       notesLayer.appendChild(note);
+      if (linesLayer) {
+        var ln = document.createElementNS(SVGNS, "line");
+        ln.setAttribute("class", "about-line");
+        ln.style.stroke = note.style.getPropertyValue("--note-color");
+        linesLayer.appendChild(ln);
+        note._line = ln;
+      }
       clampNote(note, x - note.offsetWidth / 2, y - note.offsetHeight / 2);
     }
 
@@ -1615,6 +1649,10 @@
     // the bubbles (see startAboutBubbles).
     var notesLayer = document.createElement("div");
     notesLayer.className = "about-notes";
+    var linesLayer = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    linesLayer.setAttribute("class", "about-lines");
+    linesLayer.setAttribute("aria-hidden", "true");
+    els.aboutContent.appendChild(linesLayer);
     els.aboutContent.appendChild(notesLayer);
     var hint = document.createElement("p");
     hint.className = "about-hint";
