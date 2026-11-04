@@ -16,6 +16,10 @@
     home: document.getElementById("home-view"),
     about: document.getElementById("about-view"),
     project: document.getElementById("project-view"),
+    contact: document.getElementById("contact-view"),
+    contactPageEmail: document.getElementById("contact-page-email"),
+    contactPageLinkedin: document.getElementById("contact-page-linkedin"),
+    navRight: document.querySelector(".nav-right"),
     list: document.getElementById("project-list"),
     empty: document.getElementById("empty-state"),
     emptyMessage: document.getElementById("empty-message"),
@@ -165,7 +169,24 @@
       els.contactLinkedinLink.hidden = true;
     }
 
+    // The same links, on the phone-sized Contact page.
+    if (els.contactPageEmail) {
+      if (DATA.site.email) { els.contactPageEmail.href = "mailto:" + DATA.site.email; els.contactPageEmail.hidden = false; }
+      else els.contactPageEmail.hidden = true;
+    }
+    if (els.contactPageLinkedin) {
+      if (DATA.site.linkedin) { els.contactPageLinkedin.href = DATA.site.linkedin; els.contactPageLinkedin.hidden = false; }
+      else els.contactPageLinkedin.hidden = true;
+    }
+
     toggle.addEventListener("click", function (e) {
+      // On a phone there's no room for a dropdown (it covers the filter
+      // pills), so Contact is its own little page there.
+      if (window.matchMedia && window.matchMedia("(max-width: 600px)").matches) {
+        e.preventDefault();
+        if (location.hash !== "#contact") location.hash = "#contact";
+        return;
+      }
       e.stopPropagation();
       if (menu.classList.contains("is-open")) {
         closeContactMenu();
@@ -1990,6 +2011,7 @@
     els.home.hidden = name !== "home";
     els.about.hidden = name !== "about";
     els.project.hidden = name !== "project";
+    if (els.contact) els.contact.hidden = name !== "contact";
     // Lets CSS restyle the nav's name (bigger, heading font) only while
     // the about page is showing.
     document.body.classList.toggle("is-about", name === "about");
@@ -2006,8 +2028,12 @@
       if (name === "about") els.navLeft.removeAttribute("data-tip");
       else els.navLeft.setAttribute("data-tip", "get to know me");
     }
+    if (els.navRight) {
+      if (name === "contact") els.navRight.setAttribute("aria-current", "page");
+      else els.navRight.removeAttribute("aria-current");
+    }
     if (els.navCenter) {
-      if (name !== "about") els.navCenter.setAttribute("aria-current", "page");
+      if (name !== "about" && name !== "contact") els.navCenter.setAttribute("aria-current", "page");
       else els.navCenter.removeAttribute("aria-current");
       // Hover note: on the about and project pages it says where the name
       // leads. On the gallery page there is no note.
@@ -2085,7 +2111,7 @@
 
   function route() {
     var hash = location.hash || "#";
-    var to = hash === "#about" ? "about" : hash.indexOf("#p/") === 0 ? "project" : "home";
+    var to = hash === "#about" ? "about" : hash === "#contact" ? "contact" : hash.indexOf("#p/") === 0 ? "project" : "home";
     var from = currentView;
     if (leaveTimer) {
       clearTimeout(leaveTimer);
@@ -2117,6 +2143,9 @@
       showView("about");
       startAboutBubbles(enterFx === "about");
       if (enterFx === "about") playEnter("about");
+    } else if (hash === "#contact") {
+      heroPending = null;
+      showView("contact");
     } else if (hash.indexOf("#p/") === 0) {
       var id = decodeURIComponent(hash.slice(3));
       cancelHero();

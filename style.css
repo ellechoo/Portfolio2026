@@ -73,9 +73,13 @@
 html {
   -webkit-font-smoothing: antialiased;
   scroll-behavior: smooth;
+  /* Nothing may make the page wider than the screen (that is what let a
+     phone zoom out and shifted the nav); content wraps instead. */
+  overflow-x: clip;
 }
 
 body {
+  overflow-x: clip;
   margin: 0;
   background: var(--bg);
   color: var(--ink);
@@ -224,12 +228,25 @@ body.is-about .nav-name--small {
   top: 50%;
   width: 13px;
   height: 13px;
-  margin: -6.5px 0 0 9px;
+  margin: -6.5px 0 0 6px;
   background: var(--ink);
   -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpolygon points='12,2 14.47,9.53 22,12 14.47,14.47 12,22 9.53,14.47 2,12 9.53,9.53'/%3E%3C/svg%3E") center / contain no-repeat;
   mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpolygon points='12,2 14.47,9.53 22,12 14.47,14.47 12,22 9.53,14.47 2,12 9.53,9.53'/%3E%3C/svg%3E") center / contain no-repeat;
   opacity: 0;
   transition: opacity 0.35s ease;
+  pointer-events: none;
+}
+.nav-right[aria-current="page"]::after {
+  content: "";
+  position: absolute;
+  right: 100%;
+  top: 50%;
+  width: 13px;
+  height: 13px;
+  margin: -6.5px 6px 0 0;
+  background: var(--ink);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpolygon points='12,2 14.47,9.53 22,12 14.47,14.47 12,22 9.53,14.47 2,12 9.53,9.53'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpolygon points='12,2 14.47,9.53 22,12 14.47,14.47 12,22 9.53,14.47 2,12 9.53,9.53'/%3E%3C/svg%3E") center / contain no-repeat;
   pointer-events: none;
 }
 .nav-left[aria-current="page"]::after,
@@ -245,7 +262,7 @@ body.is-about .nav-name--small {
   content: "\2190\00a0\00a0" attr(data-tip);
   position: absolute;
   /* past the star: 9px gap + 13px star + 10px breathing room */
-  left: calc(100% + 32px);
+  left: calc(100% + 29px);
   top: 50%;
   z-index: 20;
   padding: 6px 10px;
@@ -302,7 +319,7 @@ body.is-about .nav-center::before {
   }
 }
 
-.nav-right { justify-self: end; position: relative; }
+.nav-right { justify-self: end; position: relative; display: flex; align-items: center; }
 
 /* Hover: the text turns the same light blue as the DATA VIZ filter pill
    (the first category's hue in main.js: hsl(212, 72%, 70%)) instead of
@@ -345,7 +362,7 @@ button.contact-toggle {
 .contact-menu {
   display: none;
   position: absolute;
-  top: calc(100% + 8px);
+  top: calc(100% + 12px);
   right: 0;
   align-items: flex-end;
   gap: 12px;
@@ -358,7 +375,7 @@ button.contact-toggle {
   top: 100%;
   right: 0;
   width: 160px; /* matches .contact-menu's min-width */
-  height: 8px; /* matches the gap above */
+  height: 12px; /* matches the gap above */
 }
 
 .nav-right:hover .contact-menu,
@@ -578,7 +595,7 @@ button.contact-toggle {
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  flex-wrap: nowrap;
+  flex-wrap: wrap; /* only wraps when title + tags are wider than the screen */
   gap: 6px 10px;
 }
 
@@ -616,8 +633,10 @@ button.contact-toggle {
      cramped once the letters are capitals. */
   text-transform: uppercase;
   letter-spacing: 0.01em;
-  white-space: nowrap;
-  flex-shrink: 0;
+  /* One line at its natural width, unless that is wider than the screen */
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
 }
 
 /* Subdued relative to the (now bold) title above it -- a quiet
@@ -649,7 +668,7 @@ button.contact-toggle {
 
 .project-layout {
   display: grid;
-  grid-template-columns: 1fr minmax(280px, 33%);
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 33%);
   align-items: start;
   gap: var(--gutter);
   padding-bottom: 120px;
@@ -762,6 +781,7 @@ button.contact-toggle {
 }
 
 .project-sidebar {
+  min-width: 0;
   position: sticky;
   top: calc(var(--header-height) + 24px);
 }
@@ -773,6 +793,7 @@ button.contact-toggle {
   letter-spacing: -0.01em;
   line-height: 1.1;
   margin: 0 0 22px;
+  overflow-wrap: anywhere;
 }
 
 /* Deliberately a bigger gap than the title-to-meta one above (22px)
@@ -809,7 +830,7 @@ button.contact-toggle {
 
 @media (max-width: 900px) {
   .project-layout {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
   .project-sidebar {
     position: static;
@@ -1452,4 +1473,83 @@ body.is-about .site-header .contact-menu {
 @media (prefers-reduced-motion: reduce) {
   #project-view.is-hero-entering,
   #home-view.is-hero-entering { animation: none; }
+}
+
+
+/* ---------- Contact page (phones) ---------- */
+/* On a phone the Contact nav opens this simple page instead of a dropdown
+   (which would cover the filter pills). Same white pills as the dropdown. */
+#contact-view[hidden] { display: none; }
+.contact-page {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 44px 0 120px;
+}
+.contact-page a {
+  display: block;
+  white-space: nowrap;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  padding: 9px 20px;
+  border-radius: 999px;
+  background: #ffffff;
+  color: var(--bg);
+  border: 1px solid #ffffff;
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  transition: outline-color 0.15s ease;
+  animation: contact-pill-in 0.3s cubic-bezier(0.25, 0.8, 0.3, 1) both;
+}
+.contact-page a:nth-child(2) { animation-delay: 0.06s; }
+.contact-page a:hover,
+.contact-page a:focus-visible { color: var(--bg); outline-color: #ffffff; }
+.contact-page a[hidden] { display: none; }
+@media (prefers-reduced-motion: reduce) {
+  .contact-page a { animation: none; }
+}
+
+/* ---------- Phones: smaller, tighter chrome ---------- */
+@media (max-width: 600px) {
+  /* No dropdown on a phone; Contact goes to its own page. */
+  .contact-menu { display: none !important; }
+  .nav-right::before { display: none; }
+
+  .site-header a,
+  .site-header button.contact-toggle {
+    font-size: 12px;
+  }
+  /* The current-page star hugs its nav item. */
+  .nav-left::after,
+  .nav-center::after {
+    width: 10px;
+    height: 10px;
+    margin: -5px 0 0 4px;
+  }
+  .nav-right[aria-current="page"]::after {
+    width: 10px;
+    height: 10px;
+    margin: -5px 4px 0 0;
+  }
+
+  /* Keeps CONTACT (a button) level with the links beside it. */
+  .site-header button.contact-toggle { line-height: 1.5; }
+  /* A slightly smaller name on the about page so the nav can breathe. */
+  :root { --nav-big-size: 28px; }
+
+  .category-filter { gap: 8px; }
+  .pill {
+    font-size: 11.5px;
+    padding: 5px 12px;
+  }
+  .project-caption .name { font-size: 14px; }
+  .project-tags .pill-tag {
+    font-size: 9px;
+    padding: 2px 7px;
+  }
+  .project-caption .summary { font-size: 12px; }
 }
