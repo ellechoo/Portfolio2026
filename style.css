@@ -1218,6 +1218,29 @@ button.contact-toggle {
   transform: translateX(calc(var(--nav-big-size) * -0.036));
 }
 
+/* Phones: the photo sits in the exact middle of the screen (both ways)
+   rather than up under the nav name. */
+@media (max-width: 600px) {
+  .about-main {
+    position: fixed;
+    inset: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none; /* only the photo itself catches the pointer */
+  }
+  .about-layout {
+    flex: none;
+    width: 100%;
+    pointer-events: none;
+  }
+  .about-left {
+    transform: none;
+    pointer-events: auto;
+  }
+}
+
 .about-photo {
   width: 100%;
   aspect-ratio: 1;
