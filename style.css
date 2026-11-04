@@ -1390,8 +1390,14 @@ body.is-about .site-header .contact-menu {
   text-wrap: pretty; /* no one-word last lines where supported (main.js also guards it) */
   background: var(--note-color, #f6e58d);
   color: #1c1c1c;
+  /* Same type as the project-page body text: size, line height and
+     hyphenated ragging (see .project-description). */
+  font-size: 15px;
   line-height: 1.5;
   font-weight: 400;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+  hyphenate-limit-chars: 7 3 3;
   border-radius: 2px;
   box-shadow: 0 1px 1px rgba(0, 0, 0, 0.25), 0 12px 26px rgba(0, 0, 0, 0.45);
   transform: rotate(var(--tilt, 0deg));
@@ -1400,6 +1406,12 @@ body.is-about .site-header .contact-menu {
   user-select: none;
   -webkit-user-select: none;
   cursor: grab;
+}
+@media (max-width: 600px) {
+  .about-note {
+    font-size: 12px;
+    line-height: 1.6;
+  }
 }
 .about-note.is-new {
   animation: about-note-in 0.3s 0.1s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;

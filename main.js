@@ -1094,9 +1094,45 @@
       x.fillStyle = "#1c1c1c";
       x.textBaseline = "alphabetic";
       var asc = x.measureText("Hg").fontBoundingBoxAscent || parseFloat(cs.fontSize) * 0.95;
+      // A hyphenated word wraps across lines, so one span has several line
+      // boxes. Measure those on an untilted, unanimated clone (note's own
+      // transform would skew the rects) and draw each piece plus its hyphen.
+      var clone = null, crect = null;
       Array.prototype.forEach.call(note.querySelectorAll("span"), function (sp) {
-        x.fillText(sp.textContent, sp.offsetLeft, sp.offsetTop + asc);
+        if (sp.getClientRects().length < 2) {
+          x.fillText(sp.textContent, sp.offsetLeft, sp.offsetTop + asc);
+          return;
+        }
+        if (!clone) {
+          clone = note.cloneNode(true);
+          clone.className = "about-note";
+          clone.style.transform = "none";
+          clone.style.animation = "none";
+          clone.style.visibility = "hidden";
+          clone.style.left = "0px";
+          clone.style.top = "0px";
+          note.parentNode.appendChild(clone);
+          crect = clone.getBoundingClientRect();
+        }
+        var idx = Array.prototype.indexOf.call(note.querySelectorAll("span"), sp);
+        var csp = clone.querySelectorAll("span")[idx];
+        var tn = csp.firstChild, txt = csp.textContent, rg = document.createRange();
+        var pieces = [], cur = null;
+        for (var ci = 0; ci < txt.length; ci++) {
+          rg.setStart(tn, ci); rg.setEnd(tn, ci + 1);
+          var cr = rg.getClientRects()[0];
+          if (!cr) continue;
+          if (!cur || Math.abs(cr.top - cur.top) > 2) {
+            cur = { top: cr.top, left: cr.left, text: "" };
+            pieces.push(cur);
+          }
+          cur.text += txt.charAt(ci);
+        }
+        pieces.forEach(function (pc, pi) {
+          x.fillText(pc.text + (pi < pieces.length - 1 ? "-" : ""), pc.left - crect.left, pc.top - crect.top + asc);
+        });
       });
+      if (clone) clone.remove();
       if (!document.fonts || document.fonts.status === "loaded") note._bmp = c; // else redo once fonts arrive
       return c;
     }
@@ -1390,7 +1426,6 @@
       note._tilt = tiltDeg * Math.PI / 180;
       note.style.setProperty("--tilt", tiltDeg.toFixed(1) + "deg");
       note.style.width = Math.min(300, Math.max(200, W * 0.3)) + "px";
-      note.style.fontSize = W < 600 ? "13px" : "14px";
       note.style.zIndex = ++noteZ;
       if (!reduceMotion) note.classList.add("is-new");
       notesLayer.appendChild(note);
