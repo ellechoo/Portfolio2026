@@ -1519,7 +1519,7 @@
     var hint = document.createElement("p");
     hint.className = "about-hint";
     var coarse = window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
-    hint.textContent = coarse ? "double tap a bubble to pop it" : "double click a bubble to pop it";
+    hint.textContent = coarse ? "double tap a bubble to pop it!" : "double click a bubble to pop it!";
     els.aboutContent.appendChild(hint);
     els.aboutContent.appendChild(bubbleLayer);
 
