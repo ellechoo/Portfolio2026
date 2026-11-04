@@ -869,6 +869,8 @@ button.contact-toggle {
     max-width: 100%;
     margin-bottom: 0;
     row-gap: 8px;
+    position: relative;
+    top: 2px; /* optical nudge so the tag sits level with the title's letters */
   }
   .project-description,
   .project-link {
