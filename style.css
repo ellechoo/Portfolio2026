@@ -634,10 +634,12 @@ button.contact-toggle {
      cramped once the letters are capitals. */
   text-transform: uppercase;
   letter-spacing: 0.01em;
-  /* One line at its natural width, unless that is wider than the screen */
+  /* One line at its natural width, unless that is wider than the screen.
+     It only ever breaks between words (a single word is split only if it is
+     wider than the whole card), so a title can't lose its last letter. */
   min-width: 0;
   max-width: 100%;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 
 /* Subdued relative to the (now bold) title above it -- a quiet
@@ -658,13 +660,21 @@ button.contact-toggle {
 
 .back-link {
   display: inline-block;
-  font-size: 13px;
+  font-size: 12px;
+  font-weight: 400;
   color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 2px;
   margin: 32px 0 24px;
+  transition: color 0.2s ease;
 }
 
-.back-link:hover {
-  opacity: 0.6;
+/* "back to work" and "visit site" turn the same light blue as the nav on hover. */
+.back-link:hover,
+.back-link:focus-visible,
+.project-link:hover,
+.project-link:focus-visible {
+  color: hsl(212, 72%, 70%);
 }
 
 .project-layout {
@@ -822,8 +832,10 @@ button.contact-toggle {
   align-items: center;
   gap: 4px;
   margin-top: 16px;
-  font-size: 13px;
+  font-size: 12px;
+  font-weight: 400;
   color: var(--ink);
+  transition: color 0.2s ease;
   text-decoration: underline;
   text-underline-offset: 2px;
 }
@@ -1624,8 +1636,13 @@ body.is-about .site-header .contact-menu {
 p, figcaption, li, .summary, .project-description, .about-hint, .empty-state p {
   text-wrap: pretty;
 }
-h1, h2, h3, .name, .next-project-title {
+h1, h2, h3 {
   text-wrap: balance;
+}
+/* Gallery and footer titles use the gentler "pretty": balancing a title that
+   already fits on one line could squeeze it and split a word. */
+.name, .next-project-title {
+  text-wrap: pretty;
 }
 
 /* ---------- Gallery footer: back to top ---------- */
