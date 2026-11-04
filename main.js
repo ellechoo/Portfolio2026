@@ -19,6 +19,7 @@
     contact: document.getElementById("contact-view"),
     contactPageEmail: document.getElementById("contact-page-email"),
     contactPageLinkedin: document.getElementById("contact-page-linkedin"),
+    contactIntro: document.getElementById("contact-intro"),
     navRight: document.querySelector(".nav-right"),
     homeFooter: document.getElementById("home-footer"),
     toTop: document.getElementById("to-top"),
@@ -171,7 +172,13 @@
       els.contactLinkedinLink.hidden = true;
     }
 
-    // The same links, on the phone-sized Contact page.
+    // The short line above the links on the Contact page (editable in admin).
+    if (els.contactIntro) {
+      els.contactIntro.textContent = DATA.site.contactIntro ||
+        "Have a project in mind, a question about my work, or just want to say hi? I'd love to hear from you.";
+    }
+
+    // The same links, on the Contact page.
     if (els.contactPageEmail) {
       if (DATA.site.email) { els.contactPageEmail.href = "mailto:" + DATA.site.email; els.contactPageEmail.hidden = false; }
       else els.contactPageEmail.hidden = true;

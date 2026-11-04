@@ -268,6 +268,11 @@
         <div class="field"><label for="site-email">Contact email</label><input type="email" id="site-email"></div>
         <div class="field"><label for="site-linkedin">LinkedIn URL</label><input type="text" id="site-linkedin" placeholder="https://linkedin.com/in/..."></div>
       </div>
+      <div class="field">
+        <label for="site-contact-intro">Contact page intro <span style="color:var(--muted); font-weight:400;">(optional)</span></label>
+        <textarea id="site-contact-intro" rows="2" placeholder="Leave blank to use the default message"></textarea>
+        <p class="hint">A short line shown above your email and LinkedIn on the Contact page.</p>
+      </div>
       <div class="field"><label for="site-about">About / bio</label><textarea id="site-about" rows="5"></textarea></div>
 
       <label>Your photo (shown on the About page)</label>
@@ -407,7 +412,7 @@
 
   var el = {};
   ["connect-panel", "connect-btn", "connect-hint", "app", "folder-name",
-   "site-name", "site-tagline", "site-email", "site-linkedin", "site-about", "save-site-info",
+   "site-name", "site-tagline", "site-email", "site-linkedin", "site-contact-intro", "site-about", "save-site-info",
    "site-photo-preview", "site-photo-pick-btn", "site-photo-remove-btn", "site-photo-input",
    "category-list", "new-category-input", "add-category-btn",
    "admin-project-list", "add-project-btn",
@@ -747,6 +752,7 @@
     el["site-tagline"].value = state.data.site.tagline || "";
     el["site-email"].value = state.data.site.email || "";
     el["site-linkedin"].value = state.data.site.linkedin || "";
+    el["site-contact-intro"].value = state.data.site.contactIntro || "";
     el["site-about"].value = state.data.site.about || "";
 
     state.photoDraft = undefined; // undefined = no change; {file} = new photo; "remove" = clear it
@@ -827,6 +833,7 @@
       state.data.site.tagline = el["site-tagline"].value.trim();
       state.data.site.email = el["site-email"].value.trim();
       state.data.site.linkedin = el["site-linkedin"].value.trim();
+      state.data.site.contactIntro = el["site-contact-intro"].value.trim();
       state.data.site.about = el["site-about"].value;
       return writeDataToDisk();
     }).then(function () {
