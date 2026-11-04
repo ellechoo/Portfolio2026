@@ -1421,7 +1421,7 @@
         sp.textContent = word;
         note.appendChild(sp);
       });
-      note.style.setProperty("--note-color", "hsl(" + Math.round(b.hue) + ", 88%, 82%)");
+      note.style.setProperty("--note-color", "hsl(" + Math.round(b.hue) + ", 100%, 81%)");
       var tiltDeg = (Math.random() - 0.5) * 6;
       note._tilt = tiltDeg * Math.PI / 180;
       note.style.setProperty("--tilt", tiltDeg.toFixed(1) + "deg");
