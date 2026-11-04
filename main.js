@@ -1091,7 +1091,7 @@
       x.fillRect(0, 0, w, h);
       var cs = getComputedStyle(note);
       x.font = cs.fontWeight + " " + cs.fontSize + " " + cs.fontFamily;
-      x.fillStyle = "#1c1c1c";
+      x.fillStyle = "#0f0f0f";
       x.textBaseline = "alphabetic";
       var asc = x.measureText("Hg").fontBoundingBoxAscent || parseFloat(cs.fontSize) * 0.95;
       // A hyphenated word wraps across lines, so one span has several line
@@ -1421,11 +1421,17 @@
         sp.textContent = word;
         note.appendChild(sp);
       });
-      note.style.setProperty("--note-color", "hsl(" + Math.round(b.hue) + ", 92%, 74%)");
+      note.style.setProperty("--note-color", "hsl(" + Math.round(b.hue) + ", 88%, 82%)");
       var tiltDeg = (Math.random() - 0.5) * 6;
       note._tilt = tiltDeg * Math.PI / 180;
       note.style.setProperty("--tilt", tiltDeg.toFixed(1) + "deg");
-      note.style.width = Math.min(300, Math.max(200, W * 0.3)) + "px";
+      // Width follows the length of the text, so a long note is roomy rather
+      // than a tall thin strip and a short one stays compact. Never wider
+      // than the screen allows.
+      var nChars = b.text.length;
+      var noteW = W < 600 ? 200 + nChars * 0.35 : 220 + nChars * 0.45;
+      noteW = Math.max(W < 600 ? 230 : 250, Math.min(W < 600 ? 300 : 360, noteW));
+      note.style.width = Math.min(noteW, W - 32) + "px";
       note.style.zIndex = ++noteZ;
       if (!reduceMotion) note.classList.add("is-new");
       notesLayer.appendChild(note);

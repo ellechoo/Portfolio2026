@@ -1389,7 +1389,7 @@ body.is-about .site-header .contact-menu {
   box-sizing: border-box;
   text-wrap: pretty; /* no one-word last lines where supported (main.js also guards it) */
   background: var(--note-color, #f6e58d);
-  color: #1c1c1c;
+  color: #0f0f0f; /* near-black on light pastel for legibility */
   /* Same type as the project-page body text: size, line height and
      hyphenated ragging (see .project-description). */
   font-size: 15px;
