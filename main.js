@@ -20,6 +20,8 @@
     contactPageEmail: document.getElementById("contact-page-email"),
     contactPageLinkedin: document.getElementById("contact-page-linkedin"),
     navRight: document.querySelector(".nav-right"),
+    homeFooter: document.getElementById("home-footer"),
+    toTop: document.getElementById("to-top"),
     list: document.getElementById("project-list"),
     empty: document.getElementById("empty-state"),
     emptyMessage: document.getElementById("empty-message"),
@@ -180,14 +182,13 @@
     }
 
     toggle.addEventListener("click", function (e) {
-      // On a phone there's no room for a dropdown (it covers the filter
-      // pills), so Contact is its own little page there.
-      if (window.matchMedia && window.matchMedia("(max-width: 600px)").matches) {
-        e.preventDefault();
-        if (location.hash !== "#contact") location.hash = "#contact";
-        return;
-      }
+      // Clicking Contact opens its own little page (on a computer, hovering
+      // still previews the pills in a dropdown; on a phone there is no
+      // dropdown, it would cover the filter pills).
+      e.preventDefault();
+      if (location.hash !== "#contact") location.hash = "#contact";
       e.stopPropagation();
+      if (true) return;
       if (menu.classList.contains("is-open")) {
         closeContactMenu();
       } else {
@@ -1412,7 +1413,8 @@
       if (!hintEl || !photoEl) return;
       var pr = photoEl.getBoundingClientRect();
       if (!pr.width) return;
-      var vw = window.innerWidth, gap = 16, edge = 10, FULL = 172, MIN = 112;
+      var vw = window.innerWidth, gap = 16, FULL = 172;
+      var narrow = vw <= 600, edge = narrow ? 24 : 10, MIN = narrow ? 104 : 112;
       var roomR = vw - pr.right - gap - edge, roomL = pr.left - gap - edge;
       var onLeft = roomR < FULL && roomL > roomR;
       hintEl.classList.toggle("is-left", onLeft);
@@ -2012,6 +2014,8 @@
     els.about.hidden = name !== "about";
     els.project.hidden = name !== "project";
     if (els.contact) els.contact.hidden = name !== "contact";
+    document.body.classList.toggle("is-contact", name === "contact");
+    if (els.homeFooter && name !== "home") els.homeFooter.hidden = true;
     // Lets CSS restyle the nav's name (bigger, heading font) only while
     // the about page is showing.
     document.body.classList.toggle("is-about", name === "about");
@@ -2062,6 +2066,8 @@
 
   function clearLeaveFx() {
     els.about.classList.remove("is-leaving");
+    els.project.classList.remove("is-leaving");
+    if (els.contact) els.contact.classList.remove("is-leaving");
     if (els.categoryFilter) els.categoryFilter.classList.remove("is-fx-out");
   }
 
@@ -2082,6 +2088,14 @@
       els.about.classList.add("is-leaving");
       return 300;
     }
+    if (from === "project") {
+      els.project.classList.add("is-leaving");
+      return 260;
+    }
+    if (from === "contact" && els.contact) {
+      els.contact.classList.add("is-leaving");
+      return 260;
+    }
     return 0;
   }
 
@@ -2090,6 +2104,10 @@
       // (The bubbles' own entrance runs inside startAboutBubbles.)
       els.about.classList.add("is-entering");
       setTimeout(function () { els.about.classList.remove("is-entering"); }, 700);
+    } else if (to === "project") {
+      // (The contact page's pills pop in by themselves, see style.css.)
+      els.project.classList.add("is-hero-entering");
+      setTimeout(function () { els.project.classList.remove("is-hero-entering"); }, 560);
     } else if (to === "home") {
       var vh = window.innerHeight;
       var shown = Array.prototype.filter.call(els.list.querySelectorAll(".project-card"), function (c) {
@@ -2118,7 +2136,10 @@
       leaveTimer = 0;
       clearLeaveFx();
     }
-    var between = (from === "home" && to === "about") || (from === "about" && to === "home");
+    // Gallery <-> About, and any page <-> Contact, get the pop out / pop in.
+    var between = from !== null && from !== to &&
+      ((from === "home" && to === "about") || (from === "about" && to === "home") ||
+       (to === "contact" && from !== "contact") || (from === "contact" && to !== "contact"));
     if (between && !prefersReducedMotion()) {
       var wait = playLeave(from);
       if (wait) {
@@ -2136,7 +2157,7 @@
   function doRoute(enterFx) {
     var hash = location.hash || "#";
     if (hash.indexOf("#p/") !== 0) cancelHero();
-    if (hash.indexOf("#p/") !== 0 && hash !== "#about") captureReturnHero();
+    if (hash.indexOf("#p/") !== 0 && hash !== "#about" && hash !== "#contact") captureReturnHero();
     else { currentProjectId = null; heroReturn = null; }
     if (hash === "#about") {
       renderAbout();
@@ -2146,6 +2167,7 @@
     } else if (hash === "#contact") {
       heroPending = null;
       showView("contact");
+      if (enterFx === "contact") playEnter("contact");
     } else if (hash.indexOf("#p/") === 0) {
       var id = decodeURIComponent(hash.slice(3));
       cancelHero();
@@ -2153,6 +2175,7 @@
         currentProjectId = id;
         showView("project");
         runHero(id);
+        if (enterFx === "project") playEnter("project");
       }
     } else {
       heroPending = null;
@@ -2164,6 +2187,66 @@
   }
 
   els.list.addEventListener("click", rememberHero, true);
+
+  /* ---------- back to top (gallery footer) ----------
+     A quiet link at the very bottom of the gallery. It only shows when
+     the gallery is long enough to scroll. */
+  if (els.toTop) {
+    els.toTop.addEventListener("click", function () {
+      window.scrollTo({ top: 0, left: 0, behavior: prefersReducedMotion() ? "auto" : "smooth" });
+    });
+    var updateToTop = function () {
+      if (!els.homeFooter || els.home.hidden) return;
+      els.homeFooter.hidden = !(document.documentElement.scrollHeight > window.innerHeight * 1.25);
+    };
+    if (window.ResizeObserver) new ResizeObserver(updateToTop).observe(els.home);
+    window.addEventListener("resize", updateToTop);
+    window.addEventListener("load", updateToTop);
+  }
+
+  /* ---------- no orphans, anywhere ----------
+     CSS (text-wrap: pretty) does this where the browser supports it; this
+     is the fallback for the rest: the last two words of a text block are
+     joined with a non-breaking space so the last line is never one word.
+     Runs on whatever the page builds, as it builds it. */
+  var ORPHAN_SELECTOR = "p, figcaption, h1, h2, h3, .summary, .name, .project-description, .next-project-title, .about-hint, .media-caption, .caption";
+  function glueLastWords(el) {
+    if (el.closest && el.closest(".about-bubble, .about-note, script, style, textarea")) return;
+    var node = el.lastChild;
+    if (!node || node.nodeType !== 3) return;
+    var t = node.nodeValue;
+    var mt = /(\S+)[ \t\r\n]+(\S+)([ \t\r\n]*)$/.exec(t);
+    if (!mt) return;
+    // Don't glue two long words together: that could overflow a narrow screen.
+    if (mt[1].length + mt[2].length > 22) return;
+    node.nodeValue = t.slice(0, mt.index) + mt[1] + "\u00A0" + mt[2] + mt[3];
+  }
+  function glueWithin(root) {
+    if (root.nodeType !== 1) return;
+    if (root.matches && root.matches(ORPHAN_SELECTOR)) glueLastWords(root);
+    var found = root.querySelectorAll ? root.querySelectorAll(ORPHAN_SELECTOR) : [];
+    for (var i = 0; i < found.length; i++) glueLastWords(found[i]);
+  }
+  if (window.MutationObserver) {
+    var glueRoots = new Set(), glueQueued = false;
+    new MutationObserver(function (records) {
+      records.forEach(function (r) {
+        if (!r.addedNodes.length) return;
+        var root = r.target.nodeType === 1 ? r.target : r.target.parentNode;
+        if (root && !(root.closest && root.closest(".about-bubble"))) glueRoots.add(root);
+      });
+      if (glueQueued || !glueRoots.size) return;
+      glueQueued = true;
+      requestAnimationFrame(function () {
+        glueQueued = false;
+        var roots = Array.from(glueRoots);
+        glueRoots.clear();
+        roots.forEach(glueWithin);
+      });
+    }).observe(document.body, { childList: true, subtree: true });
+  }
+  glueWithin(document.body);
+
   renderChrome();
   setUpLightbox();
   setUpCustomCursor();

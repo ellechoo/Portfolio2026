@@ -1553,3 +1553,127 @@ body.is-about .site-header .contact-menu {
   }
   .project-caption .summary { font-size: 12px; }
 }
+
+
+/* ---------- No orphans (see also glueLastWords in main.js) ---------- */
+p, figcaption, li, .summary, .project-description, .about-hint, .empty-state p {
+  text-wrap: pretty;
+}
+h1, h2, h3, .name, .next-project-title {
+  text-wrap: balance;
+}
+
+/* ---------- Gallery footer: back to top ---------- */
+.home-footer {
+  position: relative;
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 24px;
+  padding: 26px 0 56px;
+}
+.home-footer[hidden] { display: none; }
+/* Same squiggly rule as the project pages' footer. */
+.home-footer::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -5px;
+  height: 10px;
+  background: var(--line);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='10' viewBox='0 0 24 10'%3E%3Cpath d='M0 5 Q6 -0.5 12 5 T24 5' fill='none' stroke='black' stroke-width='1.6'/%3E%3C/svg%3E") 0 0 / 24px 10px repeat-x;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='10' viewBox='0 0 24 10'%3E%3Cpath d='M0 5 Q6 -0.5 12 5 T24 5' fill='none' stroke='black' stroke-width='1.6'/%3E%3C/svg%3E") 0 0 / 24px 10px repeat-x;
+  pointer-events: none;
+}
+.to-top {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink);
+  opacity: 0.6;
+  cursor: pointer;
+  transition: color 0.2s ease, opacity 0.2s ease;
+}
+.to-top:hover,
+.to-top:focus-visible {
+  color: hsl(212, 72%, 70%);
+  opacity: 1;
+}
+
+/* ---------- Page <-> Contact transitions ---------- */
+#project-view.is-leaving {
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+#contact-view.is-leaving .contact-page a {
+  opacity: 0;
+  transform: scale(0.92);
+  transition: opacity 0.22s ease, transform 0.22s ease;
+  animation: none;
+}
+/* The pills pop up like the gallery cards do. */
+.contact-page a {
+  animation-name: contact-pill-pop;
+  animation-duration: 0.42s;
+  animation-timing-function: cubic-bezier(0.25, 0.8, 0.3, 1);
+}
+.contact-page a:nth-child(2) { animation-delay: 0.07s; }
+@keyframes contact-pill-pop {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+/* The Contact page replaces the hover dropdown. */
+body.is-contact .contact-menu { display: none !important; }
+
+/* ---------- Phones, round two ---------- */
+@media (max-width: 600px) {
+  /* No star on phones; the page you're on is light blue instead. */
+  .nav-left::after,
+  .nav-center::after,
+  .nav-right[aria-current="page"]::after {
+    display: none;
+  }
+  .site-header a[aria-current="page"],
+  .site-header .nav-right[aria-current="page"] .contact-toggle {
+    color: hsl(212, 72%, 70%);
+  }
+
+  /* ELLE CHOO stays the same size and font on the about page here, so
+     the nav never changes. (The photo keeps its size from --nav-big-size.) */
+  body.is-about .nav-name--big {
+    opacity: 0;
+    transform: translateX(-50%) scale(0.3);
+    pointer-events: none;
+  }
+  body.is-about .nav-name--small {
+    opacity: 1;
+  }
+
+  /* Filter pills always on one line: their size follows the screen width
+     (everything inside is in em of --pf), so six pills fit down to 320px. */
+  .category-filter {
+    --pf: min(11px, calc((100vw - 40px) / 34));
+    flex-wrap: nowrap;
+    gap: calc(var(--pf) * 0.55);
+    overflow-x: auto;
+    scrollbar-width: none;
+    /* room for the selected pill's ring, which would otherwise be clipped */
+    padding: 30px 5px 6px;
+    margin: 0 -5px;
+  }
+  .category-filter::-webkit-scrollbar { display: none; }
+  .pill {
+    flex: 0 0 auto;
+    font-size: var(--pf);
+    padding: calc(var(--pf) * 0.45) calc(var(--pf) * 0.9);
+  }
+  .project-list { padding-top: 30px; }
+
+  .home-footer { padding-bottom: 40px; }
+}
