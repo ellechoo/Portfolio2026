@@ -1745,8 +1745,9 @@ h1, h2, h3 {
   from { opacity: 0; transform: scale(0.9); }
   to { opacity: 1; transform: scale(1); }
 }
-/* The Contact page replaces the hover dropdown. */
-body.is-contact .contact-menu { display: none !important; }
+/* Contact is its own page now, so there is no hover/click dropdown anywhere. */
+.contact-menu { display: none !important; }
+.nav-right::before { display: none; }
 
 /* ---------- Phones, round two ---------- */
 @media (max-width: 600px) {

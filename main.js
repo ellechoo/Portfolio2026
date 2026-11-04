@@ -175,7 +175,7 @@
     // The short line above the links on the Contact page (editable in admin).
     if (els.contactIntro) {
       els.contactIntro.textContent = DATA.site.contactIntro ||
-        "Have a project in mind, a question about my work, or just want to say hi? I'd love to hear from you.";
+        "Want to work together? I'm currently looking for internships, and I'm open to freelance projects and collaborations too.";
     }
 
     // The same links, on the Contact page.
