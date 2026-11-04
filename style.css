@@ -499,6 +499,13 @@ button.contact-toggle {
   row-gap: var(--gallery-row-gap);
 }
 
+/* Phones: a little more air between the filter pills and the first row. */
+@media (max-width: 600px) {
+  .project-list {
+    padding-top: 36px;
+  }
+}
+
 /* .project-list's own "display: flex" above would otherwise beat the
    browser's default [hidden] rule (same specificity, but an author
    rule always wins over the user-agent one) — same trap as the
