@@ -489,7 +489,7 @@
     // Single ring shared by every pill in this row — moved and resized
     // (rather than recreated) on each pill's mouseenter, which is what
     // makes it glide from one pill to the next instead of popping in and
-    // out. Sized 4px past each pill's own edge on every side, matching
+    // out. Sized --ring-off px past each pill's own edge on every side, matching
     // how far the colored .is-active ring already sits outside a pill,
     // so hovering the selected pill shows both rings at once rather than
     // one swallowing the other.
@@ -497,9 +497,10 @@
     hoverRing.className = "pill-hover-ring";
     bar.appendChild(hoverRing);
 
-    var RING_MARGIN = 4;
     function trackHover(pill) {
       pill.addEventListener("mouseenter", function () {
+        // How far the thin ring sits past the pill (set in CSS per screen size).
+        var RING_MARGIN = parseFloat(getComputedStyle(bar).getPropertyValue("--ring-off")) || 2.5;
         hoverRing.style.left = pill.offsetLeft - RING_MARGIN + "px";
         hoverRing.style.top = pill.offsetTop - RING_MARGIN + "px";
         hoverRing.style.width = pill.offsetWidth + RING_MARGIN * 2 + "px";

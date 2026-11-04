@@ -397,8 +397,8 @@ button.contact-toggle {
   border: 1px solid var(--pill-color);
   background: var(--pill-color);
   color: var(--bg);
-  outline: 2px solid transparent;
-  outline-offset: 2px;
+  outline: 1px solid transparent;
+  outline-offset: 1.5px;
   transition: outline-color 0.15s ease;
   animation: contact-pill-in 0.25s cubic-bezier(0.25, 0.8, 0.3, 1) both;
 }
@@ -433,6 +433,7 @@ button.contact-toggle {
 /* ---------- Home: category filter ---------- */
 
 .category-filter {
+  --ring-off: 2.5; /* how far (px) the active/hover ring reaches past a pill */
   position: relative;
   display: flex;
   flex-wrap: wrap;
@@ -452,7 +453,7 @@ button.contact-toggle {
   position: absolute;
   box-sizing: border-box;
   border-radius: 999px;
-  border: 2px solid #ffffff;
+  border: 1px solid #ffffff;
   opacity: 0;
   pointer-events: none;
   transition: left 0.18s ease, top 0.18s ease, width 0.18s ease, height 0.18s ease, opacity 0.15s ease;
@@ -477,8 +478,8 @@ button.contact-toggle {
   color: var(--bg);
   cursor: pointer;
   transition: outline-color 0.15s ease;
-  outline: 2px solid transparent;
-  outline-offset: 2px;
+  outline: 1px solid transparent;
+  outline-offset: calc(var(--ring-off, 2.5) * 1px - 1px);
 }
 
 .pill.is-active {
@@ -1512,8 +1513,8 @@ body.is-about .site-header .contact-menu {
   background: #ffffff;
   color: var(--bg);
   border: 1px solid #ffffff;
-  outline: 2px solid transparent;
-  outline-offset: 2px;
+  outline: 1px solid transparent;
+  outline-offset: 1.5px;
   transition: outline-color 0.15s ease;
   animation: contact-pill-in 0.3s cubic-bezier(0.25, 0.8, 0.3, 1) both;
 }
@@ -1671,9 +1672,10 @@ body.is-contact .contact-menu { display: none !important; }
      proportions, same airy gaps) but scaled so the row spans the screen:
      everything inside is in em of --pf. Capped at the desktop size. */
   .category-filter {
-    --pf: min(13px, calc((100vw - 40px) / 35.4));
+    --pf: min(13px, calc((100vw - 40px) / 35.6));
+    --ring-off: 2;
     flex-wrap: nowrap;
-    gap: calc(var(--pf) * 0.7);
+    gap: calc(var(--pf) * 0.75);
     overflow-x: auto;
     scrollbar-width: none;
     /* room for the selected pill's ring, which would otherwise be clipped */
