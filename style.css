@@ -848,6 +848,38 @@ button.contact-toggle {
   }
 }
 
+/* Phones: the title, its category tags and the year share one line (like
+   a gallery card's name + tags) to save height. If they don't fit together
+   (a long title or several tags) the tags and year simply drop below. */
+@media (max-width: 600px) {
+  .project-sidebar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    column-gap: 14px;
+    row-gap: 12px;
+  }
+  .project-sidebar h1 {
+    flex: 0 0 auto;
+    max-width: 100%;
+    margin: 0;
+  }
+  .project-meta {
+    flex: 0 1 auto;
+    max-width: 100%;
+    margin-bottom: 0;
+    row-gap: 8px;
+  }
+  .project-description,
+  .project-link {
+    flex: 0 0 auto;
+  }
+  .project-description {
+    flex-basis: 100%;
+    margin: 16px 0 0;
+  }
+}
+
 /* ---------- Project: next-project link ---------- */
 /* A simple "keep going" footer at the bottom of every project page —
    points to whatever's next in the same date order as the gallery
