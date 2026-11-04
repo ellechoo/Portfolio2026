@@ -825,6 +825,11 @@ button.contact-toggle {
   font-size: 15px;
   color: var(--ink);
   white-space: pre-line;
+  /* Long words may be hyphenated (7+ letters, at least 3 on each side of
+     the break) to keep the right edge of the text even. */
+  hyphens: auto;
+  -webkit-hyphens: auto;
+  hyphenate-limit-chars: 7 3 3;
 }
 
 .project-link {
