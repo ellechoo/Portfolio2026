@@ -1668,18 +1668,17 @@ body.is-contact .contact-menu { display: none !important; }
     opacity: 1;
   }
 
-  /* Filter pills always on one line, sized like the desktop ones (same shape,
-     slightly tighter spacing). One fixed size on every phone (11px); only
-     phones narrower than ~376px scale it down so the row still fits:
-     everything inside is in em of --pf. */
+  /* Filter pills: one line, the same proportions as on desktop (everything
+     is in em of --pf, which is 13px there). They scale down only as far as
+     the screen requires and reach 8px past the page gutter to stay as big as
+     possible. If more categories are ever added than fit, the row scrolls
+     sideways instead of wrapping. */
   .category-filter {
-    /* The row stretches closer to the screen edges here (8px past the page
-       gutter) so the pills can stay as big as possible. */
-    --pf: min(11px, calc((100vw - 42px) / 30.4));
-    --ring-off: 2;
+    --pf: min(13px, calc((100vw - 30px) / 29.1));
     flex-wrap: nowrap;
-    gap: calc(var(--pf) * 0.6);
+    gap: calc(var(--pf) * 0.77);
     overflow-x: auto;
+    overscroll-behavior-x: contain;
     scrollbar-width: none;
     /* room for the selected pill's ring, which would otherwise be clipped */
     padding: 30px 2px 6px;
@@ -1689,7 +1688,7 @@ body.is-contact .contact-menu { display: none !important; }
   .pill {
     flex: 0 0 auto;
     font-size: var(--pf);
-    padding: calc(var(--pf) * 0.5) calc(var(--pf) * 0.7);
+    padding: calc(var(--pf) * 0.46) calc(var(--pf) * 1.08);
   }
   .project-list { padding-top: 30px; }
 

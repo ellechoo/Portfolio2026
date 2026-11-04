@@ -484,6 +484,8 @@
       return;
     }
     bar.hidden = false;
+    // The row can scroll sideways on phones; rebuilding it must not snap it back.
+    var keepScroll = bar.scrollLeft;
     bar.innerHTML = "";
 
     // Single ring shared by every pill in this row — moved and resized
@@ -530,6 +532,17 @@
       bar.appendChild(pill);
       trackHover(pill);
     });
+
+    bar.scrollLeft = keepScroll;
+    // Keep the selected pill fully in view (it may have been half off-screen).
+    var sel = bar.querySelector(".pill.is-active");
+    if (sel && bar.scrollWidth > bar.clientWidth) {
+      var pad = 24;
+      if (sel.offsetLeft - pad < bar.scrollLeft) bar.scrollLeft = Math.max(0, sel.offsetLeft - pad);
+      else if (sel.offsetLeft + sel.offsetWidth + pad > bar.scrollLeft + bar.clientWidth) {
+        bar.scrollLeft = sel.offsetLeft + sel.offsetWidth + pad - bar.clientWidth;
+      }
+    }
   }
 
   function makePill(label, isActive, color, onClick) {
