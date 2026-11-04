@@ -1669,20 +1669,22 @@ body.is-contact .contact-menu { display: none !important; }
   }
 
   /* Filter pills: one line, the same proportions as on desktop (everything
-     is in em of --pf, which is 13px there). They scale down only as far as
-     the screen requires and reach 8px past the page gutter to stay as big as
-     possible. If more categories are ever added than fit, the row scrolls
-     sideways instead of wrapping. */
+     is in em of --pf, which is 13px there), sitting inside the same page
+     gutter as everything else. They scale down only as far as the screen
+     requires, so the row ends exactly at the right gutter on narrow phones.
+     If more categories are ever added than fit, the row scrolls sideways
+     instead of wrapping. */
   .category-filter {
-    --pf: min(13px, calc((100vw - 30px) / 29.1));
+    --pf: min(13px, calc((100vw - 40px - 10px) / 28.3));
     flex-wrap: nowrap;
     gap: calc(var(--pf) * 0.77);
     overflow-x: auto;
     overscroll-behavior-x: contain;
     scrollbar-width: none;
-    /* room for the selected pill's ring, which would otherwise be clipped */
-    padding: 30px 2px 6px;
-    margin: 0 -8px;
+    /* room for the selected pill's ring, which would otherwise be clipped
+       (the negative margin cancels it, so the pills line up with the gutter) */
+    padding: 30px 5px 6px;
+    margin: 0 -5px;
   }
   .category-filter::-webkit-scrollbar { display: none; }
   .pill {

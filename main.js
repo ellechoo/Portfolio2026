@@ -622,7 +622,8 @@
 
       var name = document.createElement("span");
       name.className = "name";
-      name.textContent = project.title || "Untitled";
+      // The gallery can show a shorter/different name than the project page.
+      name.textContent = project.galleryTitle || project.title || "Untitled";
       topRow.appendChild(name);
 
       if (cats.length) {
