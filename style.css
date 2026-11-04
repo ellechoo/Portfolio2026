@@ -1669,12 +1669,13 @@ body.is-contact .contact-menu { display: none !important; }
   }
 
   /* Filter pills always on one line, sized like the desktop ones (same shape,
-     slightly tighter spacing) scaled so the row spans the screen:
-     everything inside is in em of --pf. Capped at the desktop size. */
+     slightly tighter spacing). One fixed size on every phone (11px); only
+     phones narrower than ~376px scale it down so the row still fits:
+     everything inside is in em of --pf. */
   .category-filter {
     /* The row stretches closer to the screen edges here (8px past the page
        gutter) so the pills can stay as big as possible. */
-    --pf: min(13px, calc((100vw - 42px) / 30.4));
+    --pf: min(11px, calc((100vw - 42px) / 30.4));
     --ring-off: 2;
     flex-wrap: nowrap;
     gap: calc(var(--pf) * 0.6);
