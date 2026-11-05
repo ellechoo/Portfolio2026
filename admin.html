@@ -274,6 +274,11 @@
         <p class="hint">A short line shown above your email and LinkedIn on the Contact page.</p>
       </div>
       <div class="field"><label for="site-about">About / bio</label><textarea id="site-about" rows="5"></textarea></div>
+      <div class="field">
+        <label for="site-about-short">About / bio, shorter for phones <span style="color:var(--muted); font-weight:400;">(optional)</span></label>
+        <textarea id="site-about-short" rows="5" placeholder="Leave blank to use the full bio on phones"></textarea>
+        <p class="hint">Used for the sticky notes on phones. One shorter version of each paragraph above, in the same order, with a blank line between them.</p>
+      </div>
 
       <label>Your photo (shown on the About page)</label>
       <div id="site-photo-preview" style="width:96px; height:96px; margin-bottom:10px; overflow:hidden; background:var(--surface);"></div>
@@ -421,7 +426,7 @@
 
   var el = {};
   ["connect-panel", "connect-btn", "connect-hint", "app", "folder-name",
-   "site-name", "site-tagline", "site-email", "site-linkedin", "site-contact-intro", "site-about", "save-site-info",
+   "site-name", "site-tagline", "site-email", "site-linkedin", "site-contact-intro", "site-about", "site-about-short", "save-site-info",
    "site-photo-preview", "site-photo-pick-btn", "site-photo-remove-btn", "site-photo-input",
    "category-list", "new-category-input", "add-category-btn",
    "admin-project-list", "add-project-btn",
@@ -763,6 +768,7 @@
     el["site-linkedin"].value = state.data.site.linkedin || "";
     el["site-contact-intro"].value = state.data.site.contactIntro || "";
     el["site-about"].value = state.data.site.about || "";
+    el["site-about-short"].value = state.data.site.aboutShort || "";
 
     state.photoDraft = undefined; // undefined = no change; {file} = new photo; "remove" = clear it
     renderPhotoPreview();
@@ -844,6 +850,7 @@
       state.data.site.linkedin = el["site-linkedin"].value.trim();
       state.data.site.contactIntro = el["site-contact-intro"].value.trim();
       state.data.site.about = el["site-about"].value;
+      state.data.site.aboutShort = el["site-about-short"].value;
       return writeDataToDisk();
     }).then(function () {
       state.photoDraft = undefined;

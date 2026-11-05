@@ -840,7 +840,7 @@
         }
         textEl.appendChild(w);
       });
-      return { el: el, hue: hue, text: fullText, glyphs: glyphs, canvas: lensCanvas, ctx: null, imgData: null, lut: null, lensOn: false, textEl: textEl, chars: fullText.length, x: 0, y: 0, vx: 0, vy: 0, r: 40, m: 1600, cruise: 26 + Math.random() * 16, tx: 0, ty: 0, pvx: 0, pvy: 0 };
+      return { el: el, hue: hue, text: fullText, short: el.getAttribute("data-short") || "", glyphs: glyphs, canvas: lensCanvas, ctx: null, imgData: null, lut: null, lensOn: false, textEl: textEl, chars: fullText.length, x: 0, y: 0, vx: 0, vy: 0, r: 40, m: 1600, cruise: 26 + Math.random() * 16, tx: 0, ty: 0, pvx: 0, pvy: 0 };
     });
 
     // Pick the largest font (so bubble diameters follow) at which all the
@@ -1351,8 +1351,9 @@
     // layer (under the bubbles) and can be dragged around the window.
     var notesLayer = els.aboutContent.querySelector(".about-notes");
     // Thin lines (one per note, in the note's colour) tie each sticky note
-    // back to the photo. They live in an SVG just under the notes layer.
-    var linesLayer = els.aboutContent.querySelector(".about-lines");
+    // back to the photo. Each line is its own SVG in the notes layer, one
+    // z-level under its note, so it passes over the notes that are below its
+    // note and under the ones above it.
     var SVGNS = "http://www.w3.org/2000/svg";
     function updateNoteLine(note) {
       var ln = note._line;
@@ -1436,7 +1437,8 @@
       // The last words are joined by non-breaking spaces so the final line
       // is never a single stray word (an "orphan"): two words, or three
       // when the last two are short.
-      var noteWords = b.text.split(" ");
+      var noteText = (W < 600 && b.short) ? b.short : b.text;
+      var noteWords = noteText.split(" ");
       var glue = noteWords.length;
       if (glue >= 3) {
         glue = noteWords.length - 2;
@@ -1455,20 +1457,24 @@
       // Width follows the length of the text, so a long note is roomy rather
       // than a tall thin strip and a short one stays compact. Never wider
       // than the screen allows.
-      var nChars = b.text.length;
-      var noteW = W < 600 ? 170 + nChars * 0.3 : 220 + nChars * 0.45;
-      noteW = Math.max(W < 600 ? 190 : 250, Math.min(W < 600 ? 250 : 360, noteW));
+      var nChars = noteText.length;
+      var noteW = W < 600 ? 140 + nChars * 0.35 : 220 + nChars * 0.45;
+      noteW = Math.max(W < 600 ? 150 : 250, Math.min(W < 600 ? 200 : 360, noteW));
       note.style.width = Math.min(noteW, W - 32) + "px";
-      note.style.zIndex = ++noteZ;
+      note.style.zIndex = (noteZ += 2);
       if (!reduceMotion) note.classList.add("is-new");
       notesLayer.appendChild(note);
-      if (linesLayer) {
-        var ln = document.createElementNS(SVGNS, "line");
-        ln.setAttribute("class", "about-line");
-        ln.style.stroke = note.style.getPropertyValue("--note-color");
-        linesLayer.appendChild(ln);
-        note._line = ln;
-      }
+      var lsvg = document.createElementNS(SVGNS, "svg");
+      lsvg.setAttribute("class", "about-line-svg");
+      lsvg.setAttribute("aria-hidden", "true");
+      lsvg.style.zIndex = noteZ - 1;
+      var ln = document.createElementNS(SVGNS, "line");
+      ln.setAttribute("class", "about-line");
+      ln.style.stroke = note.style.getPropertyValue("--note-color");
+      lsvg.appendChild(ln);
+      notesLayer.insertBefore(lsvg, note);
+      note._line = ln;
+      note._lineSvg = lsvg;
       clampNote(note, x - note.offsetWidth / 2, y - note.offsetHeight / 2);
     }
 
@@ -1479,7 +1485,8 @@
       dragNote = note;
       note._gx = e.clientX - note._x;
       note._gy = e.clientY - note._y;
-      note.style.zIndex = ++noteZ;
+      note.style.zIndex = (noteZ += 2);
+      if (note._lineSvg) note._lineSvg.style.zIndex = noteZ - 1;
       note.classList.remove("is-new");
       note.classList.add("is-dragging");
       try { note.setPointerCapture(e.pointerId); } catch (err) {}
@@ -1555,7 +1562,7 @@
         });
         collide(); collide();
         bodies.forEach(clampToWindow);
-        if (notesLayer) Array.prototype.forEach.call(notesLayer.children, function (n) { clampNote(n, n._x, n._y); });
+        if (notesLayer) Array.prototype.forEach.call(notesLayer.children, function (n) { if (n._lineSvg) clampNote(n, n._x, n._y); });
         render();
       });
     }
@@ -1633,11 +1640,17 @@
     var bubbleLayer = document.createElement("div");
     bubbleLayer.className = "about-bubbles";
     bubbleLayer.setAttribute("role", "list");
+    // Optional shorter wording for the sticky notes on phones: one paragraph
+    // per bubble, in the same order (site.aboutShort, set in admin).
+    var shortParas = (site.aboutShort || "").split(/\n\s*\n/).map(function (t) { return t.replace(/\s+/g, " ").trim(); }).filter(Boolean);
+    var paraIdx = 0;
     (site.about || "").split(/\n\s*\n/).forEach(function (para) {
       para = para.replace(/\s+/g, " ").trim();
       if (!para) return;
       var bubble = document.createElement("div");
       bubble.className = "about-bubble";
+      if (shortParas[paraIdx]) bubble.setAttribute("data-short", shortParas[paraIdx]);
+      paraIdx++;
       bubble.setAttribute("role", "listitem");
       var text = document.createElement("div");
       text.className = "about-bubble-text";
@@ -1649,10 +1662,6 @@
     // the bubbles (see startAboutBubbles).
     var notesLayer = document.createElement("div");
     notesLayer.className = "about-notes";
-    var linesLayer = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    linesLayer.setAttribute("class", "about-lines");
-    linesLayer.setAttribute("aria-hidden", "true");
-    els.aboutContent.appendChild(linesLayer);
     els.aboutContent.appendChild(notesLayer);
     var hint = document.createElement("p");
     hint.className = "about-hint";
