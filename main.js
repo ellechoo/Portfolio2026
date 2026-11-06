@@ -245,6 +245,43 @@
      never its position within a paired row, so lightbox prev/next
      navigation (openLightbox(media, index)) keeps working exactly as
      before regardless of how things are visually grouped. */
+  /* A group of images shown as one smaller grid (item.type === "grid":
+     { images: [{src, caption?}], columns, caption? }), set up in admin with
+     "Add images as a grid" / "Add a folder as a grid". Every image still
+     opens the lightbox, in order: `startIndex` is the first image's
+     position in the flattened lightbox list built by renderProjectMedia.
+     `d` is the first image's real size (probed); the gallery guesses the
+     same shape for all of them until each one loads, so the page doesn't
+     jump around while a long set streams in. */
+  function buildGridFigure(item, startIndex, flat, project, d) {
+    var figure = document.createElement("figure");
+    figure.className = "media-grid-figure";
+    var grid = document.createElement("div");
+    grid.className = "media-grid";
+    var cols = Math.max(1, Math.min(8, parseInt(item.columns, 10) || 3));
+    grid.style.setProperty("--cols", cols);
+    grid.style.setProperty("--cols-m", Math.min(cols, 2));
+    (item.images || []).forEach(function (im, k) {
+      var img = document.createElement("img");
+      img.src = im.src;
+      img.alt = im.caption || item.caption || project.title || "";
+      img.loading = "lazy";
+      if (d && d.w > 0 && d.h > 0) {
+        img.style.aspectRatio = d.w + " / " + d.h;
+        img.addEventListener("load", function () { img.style.aspectRatio = ""; });
+      }
+      img.addEventListener("click", function () { openLightbox(flat, startIndex + k); });
+      grid.appendChild(img);
+    });
+    figure.appendChild(grid);
+    if (item.caption) {
+      var figcaption = document.createElement("figcaption");
+      figcaption.textContent = item.caption;
+      figure.appendChild(figcaption);
+    }
+    return figure;
+  }
+
   function buildMediaFigure(item, index, media, project) {
     var figure = document.createElement("figure");
     var el;
@@ -335,14 +372,29 @@
     // even when a later one is huge. The token drops late results if the
     // visitor has already moved on to another project.
     var token = ++mediaRenderToken;
+    // The lightbox walks one flat list: a grid contributes each of its
+    // images in turn. offsets[i] = where media item i starts in that list.
+    var flat = [], offsets = [];
+    media.forEach(function (item) {
+      offsets.push(flat.length);
+      if (item.type === "grid") {
+        (item.images || []).forEach(function (im) {
+          flat.push({ type: "image", src: im.src, caption: im.caption || item.caption || "" });
+        });
+      } else {
+        flat.push(item);
+      }
+    });
     var probes = media.map(function (item) {
-      if (!item.src) return Promise.resolve(null);
-      return item.type === "video" ? probeVideo(item.src) : probeImage(item.src);
+      // A grid is probed by its first image only.
+      var src = item.type === "grid" ? (item.images && item.images[0] && item.images[0].src) : item.src;
+      if (!src) return Promise.resolve(null);
+      return item.type === "video" ? probeVideo(src) : probeImage(src);
     });
     function skinny(d) { return !!d && d.w > 0 && d.h / d.w > SKINNY_RATIO; }
 
     function appendSingle(i, d) {
-      var figure = buildMediaFigure(media[i], i, media, project);
+      var figure = buildMediaFigure(media[i], offsets[i], flat, project);
       var el = figure.querySelector("img, video");
       // Reserve the right height straight away (no collapsed box while
       // the file streams in), which is also what lets the gallery ->
@@ -356,7 +408,12 @@
       if (i >= media.length) { layoutMediaRows(); return; }
       probes[i].then(function (d0) {
         if (token !== mediaRenderToken) return;
-        if (!skinny(d0) || i + 1 >= media.length) {
+        if (media[i].type === "grid") {
+          els.projectMedia.appendChild(buildGridFigure(media[i], offsets[i], flat, project, d0));
+          step(i + 1);
+          return;
+        }
+        if (!skinny(d0) || i + 1 >= media.length || media[i + 1].type === "grid") {
           appendSingle(i, d0);
           step(i + 1);
           return;
@@ -370,8 +427,8 @@
             // the row itself so layoutMediaRows() can size them without
             // re-probing — it already has everything it needs right here.
             row.dataset.ratios = (d0.w / d0.h) + "," + (d1.w / d1.h);
-            row.appendChild(buildMediaFigure(media[i], i, media, project));
-            row.appendChild(buildMediaFigure(media[i + 1], i + 1, media, project));
+            row.appendChild(buildMediaFigure(media[i], offsets[i], flat, project));
+            row.appendChild(buildMediaFigure(media[i + 1], offsets[i + 1], flat, project));
             els.projectMedia.appendChild(row);
             layoutMediaRows();
             step(i + 2);

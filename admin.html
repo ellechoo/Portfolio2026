@@ -147,6 +147,20 @@
   .media-item .row2 { display: flex; align-items: center; gap: 12px; font-size: 12px; color: var(--muted); flex-wrap: wrap; }
   .media-item .actions { display: flex; flex-direction: column; gap: 6px; flex: none; }
 
+  /* Image groups ("grid" items): a mosaic preview, a strip of the group's
+     images with a remove button on each, and a columns picker. */
+  .media-item .preview.is-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; background: none; }
+  .media-item .preview.is-grid img { width: 100%; height: 100%; object-fit: cover; background: var(--surface); }
+  .grid-thumbs { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
+  .grid-thumb { position: relative; width: 44px; height: 44px; border-radius: 3px; overflow: hidden; background: var(--surface); }
+  .grid-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .grid-thumb button {
+    position: absolute; top: 1px; right: 1px; width: 16px; height: 16px; padding: 0;
+    border: none; border-radius: 50%; background: rgba(0,0,0,.65); color: #fff;
+    font-size: 11px; line-height: 16px; cursor: pointer;
+  }
+  .media-item select.cols-select { width: auto; padding: 2px 6px; font-size: 12px; }
+
   /* Drag-to-reorder (see renderMediaList) — same idea as the category
      chips below, but a vertical list, so the drag handle sits on its
      own rather than making the whole row (caption input included)
@@ -347,6 +361,9 @@
       <div class="dropzone" id="dropzone">Drop files here, or click to choose</div>
       <input type="file" id="file-input" accept="image/*,video/*" multiple hidden>
       <button type="button" id="pick-existing-btn" class="secondary small" style="margin-bottom:16px;">+ Add from media folder</button>
+      <button type="button" id="add-grid-files-btn" class="secondary small" style="margin-bottom:16px;">+ Add images as a grid</button>
+      <button type="button" id="add-grid-folder-btn" class="secondary small" style="margin-bottom:16px;">+ Add a folder as a grid</button>
+      <p class="hint" style="margin-top:-8px;">A grid shows a group of images together in a smaller grid on the project page. Pick several images at once, or a whole folder inside your media folder (its images are added in filename order).</p>
       <div id="media-list"></div>
 
       <div style="display:flex; gap:10px; margin-top:20px;">
@@ -431,7 +448,7 @@
    "category-list", "new-category-input", "add-category-btn",
    "admin-project-list", "add-project-btn",
    "editor", "editor-title", "p-title", "p-gallery-title", "p-outline", "p-year", "p-categories", "p-categories-empty-hint", "p-client", "p-summary", "p-description", "p-website",
-   "dropzone", "file-input", "pick-existing-btn", "media-list",
+   "dropzone", "file-input", "pick-existing-btn", "add-grid-files-btn", "add-grid-folder-btn", "media-list",
    "save-project-btn", "cancel-edit-btn", "delete-project-btn",
    "toast"].forEach(function (id) { el[id] = document.getElementById(id); });
 
@@ -1086,6 +1103,18 @@
     state.mediaDraft = [];
     if (project && Array.isArray(project.media)) {
       project.media.forEach(function (m) {
+        if (m.type === "grid") {
+          state.mediaDraft.push({
+            tempId: uid(),
+            type: "grid",
+            images: (m.images || []).map(function (im) { return { src: im.src, caption: im.caption || "" }; }),
+            columns: m.columns || 3,
+            caption: m.caption || "",
+            isThumbnail: false,
+            isNew: false,
+          });
+          return;
+        }
         var isThumb = !!(project.thumbnail && project.thumbnail.src === m.src);
         state.mediaDraft.push({
           tempId: uid(),
@@ -1229,6 +1258,178 @@
     });
   }
 
+  /* ---- image groups ("grid"): several images, or a whole folder ---- */
+
+  function naturalCompare(a, b) {
+    return a.localeCompare(b, undefined, { numeric: true, sensitivity: "base" });
+  }
+
+  function addGridToDraft(paths) {
+    paths = paths.slice().sort(naturalCompare);
+    if (!paths.length) { toast("No images found to add."); return; }
+    state.mediaDraft.push({
+      tempId: uid(),
+      type: "grid",
+      images: paths.map(function (p) { return { src: p, caption: "" }; }),
+      columns: 3,
+      caption: "",
+      isThumbnail: false,
+      isNew: false,
+    });
+    renderMediaList();
+    toast("Added a grid of " + paths.length + " image" + (paths.length === 1 ? "" : "s") + ". Set its columns below.", 4000);
+  }
+
+  // Several images picked at once -> one grid (or appended to `group`).
+  function pickGridFiles(group) {
+    if (!window.showOpenFilePicker) {
+      toast("Your browser doesn't support picking files this way — try Chrome or Edge.", 6000);
+      return Promise.resolve();
+    }
+    return getOrCreateDir("media").then(function (mediaDir) {
+      return window.showOpenFilePicker({
+        multiple: true,
+        startIn: mediaDir,
+        types: [{ description: "Images", accept: { "image/*": [".jpg", ".jpeg", ".png", ".gif", ".webp", ".avif", ".svg"] } }],
+      });
+    }).then(function (handles) {
+      return Promise.all(handles.map(function (h) { return state.dirHandle.resolve(h); }));
+    }).then(function (all) {
+      var paths = [], outside = 0;
+      all.forEach(function (segs) {
+        if (!segs) { outside++; return; }
+        var name = segs[segs.length - 1];
+        if (IMAGE_EXT_RE.test(name)) paths.push(segs.join("/"));
+      });
+      if (outside) toast("Only files inside your media folder can be added — skipped " + outside + ".", 6000);
+      if (!paths.length) { if (!outside) toast("Nothing to add."); return; }
+      if (group) {
+        var have = group.images.map(function (im) { return im.src; });
+        paths.sort(naturalCompare).forEach(function (p) {
+          if (have.indexOf(p) === -1) group.images.push({ src: p, caption: "" });
+        });
+        renderMediaList();
+      } else {
+        addGridToDraft(paths);
+      }
+    });
+  }
+
+  // A whole folder (inside the media folder) -> one grid, in filename order.
+  function pickGridFolder() {
+    if (!window.showDirectoryPicker) {
+      toast("Your browser doesn't support picking folders — try Chrome or Edge.", 6000);
+      return Promise.resolve();
+    }
+    return getOrCreateDir("media").then(function (mediaDir) {
+      return window.showDirectoryPicker({ startIn: mediaDir });
+    }).then(function (dirHandle) {
+      return state.dirHandle.resolve(dirHandle).then(function (segs) {
+        if (!segs) { toast("Pick a folder inside your media folder.", 6000); return; }
+        return collectImagePaths(dirHandle, segs).then(function (paths) {
+          if (!paths.length) { toast("That folder has no images in it."); return; }
+          addGridToDraft(paths);
+        });
+      });
+    });
+  }
+
+  async function collectImagePaths(dirHandle, segs) {
+    var paths = [];
+    for await (var entry of dirHandle.entries()) {
+      var name = entry[0], handle = entry[1];
+      if (handle.kind === "file" && IMAGE_EXT_RE.test(name) && name.charAt(0) !== ".") {
+        paths.push(segs.concat(name).join("/"));
+      }
+    }
+    return paths;
+  }
+
+  function gridErr(err) {
+    if (err && err.name === "AbortError") return; // cancelled
+    console.error(err);
+    toast("Couldn't add images: " + (err && err.message ? err.message : err), 6000);
+  }
+  el["add-grid-files-btn"].addEventListener("click", function () { pickGridFiles(null).catch(gridErr); });
+  el["add-grid-folder-btn"].addEventListener("click", function () { pickGridFolder().catch(gridErr); });
+
+  // The editor row for a grid item (same row frame as any media item).
+  function fillGridRow(row, item, index) {
+    var preview = document.createElement("div");
+    preview.className = "preview is-grid";
+    item.images.slice(0, 4).forEach(function (im) {
+      var img = document.createElement("img");
+      var cached = blobUrlCache[im.src];
+      if (cached) img.src = cached; else { img.setAttribute("data-pending-src", im.src); resolveUrlForSrc(im.src); }
+      preview.appendChild(img);
+    });
+    row.appendChild(preview);
+
+    var mid = document.createElement("div");
+    mid.className = "mid";
+    var captionInput = document.createElement("input");
+    captionInput.type = "text";
+    captionInput.placeholder = "Caption for the whole grid (optional)";
+    captionInput.value = item.caption || "";
+    captionInput.addEventListener("input", function () { item.caption = captionInput.value; });
+    mid.appendChild(captionInput);
+
+    var row2 = document.createElement("div");
+    row2.className = "row2";
+    var kind = document.createElement("span");
+    kind.textContent = "Image grid · " + item.images.length + " image" + (item.images.length === 1 ? "" : "s");
+    row2.appendChild(kind);
+    var colsLabel = document.createElement("label");
+    colsLabel.style.cssText = "display:flex; align-items:center; gap:6px; margin:0; font-weight:400;";
+    colsLabel.appendChild(document.createTextNode("Columns"));
+    var sel = document.createElement("select");
+    sel.className = "cols-select";
+    for (var c = 1; c <= 8; c++) {
+      var opt = document.createElement("option");
+      opt.value = String(c);
+      opt.textContent = String(c);
+      if (c === (item.columns || 3)) opt.selected = true;
+      sel.appendChild(opt);
+    }
+    sel.addEventListener("change", function () { item.columns = parseInt(sel.value, 10); });
+    colsLabel.appendChild(sel);
+    row2.appendChild(colsLabel);
+    row2.appendChild(button("+ Add images", "ghost small", function () { pickGridFiles(item).catch(gridErr); }));
+    mid.appendChild(row2);
+
+    var thumbs = document.createElement("div");
+    thumbs.className = "grid-thumbs";
+    item.images.forEach(function (im, k) {
+      var t = document.createElement("div");
+      t.className = "grid-thumb";
+      t.title = im.src;
+      var img = document.createElement("img");
+      var cached = blobUrlCache[im.src];
+      if (cached) img.src = cached; else { img.setAttribute("data-pending-src", im.src); resolveUrlForSrc(im.src); }
+      t.appendChild(img);
+      var x = document.createElement("button");
+      x.type = "button";
+      x.textContent = "×";
+      x.title = "Remove this image from the grid";
+      x.addEventListener("click", function () {
+        item.images.splice(k, 1);
+        if (!item.images.length) state.mediaDraft.splice(state.mediaDraft.indexOf(item), 1);
+        renderMediaList();
+      });
+      t.appendChild(x);
+      thumbs.appendChild(t);
+    });
+    mid.appendChild(thumbs);
+    row.appendChild(mid);
+
+    var actions = document.createElement("div");
+    actions.className = "actions";
+    actions.appendChild(button("↑", "ghost small", function () { reorderMedia(index, -1); }));
+    actions.appendChild(button("↓", "ghost small", function () { reorderMedia(index, 1); }));
+    actions.appendChild(button("Remove", "ghost small", function () { removeMedia(index); }));
+    row.appendChild(actions);
+  }
+
   // Drag-to-reorder for the media list, same native-HTML5 approach as
   // renderCategoryList's chips (dragMediaId is that pattern's dragCat,
   // just keyed by tempId since media items have no name to key on).
@@ -1240,6 +1441,10 @@
   function renderMediaList() {
     var wrap = el["media-list"];
     wrap.innerHTML = "";
+    if (state.mediaDraft.length && !state.mediaDraft.some(function (m) { return m.isThumbnail && m.type !== "grid"; })) {
+      var firstSingle = state.mediaDraft.find(function (m) { return m.type !== "grid"; });
+      if (firstSingle) firstSingle.isThumbnail = true;
+    }
     state.mediaDraft.forEach(function (item, index) {
       var row = document.createElement("div");
       row.className = "media-item";
@@ -1286,6 +1491,12 @@
         if (!moving || moving === item.tempId) return;
         moveMediaRelativeTo(moving, item.tempId, dropsBeforeVertical(e, row));
       });
+
+      if (item.type === "grid") {
+        fillGridRow(row, item, index);
+        wrap.appendChild(row);
+        return;
+      }
 
       var preview = document.createElement("div");
       preview.className = "preview";
@@ -1371,7 +1582,8 @@
   function removeMedia(index) {
     state.mediaDraft.splice(index, 1);
     if (state.mediaDraft.length && !state.mediaDraft.some(function (m) { return m.isThumbnail; })) {
-      state.mediaDraft[0].isThumbnail = true;
+      var firstSingle = state.mediaDraft.find(function (m) { return m.type !== "grid"; });
+      if (firstSingle) firstSingle.isThumbnail = true;
     }
     renderMediaList();
   }
@@ -1454,7 +1666,8 @@
     var slug = id;
 
     uploadNewMedia(slug).then(function (mediaEntries) {
-      var thumbEntry = mediaEntries.find(function (m) { return m.isThumbnail; }) || mediaEntries[0];
+      var thumbEntry = mediaEntries.find(function (m) { return m.isThumbnail && m.type !== "grid"; }) || mediaEntries.find(function (m) { return m.type !== "grid"; });
+      if (!thumbEntry) throw new Error("Add at least one single image or video too (a grid can't be the gallery thumbnail).");
       var project = {
         id: id,
         title: title,
@@ -1468,6 +1681,14 @@
         website: normalizeUrl(el["p-website"].value.trim()),
         thumbnail: { type: thumbEntry.type, src: thumbEntry.src, poster: thumbEntry.poster },
         media: mediaEntries.map(function (m) {
+          if (m.type === "grid") {
+            return {
+              type: "grid",
+              columns: m.columns || 3,
+              caption: m.caption || "",
+              images: m.images.map(function (im) { return im.caption ? { src: im.src, caption: im.caption } : { src: im.src }; }),
+            };
+          }
           return { type: m.type, src: m.src, poster: m.poster, caption: m.caption || "" };
         }),
         order: 0,
@@ -1513,6 +1734,9 @@
 
   function uploadNewMedia(slug) {
     return Promise.all(state.mediaDraft.map(function (item) {
+      if (item.type === "grid") {
+        return Promise.resolve({ type: "grid", images: item.images, columns: item.columns, caption: item.caption });
+      }
       if (!item.isNew) {
         return Promise.resolve({ type: item.type, src: item.src, poster: item.poster, caption: item.caption, isThumbnail: item.isThumbnail });
       }

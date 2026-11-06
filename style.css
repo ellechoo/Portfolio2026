@@ -766,6 +766,27 @@ button.contact-toggle {
   color: var(--ink);
 }
 
+/* A group of images shown as a smaller grid (see buildGridFigure in
+   main.js). Columns come from --cols (set per group in admin); phones
+   use at most two. Each image keeps its own shape. */
+.project-media .media-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--cols, 3), minmax(0, 1fr));
+  gap: calc(var(--gutter) / 2);
+  align-items: start;
+}
+.project-media .media-grid img {
+  width: 100%;
+  height: auto;
+  min-width: 0;
+}
+@media (max-width: 600px) {
+  .project-media .media-grid {
+    grid-template-columns: repeat(var(--cols-m, 2), minmax(0, 1fr));
+    gap: 8px;
+  }
+}
+
 /* Expand affordance — the only way into the lightbox for a video
    (clicking the video itself needs to reach its own play controls). */
 .media-expand {
