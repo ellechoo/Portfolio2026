@@ -488,7 +488,7 @@ button.contact-toggle {
 }
 
 .pill.is-active {
-  outline-color: var(--tag-color, var(--ink));
+  outline-color: #ffffff;
 }
 
 /* Small, read-only version of the same pill shape — used as the tag
