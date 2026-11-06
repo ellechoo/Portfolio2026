@@ -152,9 +152,23 @@
   .media-item .preview.is-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; background: none; }
   .media-item .preview.is-grid img { width: 100%; height: 100%; object-fit: cover; background: var(--surface); }
   .grid-thumbs { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
-  .grid-thumb { position: relative; width: 44px; height: 44px; border-radius: 3px; overflow: hidden; background: var(--surface); }
-  .grid-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .grid-thumb button {
+  .grid-thumb { position: relative; width: 52px; height: 52px; border-radius: 3px; background: var(--surface); cursor: grab; }
+  .grid-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 3px; pointer-events: none; }
+  .grid-thumb.is-dragging { opacity: 0.35; }
+  .grid-thumb.drop-before { box-shadow: -3px 0 0 var(--ink); }
+  .grid-thumb.drop-after { box-shadow: 3px 0 0 var(--ink); }
+  .grid-thumb .num {
+    position: absolute; left: 2px; top: 2px; min-width: 14px; padding: 0 3px; border-radius: 7px;
+    background: rgba(0,0,0,.65); color: #fff; font-size: 10px; line-height: 14px; text-align: center; pointer-events: none;
+  }
+  .grid-thumb .mv {
+    position: absolute; bottom: 1px; width: 16px; height: 16px; padding: 0; border: none; border-radius: 50%;
+    background: rgba(0,0,0,.65); color: #fff; font-size: 11px; line-height: 16px; cursor: pointer; opacity: 0;
+  }
+  .grid-thumb .mv.left { left: 1px; }
+  .grid-thumb .mv.right { right: 1px; }
+  .grid-thumb:hover .mv { opacity: 1; }
+  .grid-thumb .rm {
     position: absolute; top: 1px; right: 1px; width: 16px; height: 16px; padding: 0;
     border: none; border-radius: 50%; background: rgba(0,0,0,.65); color: #fff;
     font-size: 11px; line-height: 16px; cursor: pointer;
@@ -1399,16 +1413,74 @@
 
     var thumbs = document.createElement("div");
     thumbs.className = "grid-thumbs";
+    // Reorder: drag a thumbnail to a new spot (the bar shows where it will
+    // land), or use the small arrows that appear on hover.
+    var dragFrom = null;
+    function moveImage(from, to) {
+      if (to < 0 || to >= item.images.length || from === to) return;
+      var moved = item.images.splice(from, 1)[0];
+      item.images.splice(to, 0, moved);
+      renderMediaList();
+    }
     item.images.forEach(function (im, k) {
       var t = document.createElement("div");
       t.className = "grid-thumb";
-      t.title = im.src;
+      t.title = im.src + " — drag to reorder";
+      t.draggable = true;
+      t.addEventListener("dragstart", function (e) {
+        dragFrom = k;
+        t.classList.add("is-dragging");
+        e.dataTransfer.effectAllowed = "move";
+        e.dataTransfer.setData("text/plain", String(k)); // Firefox needs data to start a drag
+      });
+      t.addEventListener("dragend", function () {
+        dragFrom = null;
+        thumbs.querySelectorAll(".grid-thumb").forEach(function (n) { n.classList.remove("is-dragging", "drop-before", "drop-after"); });
+      });
+      t.addEventListener("dragover", function (e) {
+        if (dragFrom === null || dragFrom === k) return;
+        e.preventDefault();
+        e.dataTransfer.dropEffect = "move";
+        var r = t.getBoundingClientRect();
+        var before = (e.clientX - r.left) < r.width / 2;
+        t.classList.toggle("drop-before", before);
+        t.classList.toggle("drop-after", !before);
+      });
+      t.addEventListener("dragleave", function () { t.classList.remove("drop-before", "drop-after"); });
+      t.addEventListener("drop", function (e) {
+        e.preventDefault();
+        if (dragFrom === null || dragFrom === k) return;
+        var r = t.getBoundingClientRect();
+        var before = (e.clientX - r.left) < r.width / 2;
+        var from = dragFrom;
+        dragFrom = null;
+        var target = before ? k : k + 1;   // slot in the list as it is now
+        if (from < target) target--;       // removing the dragged one shifts the slots after it
+        moveImage(from, target);
+      });
       var img = document.createElement("img");
       var cached = blobUrlCache[im.src];
       if (cached) img.src = cached; else { img.setAttribute("data-pending-src", im.src); resolveUrlForSrc(im.src); }
       t.appendChild(img);
+      var num = document.createElement("span");
+      num.className = "num";
+      num.textContent = String(k + 1);
+      t.appendChild(num);
+      if (k > 0) {
+        var mvL = document.createElement("button");
+        mvL.type = "button"; mvL.className = "mv left"; mvL.textContent = "‹"; mvL.title = "Move earlier";
+        mvL.addEventListener("click", function () { moveImage(k, k - 1); });
+        t.appendChild(mvL);
+      }
+      if (k < item.images.length - 1) {
+        var mvR = document.createElement("button");
+        mvR.type = "button"; mvR.className = "mv right"; mvR.textContent = "›"; mvR.title = "Move later";
+        mvR.addEventListener("click", function () { moveImage(k, k + 1); });
+        t.appendChild(mvR);
+      }
       var x = document.createElement("button");
       x.type = "button";
+      x.className = "rm";
       x.textContent = "×";
       x.title = "Remove this image from the grid";
       x.addEventListener("click", function () {
