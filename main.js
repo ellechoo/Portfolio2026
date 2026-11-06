@@ -400,6 +400,10 @@
       // the file streams in), which is also what lets the gallery ->
       // project transition know where the first image will land.
       if (el && d && d.w > 0 && d.h > 0) el.style.aspectRatio = d.w + " / " + d.h;
+      // A phone-shaped video that stands alone (no skinny neighbour to pair
+      // with, not part of a grid) is shown at half width, left-aligned, on
+      // wide screens, as if it sat in a two-column grid. See .is-half in css.
+      if (media[i].type === "video" && skinny(d)) figure.classList.add("is-half");
       els.projectMedia.appendChild(figure);
     }
 

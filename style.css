@@ -766,6 +766,15 @@ button.contact-toggle {
   color: var(--ink);
 }
 
+/* A phone-shaped video on its own: half the column, left-aligned, on wide
+   screens (the width of one column of a two-column grid). Phones keep the
+   full width. Set by appendSingle() in main.js. */
+@media (min-width: 601px) {
+  .project-media figure.is-half {
+    width: calc(50% - var(--gutter) / 4);
+  }
+}
+
 /* A group of images shown as a smaller grid (see buildGridFigure in
    main.js). Columns come from --cols (set per group in admin); phones
    use at most two. Each image keeps its own shape. */
