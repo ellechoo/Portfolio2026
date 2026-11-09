@@ -832,6 +832,15 @@ button.contact-toggle {
   top: calc(var(--header-height) + 24px);
 }
 
+/* The description exists twice: whole, in the side column (wide screens),
+   and split into paragraphs on phones -- the first under the title, the
+   rest between the images (.media-text, added by renderProjectMedia).
+   Phones' rules further down switch which one shows. */
+.project-description.pd-first,
+.project-media .media-text {
+  display: none;
+}
+
 /* Wide screens: the text column scrolls by itself, so a long description
    (Voiceprint's, say) can be read in full without scrolling past all the
    images first. It is as tall as the space under the nav, the scrollbar is
@@ -978,6 +987,26 @@ button.contact-toggle {
   }
   .project-layout {
     padding-bottom: 56px;
+  }
+}
+
+/* Phones: paragraph by paragraph, with the images in between. */
+@media (max-width: 600px) {
+  .project-description.pd-full {
+    display: none;
+  }
+  .project-description.pd-first {
+    display: block;
+  }
+  .project-description.pd-first:empty {
+    display: none;
+  }
+  .project-media .media-text {
+    display: block;
+    flex: none;
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.6;
   }
 }
 

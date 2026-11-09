@@ -31,6 +31,7 @@
     projectTitle: document.getElementById("project-title"),
     projectMeta: document.getElementById("project-meta"),
     projectDescription: document.getElementById("project-description"),
+    projectDescriptionFirst: document.getElementById("project-description-first"),
     projectLink: document.getElementById("project-link"),
     projectMedia: document.getElementById("project-media"),
     nextProject: document.getElementById("next-project"),
@@ -339,7 +340,28 @@
      dimensions, not the whole thing, so it's cheap). */
   var mediaRenderToken = 0;
 
+  function descriptionParagraphs(text) {
+    return String(text || "").split(/\n\s*\n/).map(function (t) { return t.trim(); }).filter(Boolean);
+  }
+
   function renderProjectMedia(media, project) {
+    // Phones: paragraph 2 goes after the first image (or group), paragraph 3
+    // after the second, and so on; any left over after the last one. A
+    // "unit" is one image/video, one grid, or one side-by-side pair.
+    // (Hidden on wide screens by css, where the whole description sits in
+    // the side column.)
+    var extraText = descriptionParagraphs(project.description).slice(1);
+    var textPlaced = 0;
+    function placeText(finalIndex) {
+      var n = finalIndex >= media.length - 1 ? extraText.length - textPlaced : 1;
+      while (n-- > 0 && textPlaced < extraText.length) {
+        var p = document.createElement("p");
+        p.className = "project-description media-text";
+        p.textContent = extraText[textPlaced++];
+        els.projectMedia.appendChild(p);
+      }
+    }
+
     var SKINNY_RATIO = 4 / 3; // height:width -- counts as "skinny" once taller than this relative to its own width
 
     function probeImage(src) {
@@ -405,6 +427,7 @@
       // wide screens, as if it sat in a two-column grid. See .is-half in css.
       if (media[i].type === "video" && skinny(d)) figure.classList.add("is-half");
       els.projectMedia.appendChild(figure);
+      placeText(i);
     }
 
     function step(i) {
@@ -414,6 +437,7 @@
         if (token !== mediaRenderToken) return;
         if (media[i].type === "grid") {
           els.projectMedia.appendChild(buildGridFigure(media[i], offsets[i], flat, project, d0));
+          placeText(i);
           step(i + 1);
           return;
         }
@@ -434,6 +458,7 @@
             row.appendChild(buildMediaFigure(media[i], offsets[i], flat, project));
             row.appendChild(buildMediaFigure(media[i + 1], offsets[i + 1], flat, project));
             els.projectMedia.appendChild(row);
+            placeText(i + 1);
             layoutMediaRows();
             step(i + 2);
           } else {
@@ -1757,6 +1782,11 @@
     });
 
     els.projectDescription.textContent = project.description || "";
+    // On phones the description is split: its first paragraph stays up here
+    // under the title, the others are placed between the images further
+    // down (see renderProjectMedia). Both versions exist in the page and
+    // css shows the right one for the screen size.
+    if (els.projectDescriptionFirst) els.projectDescriptionFirst.textContent = descriptionParagraphs(project.description)[0] || "";
     // New project: the text column starts at its top again.
     var sideEl = document.querySelector(".project-sidebar");
     if (sideEl) sideEl.scrollTop = 0;
