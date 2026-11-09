@@ -977,7 +977,7 @@ button.contact-toggle {
   .project-description {
     flex-basis: 100%;
     margin: 16px 0 0;
-    font-size: 12px;
+    font-size: 13px;
     line-height: 1.6;
   }
   /* More air between the end of the text (or the visit-site link) and
@@ -1005,8 +1005,15 @@ button.contact-toggle {
     display: block;
     flex: none;
     margin: 0;
-    font-size: 12px;
+    font-size: 13px;
     line-height: 1.6;
+  }
+  /* Captions: smaller and quieter than the body text, so the two read as
+     different things. */
+  .project-media figcaption {
+    margin-top: 8px;
+    font-size: 10px;
+    opacity: 0.55;
   }
 }
 
