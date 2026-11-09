@@ -1757,6 +1757,10 @@
     });
 
     els.projectDescription.textContent = project.description || "";
+    // New project: the text column starts at its top again.
+    var sideEl = document.querySelector(".project-sidebar");
+    if (sideEl) sideEl.scrollTop = 0;
+    updateSidebarFade();
 
     if (project.website) {
       els.projectLink.href = project.website;
@@ -1795,6 +1799,24 @@
 
     return true;
   }
+
+  /* On wide screens the project's text column scrolls on its own (see
+     .project-sidebar in css) so a long description can be read while the
+     images stay where they are. A soft fade at the top/bottom edge shows
+     there is more to scroll; the scrollbar itself is hidden. */
+  function updateSidebarFade() {
+    var side = document.querySelector(".project-sidebar");
+    if (!side) return;
+    var max = side.scrollHeight - side.clientHeight;
+    side.classList.toggle("fade-bottom", max > 2 && side.scrollTop < max - 2);
+    side.classList.toggle("fade-top", max > 2 && side.scrollTop > 2);
+  }
+  (function () {
+    var side = document.querySelector(".project-sidebar");
+    if (side) side.addEventListener("scroll", updateSidebarFade, { passive: true });
+    window.addEventListener("resize", updateSidebarFade);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(updateSidebarFade);
+  })();
 
   /* ---------- gallery -> project: the thumbnail flies into place ----------
      Clicking a gallery card remembers where its thumbnail sits on screen.

@@ -832,6 +832,33 @@ button.contact-toggle {
   top: calc(var(--header-height) + 24px);
 }
 
+/* Wide screens: the text column scrolls by itself, so a long description
+   (Voiceprint's, say) can be read in full without scrolling past all the
+   images first. It is as tall as the space under the nav, the scrollbar is
+   hidden, and a soft fade at the top/bottom edge (classes set by
+   updateSidebarFade in main.js) shows there is more. Once its text has
+   been scrolled to the end the page scrolls on as usual. */
+@media (min-width: 901px) {
+  .project-sidebar {
+    max-height: calc(100vh - var(--header-height) - 48px);
+    overflow-y: auto;
+    scrollbar-width: none;
+  }
+  .project-sidebar::-webkit-scrollbar { display: none; }
+  .project-sidebar.fade-bottom {
+    -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 56px), transparent);
+    mask-image: linear-gradient(to bottom, #000 calc(100% - 56px), transparent);
+  }
+  .project-sidebar.fade-top {
+    -webkit-mask-image: linear-gradient(to bottom, transparent, #000 56px);
+    mask-image: linear-gradient(to bottom, transparent, #000 56px);
+  }
+  .project-sidebar.fade-top.fade-bottom {
+    -webkit-mask-image: linear-gradient(to bottom, transparent, #000 56px, #000 calc(100% - 56px), transparent);
+    mask-image: linear-gradient(to bottom, transparent, #000 56px, #000 calc(100% - 56px), transparent);
+  }
+}
+
 .project-sidebar h1 {
   font-family: 'Array', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   font-size: clamp(32px, 3.8vw, 48px);
