@@ -1883,7 +1883,8 @@ body.is-about .site-header .contact-menu {
   line-height: 1.5;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: #ffffff;
+  /* The pink of the PLAY filter button (HUE_END in main.js: hsl(285, 72%, 70%)). */
+  color: hsl(285, 72%, 70%);
   opacity: 1;
   animation: contact-intro-in 0.45s ease both;
 }
