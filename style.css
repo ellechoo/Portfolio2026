@@ -63,6 +63,8 @@
   :root {
     --gutter: 20px;
     --gallery-row-gap: 32px;
+    /* Phone thumbnails: 160px tall (was the 120px floor of the desktop clamp). */
+    --thumb-height: 160px;
   }
 }
 
