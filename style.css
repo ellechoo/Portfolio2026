@@ -1824,12 +1824,12 @@ body.is-about .site-header .contact-menu {
     font-size: 11.5px;
     padding: 5px 12px;
   }
-  .project-caption .name { font-size: 14px; }
+  .project-caption .name { font-size: 15px; }
   .project-tags .pill-tag {
     font-size: 9px;
     padding: 2px 7px;
   }
-  .project-caption .summary { font-size: 12px; }
+  .project-caption .summary { font-size: 12px; margin-top: 6px; }
 }
 
 
@@ -1965,7 +1965,7 @@ h1, h2, h3 {
      If more categories are ever added than fit, the row scrolls sideways
      instead of wrapping. */
   .category-filter {
-    --pf: min(12px, calc((100vw - 40px - 10px) / 28));
+    --pf: min(11px, calc((100vw - 40px - 10px) / 28));
     flex-wrap: nowrap;
     gap: calc(var(--pf) * 0.77);
     overflow-x: auto;
