@@ -1889,7 +1889,12 @@ body.is-about .site-header .contact-menu {
   animation: contact-intro-in 0.45s ease both;
 }
 @media (max-width: 600px) {
-  .contact-credit { font-size: 10px; }
+  /* 10px, shrinking a little on narrow phones so the sentence stays on one
+     line (it is ~33.7 "px-per-10px" wide: (screen - 2 x 20px gutter) / 34). */
+  .contact-credit {
+    font-size: min(10px, calc((100vw - 40px) / 34));
+    white-space: nowrap;
+  }
 }
 @media (prefers-reduced-motion: reduce) {
   .contact-credit { animation: none; }
