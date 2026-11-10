@@ -2204,6 +2204,40 @@
       if (Math.abs(dx) < 50 || Math.abs(dx) < Math.abs(dy) * 1.5 || dt > 800) return;
       showLightboxIndex(lightboxIndex + (dx < 0 ? 1 : -1), dx < 0 ? "next" : "prev");
     }, { passive: true });
+
+    // Trackpad: a two-finger swipe sideways arrives as wheel events with a
+    // horizontal delta. Swiping left (deltaX > 0 with natural scrolling) goes
+    // to the next item and right to the previous one, like the touch swipe.
+    // One swipe = one step: after it fires, the rest of the gesture (including
+    // the momentum tail) is ignored until a fresh swipe starts or the events stop.
+    var wheelAcc = 0, wheelLocked = false, wheelLastAbs = 0, wheelIdle = null, wheelActive = false;
+    els.lightbox.addEventListener("wheel", function (e) {
+      if (e.ctrlKey) return; // pinch-zoom on a trackpad, not a swipe
+      if (lightboxMedia.length < 2) return;
+      var dx = e.deltaX, dy = e.deltaY;
+      // Mostly vertical: not ours. (Inside a sideways gesture, its faint tail still counts.)
+      if (Math.abs(dx) <= Math.abs(dy) * 1.2 && !(wheelActive && Math.abs(dx) >= Math.abs(dy))) { wheelAcc = 0; return; }
+      // Keep the browser's own swipe-to-go-back gesture from firing.
+      e.preventDefault();
+      var abs = Math.abs(dx);
+      if (wheelLocked && (abs > wheelLastAbs * 1.5 + 10 || (wheelAcc !== 0 && (dx > 0) !== (wheelAcc > 0)))) {
+        // Delta jumped back up (or reversed): the fingers started a new swipe.
+        wheelLocked = false;
+        wheelAcc = 0;
+      }
+      wheelLastAbs = abs;
+      clearTimeout(wheelIdle);
+      wheelActive = true;
+      wheelIdle = setTimeout(function () { wheelAcc = 0; wheelLocked = false; wheelLastAbs = 0; wheelActive = false; }, 160);
+      if (wheelLocked) return;
+      if (wheelAcc !== 0 && (dx > 0) !== (wheelAcc > 0)) wheelAcc = 0;
+      wheelAcc += dx;
+      if (Math.abs(wheelAcc) < 60) return;
+      var next = wheelAcc > 0;
+      wheelLocked = true;
+      wheelAcc = dx; // remembers the swipe's direction for the reversal check above
+      showLightboxIndex(lightboxIndex + (next ? 1 : -1), next ? "next" : "prev");
+    }, { passive: false });
   }
 
   /* ---------- custom cursor ---------- */
