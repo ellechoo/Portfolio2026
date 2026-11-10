@@ -660,7 +660,7 @@ button.contact-toggle {
   font-size: 13px;
   font-weight: 400;
   margin-top: 4px;
-  opacity: 0.6;
+  opacity: 0.7;
 }
 
 /* ---------- Project page ---------- */
@@ -1832,7 +1832,7 @@ body.is-about .site-header .contact-menu {
     font-size: 9px;
     padding: 2px 7px;
   }
-  .project-caption .summary { font-size: 12px; margin-top: 5px; }
+  .project-caption .summary { font-size: 10px; margin-top: 5px; }
 }
 
 
@@ -2005,5 +2005,5 @@ h1, h2, h3 {
   .project-tags .pill-tag { font-size: 8px; padding: 2.5px 8px; }
   .project-media figcaption { font-size: 11px; }
   .to-top { font-size: 11px; }
-  .project-caption .summary { font-size: 12px; }
+  .project-caption .summary { font-size: 10px; }
 }
