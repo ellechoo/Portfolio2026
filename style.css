@@ -1213,10 +1213,23 @@ button.contact-toggle {
   font-size: 13px;
 }
 
+/* A sideways drag in the lightbox is a swipe (main.js), not a page scroll. */
+.lightbox { touch-action: pan-y pinch-zoom; }
+
+.lightbox-stage.is-sliding-next { animation: lightbox-slide-next 0.22s ease-out; }
+.lightbox-stage.is-sliding-prev { animation: lightbox-slide-prev 0.22s ease-out; }
+@keyframes lightbox-slide-next {
+  from { transform: translateX(36px); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+@keyframes lightbox-slide-prev {
+  from { transform: translateX(-36px); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+
+/* Phones: no arrow buttons, swipe left/right between items instead. */
 @media (max-width: 600px) {
-  .lightbox-prev, .lightbox-next { width: 44px; height: 44px; font-size: 34px; }
-  .lightbox-prev { left: 0; }
-  .lightbox-next { right: 0; }
+  .lightbox-prev, .lightbox-next { display: none !important; }
 }
 
 /* ---------- Custom cursor ---------- */

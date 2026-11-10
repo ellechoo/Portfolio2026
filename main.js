@@ -2125,10 +2125,17 @@
     document.removeEventListener("keydown", onLightboxKeydown);
   }
 
-  function showLightboxIndex(newIndex) {
+  function showLightboxIndex(newIndex, dir) {
     var n = lightboxMedia.length;
     lightboxIndex = (newIndex + n) % n;
     renderLightboxItem();
+    // After a swipe the new item slides in from the side it was swiped toward.
+    if (dir && !prefersReducedMotion()) {
+      var st = els.lightboxStage;
+      st.classList.remove("is-sliding-next", "is-sliding-prev");
+      void st.offsetWidth; // restart the animation
+      st.classList.add(dir === "next" ? "is-sliding-next" : "is-sliding-prev");
+    }
   }
 
   function renderLightboxItem() {
@@ -2173,6 +2180,38 @@
     els.lightbox.addEventListener("click", function (e) {
       if (e.target === els.lightbox) closeLightbox();
     });
+    els.lightboxStage.addEventListener("animationend", function () {
+      els.lightboxStage.classList.remove("is-sliding-next", "is-sliding-prev");
+    });
+
+    // Touch: swipe left for the next item, right for the previous one. (On
+    // phones the arrow buttons are hidden, see style.css, so this is how you
+    // move through the zoomed-in media.)
+    var swipe = null;
+    els.lightbox.addEventListener("touchstart", function (e) {
+      swipe = null;
+      if (e.touches.length !== 1 || lightboxMedia.length < 2) return;
+      // Pinched in? Then a sideways drag is panning the image, not a swipe.
+      if (window.visualViewport && window.visualViewport.scale > 1.05) return;
+      var t = e.touches[0];
+      // Leave a video's own control bar alone (scrubbing, volume).
+      if (e.target && e.target.tagName === "VIDEO") {
+        var r = e.target.getBoundingClientRect();
+        if (t.clientY > r.bottom - 56) return;
+      }
+      swipe = { x: t.clientX, y: t.clientY, t: Date.now() };
+    }, { passive: true });
+    els.lightbox.addEventListener("touchmove", function (e) {
+      if (e.touches.length > 1) swipe = null;
+    }, { passive: true });
+    els.lightbox.addEventListener("touchend", function (e) {
+      if (!swipe) return;
+      var t = e.changedTouches[0];
+      var dx = t.clientX - swipe.x, dy = t.clientY - swipe.y, dt = Date.now() - swipe.t;
+      swipe = null;
+      if (Math.abs(dx) < 50 || Math.abs(dx) < Math.abs(dy) * 1.5 || dt > 800) return;
+      showLightboxIndex(lightboxIndex + (dx < 0 ? 1 : -1), dx < 0 ? "next" : "prev");
+    }, { passive: true });
   }
 
   /* ---------- custom cursor ---------- */
