@@ -1913,7 +1913,7 @@ h1, h2, h3 {
 }
 @media (max-width: 600px) {
   .to-top {
-    font-size: 10px;
+    font-size: 12px;
   }
 }
 
