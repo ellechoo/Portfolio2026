@@ -2004,12 +2004,12 @@ h1, h2, h3 {
 @media (max-width: 600px) {
   /* Gallery tag labels on phones. The outline is drawn as a 0.75px inset
      shadow rather than a 1px border so its stroke is about as thin as the
-     8px letters inside it, and the padding (4px top / 2.4px bottom) sits
-     the caps in the optical centre of the pill (Inter's caps otherwise
-     ride a little high). The pill is 16px tall. */
+     8px letters inside it, and the padding (3.6px top / 2.8px bottom) sits
+     the caps just above the centre of the pill (4px / 2.4px read a touch
+     low, the original even padding read high). The pill is 16px tall. */
   .project-tags .pill-tag {
     font-size: 8px;
-    padding: 4px 9px 2.4px;
+    padding: 3.6px 9px 2.8px;
     border: 0;
     box-shadow: inset 0 0 0 0.75px var(--tag-color, var(--line));
   }
