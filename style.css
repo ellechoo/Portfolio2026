@@ -392,6 +392,7 @@ button.contact-toggle {
 /* Each link is its own white pill, same shape and type as the filter pills. */
 .contact-menu a {
   display: block;
+  font-family: 'Poppins', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   white-space: nowrap;
   font-size: 13px;
   font-weight: 500;
@@ -1739,6 +1740,7 @@ body.is-about .site-header .contact-menu {
 }
 .contact-page a {
   display: block;
+  font-family: 'Poppins', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   white-space: nowrap;
   font-size: 14px;
   font-weight: 500;
