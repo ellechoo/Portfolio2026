@@ -1010,10 +1010,15 @@ button.contact-toggle {
   .project-media .media-text {
     display: block;
     flex: none;
-    margin: 0;
+    /* 20px column gap + 28px = 48px above and below, the same space as
+       under the first paragraph (sidebar margin 28px + 20px gap) before
+       the first image. No extra at the very start or end of the column. */
+    margin: 28px 0;
     font-size: 13px;
     line-height: 1.6;
   }
+  .project-media .media-text:first-child { margin-top: 0; }
+  .project-media .media-text:last-child { margin-bottom: 0; }
   /* Captions: smaller and quieter than the body text, so the two read as
      different things. */
   .project-media figcaption {
