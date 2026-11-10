@@ -1923,6 +1923,15 @@ body.is-about .site-header .contact-menu {
     margin: -5.4px 4px 0 0;
   }
 
+  /* Equal gaps: ABOUT (short) and CONTACT (long) are different widths, so
+     the desktop 1fr / auto / 1fr grid leaves a bigger gap on the ABOUT side.
+     On a phone the three items are spread with equal space between them
+     instead (the name sits a hair off the exact middle as a result). */
+  .site-header .wrap {
+    display: flex;
+    justify-content: space-between;
+  }
+
   /* Keeps CONTACT (a button) level with the links beside it. */
   .site-header button.contact-toggle { line-height: 1.5; }
   /* A slightly smaller name on the about page so the nav can breathe. */
