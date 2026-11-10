@@ -102,10 +102,20 @@
     return isNaN(n) ? -Infinity : n;
   }
 
+  // Optional month (1-12, set in admin, never shown on the site) orders
+  // projects inside a year, newest first; projects without one come after
+  // the ones that have one.
+  function monthValue(project) {
+    var n = parseInt(project.month, 10);
+    return n >= 1 && n <= 12 ? n : 0;
+  }
+
   function sortedProjects() {
     return DATA.projects.slice().sort(function (a, b) {
       var byYear = yearValue(b) - yearValue(a);
       if (byYear !== 0) return byYear;
+      var byMonth = monthValue(b) - monthValue(a);
+      if (byMonth !== 0) return byMonth;
       return (a.order || 0) - (b.order || 0);
     });
   }
