@@ -140,21 +140,40 @@ button:focus-visible,
   align-items: center;
 }
 
+/* The bar's bottom edge fades out instead of ending in a hard line: a
+   strip just under it (a pseudo-element, so no layout change) that goes from
+   solid black to transparent, so content scrolling up under the nav melts
+   away. Hidden on the about page, where the header is transparent. */
+.site-header::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  height: 16px;
+  background: linear-gradient(to bottom,
+    rgba(0, 0, 0, 1) 0%,
+    rgba(0, 0, 0, 0.65) 40%,
+    rgba(0, 0, 0, 0.25) 75%,
+    rgba(0, 0, 0, 0) 100%);
+  pointer-events: none;
+}
+body.is-about .site-header::after { display: none; }
+
 /* A little extra air above the nav on larger screens. That pushes the nav
    text 4px below the bar's middle, so the bar is also drawn 8px taller
-   (a pseudo-element: no layout change) to give it equal space top and
-   bottom. When the header is transparent (about page) this is too. */
+   (the first 8px of the strip below is solid) to give it equal space top
+   and bottom, then it fades over the next 16px. */
 @media (min-width: 601px) {
   .site-header { padding-top: 8px; }
   .site-header::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 100%;
-    height: 8px;
-    background: inherit;
-    pointer-events: none;
+    height: 24px;
+    background: linear-gradient(to bottom,
+      rgba(0, 0, 0, 1) 0%,
+      rgba(0, 0, 0, 1) 33%,
+      rgba(0, 0, 0, 0.65) 55%,
+      rgba(0, 0, 0, 0.25) 80%,
+      rgba(0, 0, 0, 0) 100%);
   }
 }
 
