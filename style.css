@@ -2065,8 +2065,9 @@ h1, h2, h3 {
 /* Typography refinements */
 :root { --ink-body: #d6d6d6; }
 .project-caption .summary,
-.project-media figcaption,
-.contact-intro { color: var(--ink-body); }
+.project-media figcaption { color: var(--ink-body); }
+/* Contact page text: pure white, full opacity. */
+.contact-intro { color: #ffffff; opacity: 1; }
 /* Project page body text: pure white, full opacity. */
 .project-description { color: #ffffff; opacity: 1; }
 .site-header a,
