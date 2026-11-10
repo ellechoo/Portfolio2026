@@ -1857,10 +1857,9 @@ h1, h2, h3 {
 /* ---------- Gallery footer: back to top ---------- */
 .home-footer {
   position: relative;
-  display: flex;
-  justify-content: flex-end;
+  display: block;
   margin-top: 16px;
-  padding: 18px 0 32px;
+  padding: 0;
 }
 .home-footer[hidden] { display: none; }
 /* Same straight, thin rule as the project pages' footer. */
@@ -1877,7 +1876,12 @@ h1, h2, h3 {
 .to-top {
   background: none;
   border: none;
-  padding: 0;
+  /* The button fills the whole footer (left-aligned text), so clicking
+     anywhere along the row goes back to top, like the project pages' footer. */
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 18px 0 32px;
   margin: 0;
   font-family: 'Poppins', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   font-size: 12px;
@@ -1977,7 +1981,7 @@ h1, h2, h3 {
   }
   .project-list { padding-top: 30px; }
 
-  .home-footer { padding-bottom: 24px; }
+  .home-footer .to-top { padding-bottom: 24px; }
 }
 
 /* Typography refinements */
