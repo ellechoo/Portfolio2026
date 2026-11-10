@@ -1112,7 +1112,14 @@ button.contact-toggle {
 @media (max-width: 600px) {
   .next-project {
     gap: 6px 28px; /* more room between NEXT PROJECT and the title */
-    padding: 16px 0 12px;
+    padding: 16px 0 16px;
+  }
+  /* Footer type is 10px on phones; the 18px line box is kept so the label,
+     title and arrow still line up. */
+  .next-project-eyebrow,
+  .next-project-title {
+    font-size: 10px;
+    line-height: 18px;
   }
   /* The title takes whatever width is left between the label and the arrow
      and wraps inside it if it's long, so the arrow never drops to its own line. */
@@ -1915,7 +1922,7 @@ h1, h2, h3 {
 }
 @media (max-width: 600px) {
   .to-top {
-    font-size: 12px;
+    font-size: 10px;
   }
 }
 
@@ -1996,7 +2003,7 @@ h1, h2, h3 {
   }
   .project-list { padding-top: 30px; }
 
-  .home-footer .to-top { padding: 16px 0 12px; }
+  .home-footer .to-top { padding: 16px 0 16px; }
 }
 
 /* Typography refinements */
@@ -2024,6 +2031,6 @@ h1, h2, h3 {
     box-shadow: inset 0 0 0 0.75px var(--tag-color, var(--line));
   }
   .project-media figcaption { font-size: 11px; }
-  .to-top { font-size: 12px; }
+  .to-top { font-size: 10px; line-height: 18px; }
   .project-caption .summary { font-size: 10px; }
 }
