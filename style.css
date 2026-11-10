@@ -1060,6 +1060,7 @@ button.contact-toggle {
 
 .next-project-eyebrow {
   flex: 0 0 auto;
+  font-family: 'Poppins', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   font-size: 12px;
   line-height: 1.5;
   font-weight: 500;
@@ -1070,6 +1071,7 @@ button.contact-toggle {
 
 .next-project-title {
   flex: 1 1 auto;
+  font-family: 'Poppins', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   min-width: 0;
   text-align: right;
   /* Same type as "NEXT PROJECT" beside it and the gallery's "BACK TO TOP":
@@ -1877,7 +1879,7 @@ h1, h2, h3 {
   border: none;
   padding: 0;
   margin: 0;
-  font-family: inherit;
+  font-family: 'Poppins', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   font-size: 12px;
   font-weight: 500;
   letter-spacing: 0.04em;
