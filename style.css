@@ -157,11 +157,23 @@ button:focus-visible,
   top: 0;
   bottom: calc(-1 * (var(--fade-solid) + var(--fade-len) - var(--header-height)));
   z-index: -1;
+  /* Eased (smoothstep) so it has no visible start or end line. */
   background: linear-gradient(to bottom,
-    rgba(0, 0, 0, 1) var(--fade-solid),
-    rgba(0, 0, 0, 0.65) calc(var(--fade-solid) + var(--fade-len) * 0.4),
-    rgba(0, 0, 0, 0.25) calc(var(--fade-solid) + var(--fade-len) * 0.75),
-    rgba(0, 0, 0, 0) calc(var(--fade-solid) + var(--fade-len)));
+    rgba(0, 0, 0, 1.0) var(--fade-solid),
+    rgba(0, 0, 0, 0.9854) calc(var(--fade-solid) + var(--fade-len) * 0.0714),
+    rgba(0, 0, 0, 0.9446) calc(var(--fade-solid) + var(--fade-len) * 0.1429),
+    rgba(0, 0, 0, 0.8819) calc(var(--fade-solid) + var(--fade-len) * 0.2143),
+    rgba(0, 0, 0, 0.8017) calc(var(--fade-solid) + var(--fade-len) * 0.2857),
+    rgba(0, 0, 0, 0.7085) calc(var(--fade-solid) + var(--fade-len) * 0.3571),
+    rgba(0, 0, 0, 0.6064) calc(var(--fade-solid) + var(--fade-len) * 0.4286),
+    rgba(0, 0, 0, 0.5) calc(var(--fade-solid) + var(--fade-len) * 0.5),
+    rgba(0, 0, 0, 0.3936) calc(var(--fade-solid) + var(--fade-len) * 0.5714),
+    rgba(0, 0, 0, 0.2915) calc(var(--fade-solid) + var(--fade-len) * 0.6429),
+    rgba(0, 0, 0, 0.1983) calc(var(--fade-solid) + var(--fade-len) * 0.7143),
+    rgba(0, 0, 0, 0.1181) calc(var(--fade-solid) + var(--fade-len) * 0.7857),
+    rgba(0, 0, 0, 0.0554) calc(var(--fade-solid) + var(--fade-len) * 0.8571),
+    rgba(0, 0, 0, 0.0146) calc(var(--fade-solid) + var(--fade-len) * 0.9286),
+    rgba(0, 0, 0, 0.0) calc(var(--fade-solid) + var(--fade-len) * 1.0));
   pointer-events: none;
 }
 body.is-about .site-header::before { display: none; }
