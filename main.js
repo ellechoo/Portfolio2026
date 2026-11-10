@@ -11,6 +11,14 @@
 (function () {
   "use strict";
 
+  // Warm up the About page's fonts early so the bubbles and notes are measured
+  // with the real letterforms rather than a fallback font.
+  if (document.fonts && document.fonts.load) {
+    ["700 16px Poppins", "400 19px Gaegu"].forEach(function (f) {
+      document.fonts.load(f).catch(function () {});
+    });
+  }
+
   var DATA = readData();
   var els = {
     home: document.getElementById("home-view"),
