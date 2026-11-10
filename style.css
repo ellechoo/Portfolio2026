@@ -134,46 +134,47 @@ button:focus-visible,
   position: sticky;
   top: 0;
   z-index: 100;
-  background: var(--bg);
+  /* The black bar is drawn by ::before below, so its bottom edge can fade. */
   height: var(--header-height);
   display: flex;
   align-items: center;
+  /* Fade: solid black down to --fade-solid, then fading to transparent over
+     --fade-len, which runs past the header's own bottom edge. */
+  --fade-solid: 56px;
+  --fade-len: 24px;
 }
 
-/* The bar's bottom edge fades out instead of ending in a hard line: a
-   strip just under it (a pseudo-element, so no layout change) that goes from
-   solid black to transparent, so content scrolling up under the nav melts
-   away. Hidden on the about page, where the header is transparent. */
-.site-header::after {
+/* The bar: black, with its bottom edge fading out instead of ending in a hard
+   line, so content scrolling up under the nav melts away. It sits behind the
+   nav (z-index -1 inside the header's own stacking context) and reaches past
+   the header's bottom edge, so it adds no layout. Hidden on the about page,
+   where the header is transparent. */
+.site-header::before {
   content: "";
   position: absolute;
   left: 0;
   right: 0;
-  top: 100%;
-  height: 16px;
+  top: 0;
+  bottom: calc(-1 * (var(--fade-solid) + var(--fade-len) - var(--header-height)));
+  z-index: -1;
   background: linear-gradient(to bottom,
-    rgba(0, 0, 0, 1) 0%,
-    rgba(0, 0, 0, 0.65) 40%,
-    rgba(0, 0, 0, 0.25) 75%,
-    rgba(0, 0, 0, 0) 100%);
+    rgba(0, 0, 0, 1) var(--fade-solid),
+    rgba(0, 0, 0, 0.65) calc(var(--fade-solid) + var(--fade-len) * 0.4),
+    rgba(0, 0, 0, 0.25) calc(var(--fade-solid) + var(--fade-len) * 0.75),
+    rgba(0, 0, 0, 0) calc(var(--fade-solid) + var(--fade-len)));
   pointer-events: none;
 }
-body.is-about .site-header::after { display: none; }
+body.is-about .site-header::before { display: none; }
 
 /* A little extra air above the nav on larger screens. That pushes the nav
-   text 4px below the bar's middle, so the bar is also drawn 8px taller
-   (the first 8px of the strip below is solid) to give it equal space top
-   and bottom, then it fades over the next 16px. */
+   text 4px below the bar's middle, so the bar is drawn 8px taller here
+   (solid to 64px, fading from there to 96px) to give it equal space top
+   and bottom. */
 @media (min-width: 601px) {
-  .site-header { padding-top: 8px; }
-  .site-header::after {
-    height: 24px;
-    background: linear-gradient(to bottom,
-      rgba(0, 0, 0, 1) 0%,
-      rgba(0, 0, 0, 1) 33%,
-      rgba(0, 0, 0, 0.65) 55%,
-      rgba(0, 0, 0, 0.25) 80%,
-      rgba(0, 0, 0, 0) 100%);
+  .site-header {
+    padding-top: 8px;
+    --fade-solid: 64px;
+    --fade-len: 32px;
   }
 }
 
