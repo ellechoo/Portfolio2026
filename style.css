@@ -140,7 +140,7 @@ button:focus-visible,
   align-items: center;
   /* Fade: solid black down to --fade-solid, then fading to transparent over
      --fade-len, which runs past the header's own bottom edge. */
-  --fade-solid: 56px;
+  --fade-solid: 48px;
   --fade-len: 24px;
 }
 
@@ -180,12 +180,12 @@ body.is-about .site-header::before { display: none; }
 
 /* A little extra air above the nav on larger screens. That pushes the nav
    text 4px below the bar's middle, so the bar is drawn 8px taller here
-   (solid to 64px, fading from there to 96px) to give it equal space top
+   (solid to 56px, fading from there to 88px) to give it equal space top
    and bottom. */
 @media (min-width: 601px) {
   .site-header {
     padding-top: 8px;
-    --fade-solid: 64px;
+    --fade-solid: 56px;
     --fade-len: 32px;
   }
 }
