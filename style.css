@@ -1003,6 +1003,7 @@ button.contact-toggle {
   }
   .project-description.pd-first {
     display: block;
+    font-size: 12px;
   }
   .project-description.pd-first:empty {
     display: none;
@@ -1014,7 +1015,7 @@ button.contact-toggle {
        under the first paragraph (sidebar margin 28px + 20px gap) before
        the first image. No extra at the very start or end of the column. */
     margin: 28px 0;
-    font-size: 13px;
+    font-size: 12px;
     line-height: 1.6;
   }
   .project-media .media-text:first-child { margin-top: 0; }
@@ -1999,10 +2000,11 @@ h1, h2, h3 {
 
 /* Typography refinements */
 :root { --ink-body: #d6d6d6; }
-.project-description,
 .project-caption .summary,
 .project-media figcaption,
 .contact-intro { color: var(--ink-body); }
+/* Project page body text: pure white, full opacity. */
+.project-description { color: #ffffff; opacity: 1; }
 .site-header a,
 .site-header button.contact-toggle { letter-spacing: 0.04em; }
 .to-top,
