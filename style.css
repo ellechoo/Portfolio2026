@@ -1824,7 +1824,7 @@ body.is-about .site-header .contact-menu {
     font-size: 11.5px;
     padding: 5px 12px;
   }
-  .project-caption .name { font-size: 15px; }
+  .project-caption .name { font-size: 16px; }
   .project-tags .pill-tag {
     font-size: 9px;
     padding: 2px 7px;
@@ -1965,7 +1965,7 @@ h1, h2, h3 {
      If more categories are ever added than fit, the row scrolls sideways
      instead of wrapping. */
   .category-filter {
-    --pf: min(11px, calc((100vw - 40px - 10px) / 28));
+    --pf: min(10px, calc((100vw - 40px - 10px) / 28));
     flex-wrap: nowrap;
     gap: calc(var(--pf) * 0.77);
     overflow-x: auto;
@@ -1980,7 +1980,7 @@ h1, h2, h3 {
   .pill {
     flex: 0 0 auto;
     font-size: var(--pf);
-    padding: calc(var(--pf) * 0.46) calc(var(--pf) * 1.08);
+    padding: calc(var(--pf) * 0.38) calc(var(--pf) * 1.08);
   }
   .project-list { padding-top: 30px; }
 
