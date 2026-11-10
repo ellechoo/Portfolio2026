@@ -140,9 +140,22 @@ button:focus-visible,
   align-items: center;
 }
 
-/* A little extra air above the nav on larger screens. */
+/* A little extra air above the nav on larger screens. That pushes the nav
+   text 4px below the bar's middle, so the bar is also drawn 8px taller
+   (a pseudo-element: no layout change) to give it equal space top and
+   bottom. When the header is transparent (about page) this is too. */
 @media (min-width: 601px) {
   .site-header { padding-top: 8px; }
+  .site-header::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 100%;
+    height: 8px;
+    background: inherit;
+    pointer-events: none;
+  }
 }
 
 .site-header .wrap {
@@ -804,7 +817,7 @@ button.contact-toggle {
 .project-sidebar {
   min-width: 0;
   position: sticky;
-  top: calc(var(--header-height) + 24px);
+  top: calc(var(--header-height) + 32px); /* 24px of air under the (8px taller) bar */
 }
 
 /* The description exists twice: whole, in the side column (wide screens),
@@ -824,7 +837,7 @@ button.contact-toggle {
    been scrolled to the end the page scrolls on as usual. */
 @media (min-width: 901px) {
   .project-sidebar {
-    max-height: calc(100vh - var(--header-height) - 48px);
+    max-height: calc(100vh - var(--header-height) - 56px);
     overflow-y: auto;
     scrollbar-width: none;
   }
