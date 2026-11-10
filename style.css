@@ -1973,3 +1973,21 @@ h1, h2, h3 {
 
   .home-footer { padding-bottom: 24px; }
 }
+
+/* Typography refinements */
+:root { --ink-body: #d6d6d6; }
+.project-description,
+.project-caption .summary,
+.project-media figcaption,
+.contact-intro { color: var(--ink-body); }
+.site-header a,
+.site-header button.contact-toggle { letter-spacing: 0.04em; }
+.to-top,
+.next-project-eyebrow,
+.next-project-title { letter-spacing: 0.06em; }
+@media (max-width: 600px) {
+  .project-tags .pill-tag { font-size: 11px; padding: 3px 8px; }
+  .project-media figcaption { font-size: 11px; }
+  .to-top { font-size: 11px; }
+  .project-caption .summary { font-size: 12px; }
+}
