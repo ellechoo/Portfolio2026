@@ -3,7 +3,7 @@
    Black & white, Inter throughout.
    ============================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;1,500;1,600&family=Rubik:wght@600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;1,500;1,600&family=Rubik:wght@500&family=Unbounded:wght@600&display=swap');
 
 /* Array (Frode Helland, via Fontshare — free for personal/commercial
    use) — used for headings only (Semibold), see .project-sidebar h1 /
@@ -151,7 +151,7 @@ button:focus-visible,
 
 .site-header a,
 .site-header button.contact-toggle {
-  font-family: 'Rubik', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: 'Unbounded', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   font-size: 14px;
   font-weight: 600;
   text-transform: uppercase;
@@ -471,7 +471,7 @@ button.contact-toggle {
    the two apart). The only thing that marks "selected" is the outer
    ring (outline), toggled on in .is-active below. */
 .pill {
-  font-family: inherit;
+  font-family: 'Rubik', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   font-size: 13px;
   font-weight: 500;
   line-height: 1.5;
@@ -1953,7 +1953,7 @@ h1, h2, h3 {
      If more categories are ever added than fit, the row scrolls sideways
      instead of wrapping. */
   .category-filter {
-    --pf: min(13px, calc((100vw - 40px - 10px) / 28.3));
+    --pf: min(13px, calc((100vw - 40px - 10px) / 27.9));
     flex-wrap: nowrap;
     gap: calc(var(--pf) * 0.77);
     overflow-x: auto;
