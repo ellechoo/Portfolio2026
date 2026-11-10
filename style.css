@@ -1799,7 +1799,7 @@ body.is-about .site-header .contact-menu {
 
   .site-header a,
   .site-header button.contact-toggle {
-    font-size: 12px;
+    font-size: 11px;
   }
   /* The current-page star hugs its nav item. */
   .nav-left::after,
