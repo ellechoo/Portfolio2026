@@ -1892,7 +1892,9 @@ h1, h2, h3 {
   display: block;
   width: 100%;
   text-align: left;
-  padding: 18px 0 32px;
+  /* Same space and line height as the project pages' NEXT PROJECT footer. */
+  padding: 18px 0 16px;
+  line-height: 1.5;
   margin: 0;
   font-family: 'Poppins', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   font-size: 12px;
@@ -1992,7 +1994,7 @@ h1, h2, h3 {
   }
   .project-list { padding-top: 30px; }
 
-  .home-footer .to-top { padding-bottom: 24px; }
+  .home-footer .to-top { padding: 16px 0 12px; }
 }
 
 /* Typography refinements */
@@ -2019,6 +2021,6 @@ h1, h2, h3 {
     box-shadow: inset 0 0 0 0.75px var(--tag-color, var(--line));
   }
   .project-media figcaption { font-size: 11px; }
-  .to-top { font-size: 11px; }
+  .to-top { font-size: 12px; }
   .project-caption .summary { font-size: 10px; }
 }
