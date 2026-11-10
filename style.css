@@ -530,6 +530,7 @@ button.contact-toggle {
 @media (max-width: 600px) {
   .project-list {
     padding-top: 36px;
+    column-gap: 24px; /* space between projects sharing a row (was the 20px gutter) */
   }
 }
 
