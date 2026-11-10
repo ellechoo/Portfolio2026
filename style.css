@@ -674,11 +674,9 @@ button.contact-toggle {
   transition: color 0.2s ease;
 }
 
-/* "back to work" and "visit site" turn the same light blue as the nav on hover. */
+/* "back to work" turns the same light blue as the nav on hover. */
 .back-link:hover,
-.back-link:focus-visible,
-.project-link:hover,
-.project-link:focus-visible {
+.back-link:focus-visible {
   color: hsl(212, 72%, 70%);
 }
 
@@ -912,11 +910,13 @@ button.contact-toggle {
   margin-top: 16px;
   font-size: 12px;
   font-weight: 400;
-  color: var(--ink);
+  color: hsl(212, 72%, 70%);
   transition: color 0.2s ease;
   text-decoration: underline;
   text-underline-offset: 2px;
 }
+.project-link:hover,
+.project-link:focus-visible { color: hsl(212, 72%, 84%); }
 .project-link[hidden] { display: none; }
 
 @media (max-width: 900px) {
