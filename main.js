@@ -960,8 +960,8 @@
         b.textEl.style.width = box + "px";
         b.textEl.style.lineHeight = "";
         // Largest font whose text block still fits the box's height
-        // (binary search; short paragraphs may grow up to 1.5x the shared size)...
-        var lo = 7.5, hi = f * 1.5;
+        // (binary search; short paragraphs may grow up to 1.9x the shared size)...
+        var lo = 7.5, hi = f * 1.9;
         for (var it = 0; it < 12; it++) {
           var mid = (lo + hi) / 2;
           b.textEl.style.fontSize = mid + "px";
@@ -972,7 +972,7 @@
         // ...then spread the lines so the block is exactly as tall as the box:
         // no empty band above or below the text.
         var natural = b.textEl.scrollHeight;
-        var lines = Math.max(1, Math.round(natural / (fs * 1.38)));
+        var lines = Math.max(1, Math.round(natural / (fs * 1.2)));
         var lh = box / lines;
         b.textEl.style.lineHeight = Math.min(Math.max(lh, fs * 1.15), fs * 2.1) + "px";
         b.r = d / 2;

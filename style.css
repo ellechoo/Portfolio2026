@@ -1468,7 +1468,32 @@ body.is-about .site-header .contact-menu {
   position: absolute;
   inset: 0;
   z-index: 1;
-  background: var(--bubble-color, hsla(240, 72%, 70%, 0.72));
+  border-radius: 50%;
+  /* "Deep glass": a dark, tinted centre (translucent, so the photo still
+     shows through the lens) that brightens to a glowing rim in the bubble's
+     own color. */
+  background:
+    radial-gradient(circle,
+      color-mix(in srgb, var(--bubble-ink, #8c8cf0) 10%, transparent) 0%,
+      color-mix(in srgb, var(--bubble-ink, #8c8cf0) 22%, transparent) 58%,
+      color-mix(in srgb, var(--bubble-ink, #8c8cf0) 55%, transparent) 88%,
+      var(--bubble-ink, #8c8cf0) 100%),
+    linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6));
+  box-shadow:
+    inset 0 0 26px 6px color-mix(in srgb, var(--bubble-ink, #8c8cf0) 85%, black),
+    inset 0 0 2px 1px var(--bubble-ink, #8c8cf0);
+}
+/* Soft colored sheen, top-left and bottom-right, in place of a white highlight. */
+.about-bubble::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  border-radius: 50%;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 34% 18% at 31% 18%, color-mix(in srgb, var(--bubble-ink, #8c8cf0) 55%, transparent), rgba(0, 0, 0, 0)),
+    radial-gradient(ellipse 50% 22% at 66% 94%, color-mix(in srgb, var(--bubble-ink, #8c8cf0) 30%, transparent), rgba(0, 0, 0, 0));
 }
 .about-bubble-lens {
   position: absolute;
@@ -1493,10 +1518,13 @@ body.is-about .site-header .contact-menu {
      width, leaving empty bands at the left and right. */
   flex: none;
   text-align: center;
-  text-transform: uppercase; /* sticky notes keep normal case */
-  font-family: 'Poppins', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  line-height: 1.38;
+  /* Handwritten like the sticky notes, but bold and in the bubble's color.
+     Keep line-height in step with the 1.2 in layoutBubbles (main.js). */
+  font-family: 'Gaegu', 'Comic Sans MS', cursive;
+  line-height: 1.2;
   font-weight: 700;
+  color: var(--bubble-ink);
+  text-shadow: 0 0 10px color-mix(in srgb, var(--bubble-ink) 55%, transparent);
   pointer-events: none;
 }
 
