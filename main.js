@@ -1605,38 +1605,24 @@
 
     // ----- resize -----
     var resizeQueued = false;
-    // The hint is a speech bubble coming out of the photo: to its right, or
-    // to its left when that side has more room (narrow screens). On a very
-    // narrow screen it shrinks to fit and may tuck a little over the photo's edge.
+    // The hint is a speech bubble coming out of the photo: centred under it
+    // (phones and desktop alike), tucked up so it overlaps the photo's bottom
+    // edge, with its tail pointing up into the photo. It's on one line; on a
+    // very narrow screen it just stays inside the viewport edges.
     var hintEl = els.aboutContent.querySelector(".about-hint");
+    var HINT_OVERLAP = 12; // px of the bubble that sit over the photo
     function positionHint() {
       if (!hintEl || !photoEl) return;
       var pr = photoEl.getBoundingClientRect();
       if (!pr.width) return;
-      var vw = window.innerWidth, gap = 16, FULL = 172;
-      var narrow = vw <= 600, edge = narrow ? 24 : 10, MIN = narrow ? 104 : 112;
-      if (narrow) {
-        // Phones: centred under the photo, tail pointing up at it.
-        hintEl.classList.remove("is-left");
-        hintEl.classList.add("is-below");
-        hintEl.style.maxWidth = "";
-        var bw = hintEl.offsetWidth;
-        var cx = pr.left + pr.width / 2;
-        var bx = Math.max(edge, Math.min(vw - bw - edge, cx - bw / 2));
-        hintEl.style.left = bx + "px";
-        hintEl.style.top = (pr.bottom + 14) + "px";
-        hintEl.style.setProperty("--tail-x", Math.max(16, Math.min(bw - 16, cx - bx)) + "px");
-        return;
-      }
-      hintEl.classList.remove("is-below");
-      var roomR = vw - pr.right - gap - edge, roomL = pr.left - gap - edge;
-      var onLeft = roomR < FULL && roomL > roomR;
-      hintEl.classList.toggle("is-left", onLeft);
-      hintEl.style.maxWidth = Math.max(MIN, Math.min(FULL, onLeft ? roomL : roomR)) + "px";
-      var hw = hintEl.offsetWidth;
-      var x = onLeft ? pr.left - gap - hw : pr.right + gap;
-      hintEl.style.left = Math.max(edge, Math.min(vw - hw - edge, x)) + "px";
-      hintEl.style.top = (pr.top + pr.height * 0.12) + "px";
+      var vw = window.innerWidth, edge = vw <= 600 ? 24 : 10;
+      hintEl.classList.add("is-below");
+      var bw = hintEl.offsetWidth;
+      var cx = pr.left + pr.width / 2;
+      var bx = Math.max(edge, Math.min(vw - bw - edge, cx - bw / 2));
+      hintEl.style.left = bx + "px";
+      hintEl.style.top = (pr.bottom - HINT_OVERLAP) + "px";
+      hintEl.style.setProperty("--tail-x", Math.max(16, Math.min(bw - 16, cx - bx)) + "px");
     }
 
     function onResize() {
@@ -1675,6 +1661,12 @@
       // Appears once the bubbles have settled in (later when they're flying out of the photo).
       hintEl.style.setProperty("--hint-delay", (introStart ? 1.5 : 0.6) + "s");
       positionHint();
+      // The bubble is centred using its own width, which changes when the web
+      // font arrives, so centre it again then.
+      if (document.fonts) {
+        if (document.fonts.ready) document.fonts.ready.then(positionHint);
+        if (document.fonts.addEventListener) document.fonts.addEventListener("loadingdone", positionHint);
+      }
     }
     render();
     rafId = requestAnimationFrame(frame);
