@@ -666,8 +666,8 @@ button.contact-toggle {
 /* ---------- Project page ---------- */
 /* Media on the left, a ~1/3-width sidebar (title / meta / description)
    on the right, with the full write-up — the home grid only shows a
-   small caption per thumbnail. Click any image, or a video's expand
-   button, to see it larger in the lightbox (below). */
+   small caption per thumbnail. Click any image to see it larger in the
+   lightbox (below); videos use their own full-screen control. */
 
 .back-link {
   display: inline-block;
@@ -799,36 +799,6 @@ button.contact-toggle {
     grid-template-columns: repeat(var(--cols-m, 2), minmax(0, 1fr));
     gap: 8px;
   }
-}
-
-/* Expand affordance — the only way into the lightbox for a video
-   (clicking the video itself needs to reach its own play controls). */
-.media-expand {
-  position: absolute;
-  right: 14px;
-  bottom: 14px;
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  border: none;
-  background: rgba(10, 10, 10, 0.55);
-  color: var(--ink);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-}
-
-.media-expand:hover {
-  background: rgba(10, 10, 10, 0.8);
-}
-
-.media-expand svg {
-  width: 15px;
-  height: 15px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.6;
 }
 
 .project-sidebar {

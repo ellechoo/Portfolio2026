@@ -315,17 +315,9 @@
       el.preload = "metadata";
       figure.appendChild(el);
       autoplayInView(el);
-
-      var expand = document.createElement("button");
-      expand.type = "button";
-      expand.className = "media-expand";
-      expand.setAttribute("aria-label", "View larger");
-      expand.innerHTML = '<svg viewBox="0 0 20 20"><path d="M7 3H3v4M13 3h4v4M7 17H3v-4M13 17h4v-4"/></svg>';
-      expand.addEventListener("click", function (e) {
-        e.stopPropagation();
-        openLightbox(media, index);
-      });
-      figure.appendChild(expand);
+      // No separate "view larger" button: the video's own controls already
+      // have a full-screen button. (Videos still show up in the lightbox when
+      // you swipe/arrow through from an image.)
     } else {
       el = document.createElement("img");
       el.src = item.src;
